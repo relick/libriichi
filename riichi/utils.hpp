@@ -113,4 +113,20 @@ public:
 
 struct NullType{};
 
+template<typename T_Enum, size_t t_EnumCount>
+struct EnumRange
+{
+	struct EnumIter
+	{
+		size_t m_enumPos{ t_EnumCount };
+
+		void operator++() { ++m_enumPos; }
+		T_Enum operator*() { return ( T_Enum )m_enumPos; }
+		bool operator!=( EnumIter const& b ) const { return m_enumPos != b.m_enumPos; }
+	};
+
+	static EnumIter begin() { return EnumIter{ 0 }; }
+	static EnumIter end() { return EnumIter{ t_EnumCount }; }
+};
+
 }

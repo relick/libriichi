@@ -66,17 +66,14 @@ struct HandInterpretation
 };
 
 // Useful pre-calculations that saves every yaku checking for the same simple things
-// TODO: this structure... kinda ignores the carefully made enums. maybe a refactor is possible!
 struct HandAssessment
 {
-	bool m_containsSuits{ false };
-	bool m_containsManzu{ false };
-	bool m_containsPinzu{ false };
-	bool m_containsSouzu{ false };
-	bool m_containsTerminals{ false };
-	bool m_containsDragons{ false };
-	bool m_containsWinds{ false };
-	bool m_containsHonours{ false };
+	std::array<bool, c_tileTypeCount> m_containsTileType{};
+	bool ContainsTileType( TileType i_type ) const { return m_containsTileType[ ( size_t )i_type ]; }
+	std::array<bool, c_suitCount> m_containsSuit{};
+	bool ContainsSuit( Suit i_suit ) const { return m_containsSuit[ ( size_t )i_suit ]; }
+	bool m_containsTerminals{ false }; // 1 or 9 of suit tiles
+	bool m_containsHonours{ false }; // wind or dragon
 	bool m_open{ false };
 
 	explicit HandAssessment( Hand const& i_hand );

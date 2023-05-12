@@ -27,34 +27,21 @@ HandAssessment::HandAssessment
 	// Now assess individual tiles
 	for ( Tile const& tile : tilesInHand )
 	{
-		switch ( tile.Type() )
-		{
-		using enum TileType;
-		case Suit:
-		{
-			m_containsSuits = true;
+		m_containsTileType[ ( size_t )tile.Type() ] = true;
 
-			SuitTile const& suitTile = tile.Get<Suit>();
+		if ( tile.Type() == TileType::Suit )
+		{
+			SuitTile const& suitTile = tile.Get<TileType::Suit>();
+			m_containsSuit[ ( size_t )suitTile.m_suit ] = true;
 			if ( suitTile.m_value == 1 || suitTile.m_value == 9 )
 			{
 				m_containsTerminals = true;
 			}
 			break;
 		}
-		case Dragon:
-		{
-			m_containsDragons = true;
-			break;
-		}
-		case Wind:
-		{
-			m_containsWinds = true;
-			break;
-		}
-		}
 	}
 
-	m_containsHonours = m_containsDragons || m_containsWinds;
+	m_containsHonours = ContainsTileType( TileType::Dragon ) || ContainsTileType( TileType::Wind );
 
 	// Finally, make possible hand interpretations
 	// Start by setting up the fixed part determined by the melds

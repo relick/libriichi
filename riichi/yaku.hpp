@@ -139,7 +139,7 @@ struct Pinfu
 		TileDrawType i_nextTileType
 	) const final
 	{
-		if ( i_assessment.m_open || i_assessment.m_containsDragons )
+		if ( i_assessment.m_open || i_assessment.ContainsTileType( TileType::Dragon ) )
 		{
 			// Invalid hand for pinfu
 			return NoYaku;
@@ -743,20 +743,13 @@ struct Honitsu
 	) const final
 	{
 		int suitTypeCount = 0;
-		if ( i_assessment.m_containsManzu
-			|| ( i_nextTile.Type() == TileType::Suit && i_nextTile.Get<TileType::Suit>().m_suit == Suit::Manzu ) )
+		for ( Suit suit : Suits{} )
 		{
-			++suitTypeCount;
-		}
-		if ( i_assessment.m_containsPinzu
-			|| ( i_nextTile.Type() == TileType::Suit && i_nextTile.Get<TileType::Suit>().m_suit == Suit::Pinzu ) )
-		{
-			++suitTypeCount;
-		}
-		if ( i_assessment.m_containsSouzu
-			|| ( i_nextTile.Type() == TileType::Suit && i_nextTile.Get<TileType::Suit>().m_suit == Suit::Souzu ) )
-		{
-			++suitTypeCount;
+			if ( i_assessment.ContainsSuit( suit )
+				|| ( i_nextTile.Type() == TileType::Suit && i_nextTile.Get<TileType::Suit>().m_suit == suit ) )
+			{
+				++suitTypeCount;
+			}
 		}
 
 		if ( suitTypeCount == 1 )
@@ -848,17 +841,12 @@ struct Chinitsu
 		}
 
 		int suitTypeCount = 0;
-		if ( i_assessment.m_containsManzu || i_nextTile.Get<TileType::Suit>().m_suit == Suit::Manzu )
+		for ( Suit suit : Suits{} )
 		{
-			++suitTypeCount;
-		}
-		if ( i_assessment.m_containsPinzu || i_nextTile.Get<TileType::Suit>().m_suit == Suit::Pinzu )
-		{
-			++suitTypeCount;
-		}
-		if ( i_assessment.m_containsSouzu || i_nextTile.Get<TileType::Suit>().m_suit == Suit::Souzu )
-		{
-			++suitTypeCount;
+			if ( i_assessment.ContainsSuit( suit ) || i_nextTile.Get<TileType::Suit>().m_suit == suit )
+			{
+				++suitTypeCount;
+			}
 		}
 
 		if ( suitTypeCount == 1 )
@@ -1005,7 +993,7 @@ struct Daisangen
 		TileDrawType i_nextTileType
 	) const final
 	{
-		if ( !i_assessment.m_containsDragons )
+		if ( !i_assessment.ContainsTileType( TileType::Dragon ) )
 		{
 			return NoYaku;
 		}
@@ -1055,7 +1043,7 @@ struct Shousuushii
 		TileDrawType i_nextTileType
 	) const final
 	{
-		if ( !i_assessment.m_containsWinds )
+		if ( !i_assessment.ContainsTileType( TileType::Wind ) )
 		{
 			return NoYaku;
 		}
@@ -1118,7 +1106,7 @@ struct Daisuushii
 		TileDrawType i_nextTileType
 	) const final
 	{
-		if ( !i_assessment.m_containsWinds )
+		if ( !i_assessment.ContainsTileType( TileType::Wind ) )
 		{
 			return NoYaku;
 		}
@@ -1167,7 +1155,7 @@ struct Tsuuiisou
 		TileDrawType i_nextTileType
 	) const final
 	{
-		if ( i_assessment.m_containsSuits || i_nextTile.Type() == TileType::Suit )
+		if ( i_assessment.ContainsTileType( TileType::Suit ) || i_nextTile.Type() == TileType::Suit )
 		{
 			return NoYaku;
 		}
@@ -1241,10 +1229,10 @@ struct Ryuuiisou
 	) const final
 	{
 		// Early-out on some broad strokes, for optimisation
-		if ( i_assessment.m_containsWinds
-			|| i_assessment.m_containsManzu
-			|| i_assessment.m_containsPinzu
-			|| !i_assessment.m_containsSouzu
+		if ( i_assessment.ContainsTileType( TileType::Wind )
+			|| i_assessment.ContainsSuit( Suit::Manzu )
+			|| i_assessment.ContainsSuit( Suit::Pinzu )
+			|| !i_assessment.ContainsSuit( Suit::Souzu )
 			|| i_nextTile.Type() == TileType::Wind
 			|| ( i_nextTile.Type() == TileType::Suit && i_nextTile.Get<TileType::Suit>().m_suit != Suit::Souzu ) )
 		{

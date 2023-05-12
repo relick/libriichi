@@ -13,6 +13,8 @@ enum class TileType : uint8_t
 	Dragon,
 	Wind,
 };
+inline constexpr size_t c_tileTypeCount = 3;
+using TileTypes = Utils::EnumRange<TileType, c_tileTypeCount>;
 
 enum class Suit : uint8_t
 {
@@ -20,6 +22,8 @@ enum class Suit : uint8_t
 	Pinzu,
 	Souzu,
 };
+inline constexpr size_t c_suitCount = 3;
+using Suits = Utils::EnumRange<Suit, c_suitCount>;
 
 using SuitTileValue = Utils::RestrictedIntegral<uint8_t, 1, 1, 9>;
 
