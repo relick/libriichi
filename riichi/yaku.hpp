@@ -116,11 +116,54 @@ struct MenzenchinTsumohou
 	}
 };
 
-// TODO
-struct Riichi{};
+struct Riichi
+	: public NamedYaku<"Riichi">
+{
+	// Win after calling riichi
 
-// TODO
-struct Ippatsu{};
+	HanValue CalculateValue
+	(
+		Round const& i_round,
+		Seat const& i_playerSeat,
+		Player const& i_player,
+		Hand const& i_hand,
+		HandAssessment const& i_assessment,
+		HandInterpretation const& i_interp,
+		Tile const& i_nextTile,
+		TileDrawType i_nextTileType
+	) const final
+	{
+		i_round.CalledRiichi( i_playerSeat ) ? 1 : NoYaku;
+	}
+};
+
+struct Ippatsu
+	: public NamedYaku<"Ippatsu">
+{
+	// Win after calling riichi before your next discard and before any calls
+
+	HanValue CalculateValue
+	(
+		Round const& i_round,
+		Seat const& i_playerSeat,
+		Player const& i_player,
+		Hand const& i_hand,
+		HandAssessment const& i_assessment,
+		HandInterpretation const& i_interp,
+		Tile const& i_nextTile,
+		TileDrawType i_nextTileType
+	) const final
+	{
+		// Oh yeah, we're in 'hardcode the yaku' town
+		// it's just easier this way, for now
+		if ( i_round.RiichiIppatsuValid( i_playerSeat ) )
+		{
+			return 1;
+		}
+		
+		return NoYaku;
+	}
+};
 
 struct Pinfu
 	: public NamedYaku<"Pinfu">
@@ -263,11 +306,57 @@ private:
 	}
 };
 
-// TODO
-struct HaiteiRaoyue{};
+struct HaiteiRaoyue
+	: public NamedYaku<"HaiteiRaoyue">
+{
+	// Win with tsumo on final tile from the wall
 
-// TODO
-struct HouteiRaoyui{};
+	HanValue CalculateValue
+	(
+		Round const& i_round,
+		Seat const& i_playerSeat,
+		Player const& i_player,
+		Hand const& i_hand,
+		HandAssessment const& i_assessment,
+		HandInterpretation const& i_interp,
+		Tile const& i_nextTile,
+		TileDrawType i_nextTileType
+	) const final
+	{
+		if ( i_nextTileType == TileDrawType::SelfDraw && i_round.WallSize() == 0u )
+		{
+			return 1;
+		}
+
+		return NoYaku;
+	}
+};
+
+struct HouteiRaoyui
+	: public NamedYaku<"HouteiRaoyui">
+{
+	// Win with ron on final discard
+
+	HanValue CalculateValue
+	(
+		Round const& i_round,
+		Seat const& i_playerSeat,
+		Player const& i_player,
+		Hand const& i_hand,
+		HandAssessment const& i_assessment,
+		HandInterpretation const& i_interp,
+		Tile const& i_nextTile,
+		TileDrawType i_nextTileType
+	) const final
+	{
+		if ( i_nextTileType == TileDrawType::DiscardDraw && i_round.WallSize() == 0u )
+		{
+			return 1;
+		}
+
+		return NoYaku;
+	}
+};
 
 struct RinshanKaihou
 	: public NamedYaku<"RinshanKaihou">
@@ -290,8 +379,26 @@ struct RinshanKaihou
 	}
 };
 
-// TODO
-struct Chankan{};
+struct Chankan
+	: public NamedYaku<"Chankan">
+{
+	// Win on an upgraded kan tile
+
+	HanValue CalculateValue
+	(
+		Round const& i_round,
+		Seat const& i_playerSeat,
+		Player const& i_player,
+		Hand const& i_hand,
+		HandAssessment const& i_assessment,
+		HandInterpretation const& i_interp,
+		Tile const& i_nextTile,
+		TileDrawType i_nextTileType
+	) const final
+	{
+		return i_nextTileType == TileDrawType::KanTheft ? 1 : NoYaku;
+	}
+};
 
 template<bool t_KuitanEnabled = true>
 struct Tanyao
@@ -498,8 +605,26 @@ private:
 	}
 };
 
-// TODO
-struct DoubleRiichi{};
+struct DoubleRiichi
+	: public NamedYaku<"Riichi">
+{
+	// Win after calling riichi on the very first discard
+
+	HanValue CalculateValue
+	(
+		Round const& i_round,
+		Seat const& i_playerSeat,
+		Player const& i_player,
+		Hand const& i_hand,
+		HandAssessment const& i_assessment,
+		HandInterpretation const& i_interp,
+		Tile const& i_nextTile,
+		TileDrawType i_nextTileType
+	) const final
+	{
+		i_round.CalledDoubleRiichi( i_playerSeat )  ? 2 : NoYaku;
+	}
+};
 
 struct Chantaiyao
 	: public NamedYaku<"Chantaiyao">
@@ -549,11 +674,177 @@ private:
 	}
 };
 
-// TODO
-struct SanshokuDoujun{};
+struct SanshokuDoujun
+	: public NamedYaku<"SanshokuDoujun">
+{
+	// Three sequences with the same numbers but different suits.
+	// Openness affects value
 
-// TODO
-struct Ittsu{};
+	HanValue CalculateValue
+	(
+		Round const& i_round,
+		Seat const& i_playerSeat,
+		Player const& i_player,
+		Hand const& i_hand,
+		HandAssessment const& i_assessment,
+		HandInterpretation const& i_interp,
+		Tile const& i_nextTile,
+		TileDrawType i_nextTileType
+	) const final
+	{
+		// Note 1: Unfortunately, the fourth group and pair are totally unrelated, so we can't make quick rule-outs without checking all combos
+		// Note 2: We can also stop when we find a match or when we are sure we don't have a match, so it's not too bad of a search at least.
+
+		if ( !std::ranges::all_of( i_assessment.m_containsSuit, std::identity{} ) )
+		{
+			return NoYaku;
+		}
+
+		// the literal worst yaku
+
+		if ( i_interp.m_waitType != WaitType::Shanpon && i_interp.m_waitType != WaitType::Tanki )
+		{
+			// Need to consider the final group, as it completed a sequence
+			HandInterpretation::Group finalGroup;
+			finalGroup.m_type = GroupType::Sequence;
+			finalGroup.m_tiles = i_interp.m_ungrouped;
+			finalGroup.m_tiles.push_back( i_nextTile );
+
+			for ( size_t groupI = 0; groupI < i_interp.m_groups.size(); ++groupI )
+			{
+				for ( size_t secondGroupI = groupI + 1; secondGroupI < i_interp.m_groups.size(); ++secondGroupI )
+				{
+					if ( Sanshoku( finalGroup, i_interp.m_groups[ groupI ], i_interp.m_groups[ secondGroupI ] ) )
+					{
+						return i_assessment.m_open ? 1 : 2;
+					}
+				}
+			}
+		}
+
+		// Didn't find one with final group, so check the existing groups
+		for ( size_t groupI = 0; groupI < i_interp.m_groups.size(); ++groupI )
+		{
+			for ( size_t secondGroupI = groupI + 1; secondGroupI < i_interp.m_groups.size(); ++secondGroupI )
+			{
+				for ( size_t thirdGroupI = secondGroupI + 1; thirdGroupI < i_interp.m_groups.size(); ++thirdGroupI )
+				{
+					if ( Sanshoku( i_interp.m_groups[ groupI ], i_interp.m_groups[ secondGroupI ], i_interp.m_groups[ thirdGroupI ] ) )
+					{
+						return i_assessment.m_open ? 1 : 2;
+					}
+				}
+			}
+		}
+
+		// Failed to find matches
+		return NoYaku;
+	}
+private:
+	static bool Sanshoku( HandInterpretation::Group const& i_a, HandInterpretation::Group const& i_b, HandInterpretation::Group const& i_c )
+	{
+		if ( i_a.m_type != GroupType::Sequence || i_b.m_type != GroupType::Sequence || i_c.m_type != GroupType::Sequence )
+		{
+			return false;
+		}
+
+		std::array<bool, c_suitCount> suits;
+		suits[ ( size_t )i_a.m_tiles.front().Get<TileType::Suit>().m_suit ] = true;
+		suits[ ( size_t )i_b.m_tiles.front().Get<TileType::Suit>().m_suit ] = true;
+		suits[ ( size_t )i_c.m_tiles.front().Get<TileType::Suit>().m_suit ] = true;
+		if ( !std::ranges::all_of( suits, std::identity{} ) )
+		{
+			return false;
+		}
+
+		// I am too tired with yaku at this point to care how shit this code is
+		// TODO
+		return std::ranges::contains( i_b.m_tiles | std::views::transform( []( Tile const& i_t ) { return i_t.Get<TileType::Suit>().m_value; } ), i_a.m_tiles[ 0 ].Get<TileType::Suit>().m_value )
+			&& std::ranges::contains( i_b.m_tiles | std::views::transform( []( Tile const& i_t ) { return i_t.Get<TileType::Suit>().m_value; } ), i_a.m_tiles[ 1 ].Get<TileType::Suit>().m_value )
+			&& std::ranges::contains( i_b.m_tiles | std::views::transform( []( Tile const& i_t ) { return i_t.Get<TileType::Suit>().m_value; } ), i_a.m_tiles[ 2 ].Get<TileType::Suit>().m_value )
+			&& std::ranges::contains( i_c.m_tiles | std::views::transform( []( Tile const& i_t ) { return i_t.Get<TileType::Suit>().m_value; } ), i_a.m_tiles[ 0 ].Get<TileType::Suit>().m_value )
+			&& std::ranges::contains( i_c.m_tiles | std::views::transform( []( Tile const& i_t ) { return i_t.Get<TileType::Suit>().m_value; } ), i_a.m_tiles[ 1 ].Get<TileType::Suit>().m_value )
+			&& std::ranges::contains( i_c.m_tiles | std::views::transform( []( Tile const& i_t ) { return i_t.Get<TileType::Suit>().m_value; } ), i_a.m_tiles[ 2 ].Get<TileType::Suit>().m_value );
+	}
+};
+
+struct Ikkitsuukan
+	: public NamedYaku<"Ikkitsuukan">
+{
+	// Usually called 'ittsuu'
+	// One suit, three sequences, 123 456 789
+	// Openness affects value
+
+	HanValue CalculateValue
+	(
+		Round const& i_round,
+		Seat const& i_playerSeat,
+		Player const& i_player,
+		Hand const& i_hand,
+		HandAssessment const& i_assessment,
+		HandInterpretation const& i_interp,
+		Tile const& i_nextTile,
+		TileDrawType i_nextTileType
+	) const final
+	{
+		// This one isn't so bad. We'll make a matrix and just search all our groups
+
+		std::array<std::array<bool, 3>, c_suitCount> groupsPerSuit{};
+
+		auto fnEvalGroup = [ &groupsPerSuit ]( HandInterpretation::Group const& i_group )
+		{
+			if ( i_group.m_type != GroupType::Sequence )
+			{
+				return;
+			}
+
+			// TODO
+			// This bit's kinda disgusting
+			if ( std::ranges::contains( i_group.m_tiles | std::views::transform( []( Tile const& i_t ) { return i_t.Get<TileType::Suit>().m_value; } ), SuitTileValue( 1 ) )
+				&& std::ranges::contains( i_group.m_tiles | std::views::transform( []( Tile const& i_t ) { return i_t.Get<TileType::Suit>().m_value; } ), SuitTileValue( 2 ) ) 
+				&& std::ranges::contains( i_group.m_tiles | std::views::transform( []( Tile const& i_t ) { return i_t.Get<TileType::Suit>().m_value; } ), SuitTileValue( 3 ) ) )
+			{
+				groupsPerSuit[ ( size_t )i_group.m_tiles.front().Get<TileType::Suit>().m_suit ][ 0 ] = true;
+			}
+			else if ( std::ranges::contains( i_group.m_tiles | std::views::transform( []( Tile const& i_t ) { return i_t.Get<TileType::Suit>().m_value; } ), SuitTileValue( 4 ) )
+				&& std::ranges::contains( i_group.m_tiles | std::views::transform( []( Tile const& i_t ) { return i_t.Get<TileType::Suit>().m_value; } ), SuitTileValue( 5 ) )
+				&& std::ranges::contains( i_group.m_tiles | std::views::transform( []( Tile const& i_t ) { return i_t.Get<TileType::Suit>().m_value; } ), SuitTileValue( 6 ) ) )
+			{
+				groupsPerSuit[ ( size_t )i_group.m_tiles.front().Get<TileType::Suit>().m_suit ][ 1 ] = true;
+			}
+			else if ( std::ranges::contains( i_group.m_tiles | std::views::transform( []( Tile const& i_t ) { return i_t.Get<TileType::Suit>().m_value; } ), SuitTileValue( 7 ) )
+				&& std::ranges::contains( i_group.m_tiles | std::views::transform( []( Tile const& i_t ) { return i_t.Get<TileType::Suit>().m_value; } ), SuitTileValue( 8 ) )
+				&& std::ranges::contains( i_group.m_tiles | std::views::transform( []( Tile const& i_t ) { return i_t.Get<TileType::Suit>().m_value; } ), SuitTileValue( 9 ) ) )
+			{
+				groupsPerSuit[ ( size_t )i_group.m_tiles.front().Get<TileType::Suit>().m_suit ][ 2 ] = true;
+			}
+		};
+
+		if ( i_interp.m_waitType != WaitType::Shanpon && i_interp.m_waitType != WaitType::Tanki )
+		{
+			// Need to consider the final group, as it completed a sequence
+			HandInterpretation::Group finalGroup;
+			finalGroup.m_type = GroupType::Sequence;
+			finalGroup.m_tiles = i_interp.m_ungrouped;
+			finalGroup.m_tiles.push_back( i_nextTile );
+
+			fnEvalGroup( finalGroup );
+		}
+
+		for ( HandInterpretation::Group const& group : i_interp.m_groups )
+		{
+			fnEvalGroup( group );
+		}
+
+		if ( std::ranges::any_of( groupsPerSuit, []( auto const& arr ) { return std::ranges::all_of( arr, std::identity{} ); } ) )
+		{
+			return i_assessment.m_open ? 1 : 2;
+		}
+
+		// Failed to find ittsuu
+		return NoYaku;
+	}
+};
 
 struct Toitoi
 	: public NamedYaku<"Toitoi">
@@ -632,8 +923,96 @@ struct Sanankou
 	}
 };
 
-// TODO
-struct SanshokuDoukou{};
+struct SanshokuDoukou
+	: public NamedYaku<"SanshokuDoukou">
+{
+	// Three triplets with the same number but different suits.
+
+	HanValue CalculateValue
+	(
+		Round const& i_round,
+		Seat const& i_playerSeat,
+		Player const& i_player,
+		Hand const& i_hand,
+		HandAssessment const& i_assessment,
+		HandInterpretation const& i_interp,
+		Tile const& i_nextTile,
+		TileDrawType i_nextTileType
+	) const final
+	{
+		// Note 1: Unfortunately, the fourth group and pair are totally unrelated, so we can't make quick rule-outs without checking all combos
+		// Note 2: We can also stop when we find a match or when we are sure we don't have a match, so it's not too bad of a search at least.
+
+		if ( !std::ranges::all_of( i_assessment.m_containsSuit, std::identity{} ) )
+		{
+			return NoYaku;
+		}
+
+		// the literal second worst yaku
+
+		if ( i_interp.m_waitType == WaitType::Shanpon )
+		{
+			// Need to consider the final group, as it completed a triplet
+			HandInterpretation::Group finalGroup;
+			finalGroup.m_type = GroupType::Triplet;
+			finalGroup.m_tiles = i_interp.m_ungrouped;
+			finalGroup.m_tiles.push_back( i_nextTile );
+
+			for ( size_t groupI = 0; groupI < i_interp.m_groups.size(); ++groupI )
+			{
+				for ( size_t secondGroupI = groupI + 1; secondGroupI < i_interp.m_groups.size(); ++secondGroupI )
+				{
+					if ( Sanshoku( finalGroup, i_interp.m_groups[ groupI ], i_interp.m_groups[ secondGroupI ] ) )
+					{
+						return 2;
+					}
+				}
+			}
+		}
+
+		// Didn't find one with final group, so check the existing groups
+		for ( size_t groupI = 0; groupI < i_interp.m_groups.size(); ++groupI )
+		{
+			for ( size_t secondGroupI = groupI + 1; secondGroupI < i_interp.m_groups.size(); ++secondGroupI )
+			{
+				for ( size_t thirdGroupI = secondGroupI + 1; thirdGroupI < i_interp.m_groups.size(); ++thirdGroupI )
+				{
+					if ( Sanshoku( i_interp.m_groups[ groupI ], i_interp.m_groups[ secondGroupI ], i_interp.m_groups[ thirdGroupI ] ) )
+					{
+						return 2;
+					}
+				}
+			}
+		}
+
+		// Failed to find matches
+		return NoYaku;
+	}
+private:
+	static bool Sanshoku( HandInterpretation::Group const& i_a, HandInterpretation::Group const& i_b, HandInterpretation::Group const& i_c )
+	{
+		if ( ( i_a.m_type != GroupType::Triplet && i_a.m_type != GroupType::Quad )
+			|| ( i_b.m_type != GroupType::Triplet && i_b.m_type != GroupType::Quad )
+			|| ( i_c.m_type != GroupType::Triplet && i_c.m_type != GroupType::Quad ) )
+		{
+			return false;
+		}
+
+		// Check suits
+		std::array<bool, c_suitCount> suits;
+		suits[ ( size_t )i_a.m_tiles.front().Get<TileType::Suit>().m_suit ] = true;
+		suits[ ( size_t )i_b.m_tiles.front().Get<TileType::Suit>().m_suit ] = true;
+		suits[ ( size_t )i_c.m_tiles.front().Get<TileType::Suit>().m_suit ] = true;
+		if ( !std::ranges::all_of( suits, std::identity{} ) )
+		{
+			return false;
+		}
+		
+		// Check values match
+		return i_a.m_tiles.front().Get<TileType::Suit>().m_value == i_b.m_tiles.front().Get<TileType::Suit>().m_value
+			&& i_b.m_tiles.front().Get<TileType::Suit>().m_value == i_c.m_tiles.front().Get<TileType::Suit>().m_value;
+	}
+};
 
 struct Sankantsu
 	: public NamedYaku<"Sankantsu">
@@ -671,8 +1050,57 @@ struct Sankantsu
 	}
 };
 
-// TODO
-struct Chiitoitsu{};
+// TODO: The main and interpretations algorithm will fail to recognise 13 orphans
+struct Chiitoitsu
+	: public NamedYaku<"Chiitoitsu">
+{
+	// Hand consists of 7 unique pairs
+	// Must be closed, by nature of the hand structure
+
+	HanValue CalculateValue
+	(
+		Round const& i_round,
+		Seat const& i_playerSeat,
+		Player const& i_player,
+		Hand const& i_hand,
+		HandAssessment const& i_assessment,
+		HandInterpretation const& i_interp,
+		Tile const& i_nextTile,
+		TileDrawType i_nextTileType
+	) const final
+	{
+		if ( i_interp.m_waitType != WaitType::Tanki )
+		{
+			return NoYaku;
+		}
+
+		std::unordered_set<Tile> uniqueTiles;
+		uniqueTiles.insert( i_nextTile );
+		
+		for ( HandInterpretation::Group const& group : i_interp.m_groups )
+		{
+			if ( group.m_type != GroupType::Pair )
+			{
+				return NoYaku;
+			}
+			uniqueTiles.insert( group.m_tiles.front() );
+		}
+
+		return uniqueTiles.size() == 7 ? 2 : NoYaku;
+	}
+
+private:
+	static bool ValidTile( Tile const& i_tile )
+	{
+		if ( i_tile.Type() != TileType::Suit )
+		{
+			return true;
+		}
+
+		SuitTile const& suitTile = i_tile.Get<TileType::Suit>();
+		return suitTile.m_value == 1 || suitTile.m_value == 9;
+	}
+};
 
 struct Honroutou
 	: public NamedYaku<"Honroutou">
@@ -722,8 +1150,67 @@ private:
 	}
 };
 
-// TODO
-struct Shousangen{};
+struct Shousangen
+	: public NamedYaku<"Shousangen">
+{
+	// smol 3 dragons
+	// triplets/quads of 2 dragons required + pair of 3rd dragon
+
+	HanValue CalculateValue
+	(
+		Round const& i_round,
+		Seat const& i_playerSeat,
+		Player const& i_player,
+		Hand const& i_hand,
+		HandAssessment const& i_assessment,
+		HandInterpretation const& i_interp,
+		Tile const& i_nextTile,
+		TileDrawType i_nextTileType
+	) const final
+	{
+		if ( !i_assessment.ContainsTileType( TileType::Dragon ) )
+		{
+			return NoYaku;
+		}
+
+		int dragonTripletCount = 0; // can't have more than one triplet of the same dragon so 2 triplets = 2 different dragons
+
+		for ( HandInterpretation::Group const& group : i_interp.m_groups )
+		{
+			if ( group.m_type == GroupType::Triplet || group.m_type == GroupType::Quad )
+			{
+				if ( group.m_tiles.front().Type() == TileType::Dragon )
+				{
+					++dragonTripletCount;
+				}
+			}
+			else if ( group.m_type == GroupType::Pair )
+			{
+				if ( group.m_tiles.front().Type() != TileType::Dragon )
+				{
+					return NoYaku;
+				}
+			}
+		}
+
+		if ( i_interp.m_waitType == WaitType::Tanki && i_nextTile.Type() != TileType::Dragon )
+		{
+			return NoYaku;
+		}
+		else if ( i_interp.m_waitType == WaitType::Shanpon && i_nextTile.Type() == TileType::Dragon )
+		{
+			++dragonTripletCount;
+		}
+
+		// Require exactly 2, as shousangen is exclusive from daisangen
+		if ( dragonTripletCount == 2 )
+		{
+			return Yakuman;
+		}
+
+		return NoYaku;
+	}
+};
 
 struct Honitsu
 	: public NamedYaku<"Honitsu">
@@ -816,7 +1303,102 @@ private:
 };
 
 // TODO
-struct Ryanpeikou{};
+struct Ryanpeikou
+	: public NamedYaku<"Ryanpeikou">
+{
+	// Closed hand containing two sets of two identical sequences
+
+	HanValue CalculateValue
+	(
+		Round const& i_round,
+		Seat const& i_playerSeat,
+		Player const& i_player,
+		Hand const& i_hand,
+		HandAssessment const& i_assessment,
+		HandInterpretation const& i_interp,
+		Tile const& i_nextTile,
+		TileDrawType i_nextTileType
+	) const final
+	{
+		if ( i_assessment.m_open || i_interp.m_waitType == WaitType::Shanpon )
+		{
+			return NoYaku;
+		}
+
+		// All my homies hate ryanpeikou
+		// Alright, note 1: if we find an iipeikou, it's sufficient to check for another iipeikou in the remaining groups i.e. there's no way we'd miss it by selecting a 'wrong' different pair
+		// Note 2: ryanpeikou needs 4 sequences, therefore it must involve the winning group unless it's a tanki wait
+		// this actually makes it slightly simpler than iipeikou, in a way
+
+		if ( i_interp.m_waitType == WaitType::Tanki )
+		{
+			for ( size_t groupI = 0; groupI < i_interp.m_groups.size(); ++groupI )
+			{
+				for ( size_t secondGroupI = groupI + 1; secondGroupI < i_interp.m_groups.size(); ++secondGroupI )
+				{
+					if ( IsMatchingSequence( i_interp.m_groups[ groupI ], i_interp.m_groups[ secondGroupI ] ) )
+					{
+						// We got one! Check the other!
+
+						// I don't like this code, but it works I guess
+						size_t thirdGroupI = 0;
+						size_t fourthGroupI = 0;
+						while ( thirdGroupI == groupI || thirdGroupI == secondGroupI )
+						{
+							thirdGroupI++;
+						}
+						while ( fourthGroupI == groupI || fourthGroupI == secondGroupI || fourthGroupI == thirdGroupI )
+						{
+							fourthGroupI++;
+						}
+						return IsMatchingSequence( i_interp.m_groups[ thirdGroupI ], i_interp.m_groups[ fourthGroupI ] ) ? 3 : NoYaku;
+					}
+				}
+			}
+		}
+		else
+		{
+			// Need to consider the final group, as it completed a sequence
+			HandInterpretation::Group finalGroup;
+			finalGroup.m_type = GroupType::Sequence;
+			finalGroup.m_tiles = i_interp.m_ungrouped;
+			finalGroup.m_tiles.push_back( i_nextTile );
+
+			for ( size_t groupI = 0; groupI < i_interp.m_groups.size(); ++groupI )
+			{
+				if ( IsMatchingSequence(  finalGroup, i_interp.m_groups[ groupI ] ) )
+				{
+					// We got one! Check the other!
+					size_t thirdGroupI = 0;
+					size_t fourthGroupI = 0;
+					while ( thirdGroupI == groupI )
+					{
+						thirdGroupI++;
+					}
+					while ( fourthGroupI == groupI || fourthGroupI == thirdGroupI )
+					{
+						fourthGroupI++;
+					}
+					return IsMatchingSequence( i_interp.m_groups[ thirdGroupI ], i_interp.m_groups[ fourthGroupI ] ) ? 3 : NoYaku;
+				}
+			}
+		}
+
+		// Failed to find ryanpeikou
+		return NoYaku;
+	}
+private:
+	static bool IsMatchingSequence( HandInterpretation::Group const& i_a, HandInterpretation::Group const& i_b )
+	{
+		if ( i_a.m_type == GroupType::Sequence && i_b.m_type == GroupType::Sequence )
+		{
+			return std::ranges::contains( i_b.m_tiles, i_a.m_tiles[ 0 ] )
+				&& std::ranges::contains( i_b.m_tiles, i_a.m_tiles[ 1 ] )
+				&& std::ranges::contains( i_b.m_tiles, i_a.m_tiles[ 2 ] );
+		}
+		return false;
+	}
+};
 
 struct Chinitsu
 	: public NamedYaku<"Chinitsu">
@@ -858,8 +1440,7 @@ struct Chinitsu
 	}
 };
 
-// TODO: Kazoe Yakuman - not really a yaku
-
+// TODO: The main and interpretations algorithm will fail to recognise 13 orphans
 struct KokushiMusou
 	: public NamedYaku<"KokushiMusou">
 {
@@ -1029,7 +1610,7 @@ struct Shousuushii
 	: public NamedYaku<"Shousuushii">
 {
 	// small 4 winds
-	// triplets/quads of all 3 winds required + pair of 4th wind
+	// triplets/quads of 3 winds required + pair of 4th wind
 
 	HanValue CalculateValue
 	(
@@ -1049,7 +1630,6 @@ struct Shousuushii
 		}
 
 		int windTripletCount = 0; // can't have more than one triplet of the same wind so 3 triplets = 3 different winds
-		bool foundWindPair = false;
 
 		for ( HandInterpretation::Group const& group : i_interp.m_groups )
 		{
@@ -1386,14 +1966,65 @@ struct Suukantsu
 	}
 };
 
-// TODO
-struct Tenhou{};
+struct Tenhou
+	: public NamedYaku<"Tenhou">
+{
+	// Win as the dealer on the first tile
 
-// TODO
-struct Chihou{};
+	HanValue CalculateValue
+	(
+		Round const& i_round,
+		Seat const& i_playerSeat,
+		Player const& i_player,
+		Hand const& i_hand,
+		HandAssessment const& i_assessment,
+		HandInterpretation const& i_interp,
+		Tile const& i_nextTile,
+		TileDrawType i_nextTileType
+	) const final
+	{
+		if ( i_round.IsDealer( i_playerSeat ) && i_round.Discards( i_playerSeat ).empty() )
+		{
+			return Yakuman;
+		}
 
-// TODO
-struct NagashiMangan{};
+		return NoYaku;
+	}
+};
+
+struct Chihou
+	: public NamedYaku<"Chihou">
+{
+	// Win as a non-dealer on the first tile drawn
+
+	HanValue CalculateValue
+	(
+		Round const& i_round,
+		Seat const& i_playerSeat,
+		Player const& i_player,
+		Hand const& i_hand,
+		HandAssessment const& i_assessment,
+		HandInterpretation const& i_interp,
+		Tile const& i_nextTile,
+		TileDrawType i_nextTileType
+	) const final
+	{
+		if ( i_nextTileType == TileDrawType::SelfDraw
+			&& !i_round.CallsMade()
+			&& !i_round.IsDealer( i_playerSeat )
+			&& i_round.Discards( i_playerSeat ).empty()
+			)
+		{
+			return Yakuman;
+		}
+
+		return NoYaku;
+	}
+};
+
+// TODO: Scoring options that aren't typical yaku
+// Kazoe Yakuman
+// Nagashi Mangan
 
 }
 }

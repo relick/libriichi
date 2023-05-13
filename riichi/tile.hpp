@@ -66,6 +66,7 @@ enum class TileDrawType
 	SelfDraw,
 	DiscardDraw,
 	DeadWallDraw,
+	KanTheft,
 };
 
 }
