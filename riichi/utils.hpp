@@ -129,4 +129,14 @@ struct EnumRange
 	static EnumIter end() { return EnumIter{ t_EnumCount }; }
 };
 
+template<typename T_Value, typename T_Enum, size_t t_EnumCount>
+struct EnumIndexedArray
+{
+	std::array<T_Value, t_EnumCount> data;
+	T_Value& operator[]( T_Enum e ) { return data[ ( size_t )e ]; }
+	T_Value const& operator[]( T_Enum e ) const { return data[ ( size_t )e ]; }
+	auto begin() const { return data.begin(); }
+	auto end() const { return data.end(); }
+};
+
 }

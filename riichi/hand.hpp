@@ -68,10 +68,8 @@ struct HandInterpretation
 // Useful pre-calculations that saves every yaku checking for the same simple things
 struct HandAssessment
 {
-	std::array<bool, c_tileTypeCount> m_containsTileType{};
-	bool ContainsTileType( TileType i_type ) const { return m_containsTileType[ ( size_t )i_type ]; }
-	std::array<bool, c_suitCount> m_containsSuit{};
-	bool ContainsSuit( Suit i_suit ) const { return m_containsSuit[ ( size_t )i_suit ]; }
+	Utils::EnumIndexedArray<bool, TileType, c_tileTypeCount> m_containsTileType{};
+	Utils::EnumIndexedArray<bool, Suit, c_suitCount> m_containsSuit{};
 	bool m_containsTerminals{ false }; // 1 or 9 of suit tiles
 	bool m_containsHonours{ false }; // wind or dragon
 	bool m_open{ false };

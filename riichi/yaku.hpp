@@ -182,7 +182,7 @@ struct Pinfu
 		TileDrawType i_nextTileType
 	) const final
 	{
-		if ( i_assessment.m_open || i_assessment.ContainsTileType( TileType::Dragon ) )
+		if ( i_assessment.m_open || i_assessment.m_containsTileType[ TileType::Dragon ] )
 		{
 			// Invalid hand for pinfu
 			return NoYaku;
@@ -748,10 +748,10 @@ private:
 			return false;
 		}
 
-		std::array<bool, c_suitCount> suits;
-		suits[ ( size_t )i_a.m_tiles.front().Get<TileType::Suit>().m_suit ] = true;
-		suits[ ( size_t )i_b.m_tiles.front().Get<TileType::Suit>().m_suit ] = true;
-		suits[ ( size_t )i_c.m_tiles.front().Get<TileType::Suit>().m_suit ] = true;
+		Utils::EnumIndexedArray<bool, Suit, c_suitCount> suits;
+		suits[ i_a.m_tiles.front().Get<TileType::Suit>().m_suit ] = true;
+		suits[ i_b.m_tiles.front().Get<TileType::Suit>().m_suit ] = true;
+		suits[ i_c.m_tiles.front().Get<TileType::Suit>().m_suit ] = true;
 		if ( !std::ranges::all_of( suits, std::identity{} ) )
 		{
 			return false;
@@ -789,7 +789,7 @@ struct Ikkitsuukan
 	{
 		// This one isn't so bad. We'll make a matrix and just search all our groups
 
-		std::array<std::array<bool, 3>, c_suitCount> groupsPerSuit{};
+		Utils::EnumIndexedArray<std::array<bool, 3>, Suit, c_suitCount> groupsPerSuit{};
 
 		auto fnEvalGroup = [ &groupsPerSuit ]( HandInterpretation::Group const& i_group )
 		{
@@ -804,19 +804,19 @@ struct Ikkitsuukan
 				&& std::ranges::contains( i_group.m_tiles | std::views::transform( []( Tile const& i_t ) { return i_t.Get<TileType::Suit>().m_value; } ), SuitTileValue( 2 ) ) 
 				&& std::ranges::contains( i_group.m_tiles | std::views::transform( []( Tile const& i_t ) { return i_t.Get<TileType::Suit>().m_value; } ), SuitTileValue( 3 ) ) )
 			{
-				groupsPerSuit[ ( size_t )i_group.m_tiles.front().Get<TileType::Suit>().m_suit ][ 0 ] = true;
+				groupsPerSuit[ i_group.m_tiles.front().Get<TileType::Suit>().m_suit ][ 0 ] = true;
 			}
 			else if ( std::ranges::contains( i_group.m_tiles | std::views::transform( []( Tile const& i_t ) { return i_t.Get<TileType::Suit>().m_value; } ), SuitTileValue( 4 ) )
 				&& std::ranges::contains( i_group.m_tiles | std::views::transform( []( Tile const& i_t ) { return i_t.Get<TileType::Suit>().m_value; } ), SuitTileValue( 5 ) )
 				&& std::ranges::contains( i_group.m_tiles | std::views::transform( []( Tile const& i_t ) { return i_t.Get<TileType::Suit>().m_value; } ), SuitTileValue( 6 ) ) )
 			{
-				groupsPerSuit[ ( size_t )i_group.m_tiles.front().Get<TileType::Suit>().m_suit ][ 1 ] = true;
+				groupsPerSuit[ i_group.m_tiles.front().Get<TileType::Suit>().m_suit ][ 1 ] = true;
 			}
 			else if ( std::ranges::contains( i_group.m_tiles | std::views::transform( []( Tile const& i_t ) { return i_t.Get<TileType::Suit>().m_value; } ), SuitTileValue( 7 ) )
 				&& std::ranges::contains( i_group.m_tiles | std::views::transform( []( Tile const& i_t ) { return i_t.Get<TileType::Suit>().m_value; } ), SuitTileValue( 8 ) )
 				&& std::ranges::contains( i_group.m_tiles | std::views::transform( []( Tile const& i_t ) { return i_t.Get<TileType::Suit>().m_value; } ), SuitTileValue( 9 ) ) )
 			{
-				groupsPerSuit[ ( size_t )i_group.m_tiles.front().Get<TileType::Suit>().m_suit ][ 2 ] = true;
+				groupsPerSuit[ i_group.m_tiles.front().Get<TileType::Suit>().m_suit ][ 2 ] = true;
 			}
 		};
 
@@ -999,10 +999,10 @@ private:
 		}
 
 		// Check suits
-		std::array<bool, c_suitCount> suits;
-		suits[ ( size_t )i_a.m_tiles.front().Get<TileType::Suit>().m_suit ] = true;
-		suits[ ( size_t )i_b.m_tiles.front().Get<TileType::Suit>().m_suit ] = true;
-		suits[ ( size_t )i_c.m_tiles.front().Get<TileType::Suit>().m_suit ] = true;
+		Utils::EnumIndexedArray<bool, Suit, c_suitCount> suits;
+		suits[ i_a.m_tiles.front().Get<TileType::Suit>().m_suit ] = true;
+		suits[ i_b.m_tiles.front().Get<TileType::Suit>().m_suit ] = true;
+		suits[ i_c.m_tiles.front().Get<TileType::Suit>().m_suit ] = true;
 		if ( !std::ranges::all_of( suits, std::identity{} ) )
 		{
 			return false;
@@ -1168,7 +1168,7 @@ struct Shousangen
 		TileDrawType i_nextTileType
 	) const final
 	{
-		if ( !i_assessment.ContainsTileType( TileType::Dragon ) )
+		if ( !i_assessment.m_containsTileType[ TileType::Dragon ] )
 		{
 			return NoYaku;
 		}
@@ -1232,7 +1232,7 @@ struct Honitsu
 		int suitTypeCount = 0;
 		for ( Suit suit : Suits{} )
 		{
-			if ( i_assessment.ContainsSuit( suit )
+			if ( i_assessment.m_containsSuit[ suit ]
 				|| ( i_nextTile.Type() == TileType::Suit && i_nextTile.Get<TileType::Suit>().m_suit == suit ) )
 			{
 				++suitTypeCount;
@@ -1425,7 +1425,7 @@ struct Chinitsu
 		int suitTypeCount = 0;
 		for ( Suit suit : Suits{} )
 		{
-			if ( i_assessment.ContainsSuit( suit ) || i_nextTile.Get<TileType::Suit>().m_suit == suit )
+			if ( i_assessment.m_containsSuit[ suit ] || i_nextTile.Get<TileType::Suit>().m_suit == suit )
 			{
 				++suitTypeCount;
 			}
@@ -1574,7 +1574,7 @@ struct Daisangen
 		TileDrawType i_nextTileType
 	) const final
 	{
-		if ( !i_assessment.ContainsTileType( TileType::Dragon ) )
+		if ( !i_assessment.m_containsTileType[ TileType::Dragon ] )
 		{
 			return NoYaku;
 		}
@@ -1624,7 +1624,7 @@ struct Shousuushii
 		TileDrawType i_nextTileType
 	) const final
 	{
-		if ( !i_assessment.ContainsTileType( TileType::Wind ) )
+		if ( !i_assessment.m_containsTileType[ TileType::Wind ] )
 		{
 			return NoYaku;
 		}
@@ -1686,7 +1686,7 @@ struct Daisuushii
 		TileDrawType i_nextTileType
 	) const final
 	{
-		if ( !i_assessment.ContainsTileType( TileType::Wind ) )
+		if ( !i_assessment.m_containsTileType[ TileType::Wind ] )
 		{
 			return NoYaku;
 		}
@@ -1735,7 +1735,7 @@ struct Tsuuiisou
 		TileDrawType i_nextTileType
 	) const final
 	{
-		if ( i_assessment.ContainsTileType( TileType::Suit ) || i_nextTile.Type() == TileType::Suit )
+		if ( i_assessment.m_containsTileType[ TileType::Suit ] || i_nextTile.Type() == TileType::Suit )
 		{
 			return NoYaku;
 		}
@@ -1809,10 +1809,10 @@ struct Ryuuiisou
 	) const final
 	{
 		// Early-out on some broad strokes, for optimisation
-		if ( i_assessment.ContainsTileType( TileType::Wind )
-			|| i_assessment.ContainsSuit( Suit::Manzu )
-			|| i_assessment.ContainsSuit( Suit::Pinzu )
-			|| !i_assessment.ContainsSuit( Suit::Souzu )
+		if ( i_assessment.m_containsTileType[ TileType::Wind ]
+			|| i_assessment.m_containsSuit[ Suit::Manzu ]
+			|| i_assessment.m_containsSuit[ Suit::Pinzu ]
+			|| !i_assessment.m_containsSuit[ Suit::Souzu ]
 			|| i_nextTile.Type() == TileType::Wind
 			|| ( i_nextTile.Type() == TileType::Suit && i_nextTile.Get<TileType::Suit>().m_suit != Suit::Souzu ) )
 		{
