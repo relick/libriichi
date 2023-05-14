@@ -6,39 +6,33 @@
 namespace Riichi::TableStates
 {
 
-template<PlayerCount t_PlayerCount>
-void Setup<t_PlayerCount>::StartGame
+void Setup::StartGame
 (
 )	const
 {}
 
-template<PlayerCount t_PlayerCount>
-void BetweenRounds<t_PlayerCount>::StartRound
+void BetweenRounds::StartRound
 (
 )	const
 {}
 
-template<PlayerCount t_PlayerCount>
-void Turn_AI<t_PlayerCount>::Discard
+void Turn_AI::Discard
 (
 )	const
 {}
 
-template<PlayerCount t_PlayerCount>
-void Turn_Player<t_PlayerCount>::Discard
+void Turn_Player::Discard
 (
 	Tile const& i_tile
 )	const
 {}
 
-template<PlayerCount t_PlayerCount>
-void BetweenTurns<t_PlayerCount>::Pass
+void BetweenTurns::Pass
 (
 )	const
 {}
 
-template<PlayerCount t_PlayerCount>
-void RobAKanChance<t_PlayerCount>::Pass
+void RobAKanChance::Pass
 (
 )	const
 {}

@@ -5,8 +5,7 @@
 namespace Riichi
 {
 
-template<PlayerCount t_PlayerCount>
-bool Table<t_PlayerCount>::Playing
+bool Table::Playing
 (
 )	const
 {

@@ -11,22 +11,22 @@ int main()
 	//// Just as if it was a windowing engine, events need to be handled
 	//// Should be serialisable and deserialisable, as well as replayable
 
-	Riichi::Table<4_Players> table(
+	Riichi::Table table(
 		std::make_unique<Riichi::StandardYonma>(),
 		std::random_device()(),
 		std::random_device()()
 	);
 
-	table.SetPlayer<Riichi::Seat::East>( Riichi::Player{
+	table.AddPlayer( Riichi::Player{
 		Riichi::PlayerType::AI
 	} );
-	table.SetPlayer<Riichi::Seat::South>( Riichi::Player{
+	table.AddPlayer( Riichi::Player{
 		Riichi::PlayerType::AI
 	} );
-	table.SetPlayer<Riichi::Seat::West>( Riichi::Player{
+	table.AddPlayer( Riichi::Player{
 		Riichi::PlayerType::AI
 	} );
-	table.SetPlayer<Riichi::Seat::North>( Riichi::Player{
+	table.AddPlayer( Riichi::Player{
 		Riichi::PlayerType::AI
 	} );
 
@@ -36,7 +36,7 @@ int main()
 	do
 	{
 		// First, get current state, and process (providing any input necessary)
-		auto const& state = table.GetState();
+		Riichi::TableState const& state = table.GetState();
 		switch ( state.Type() )
 		{
 		using enum Riichi::TableStateType;
@@ -60,14 +60,14 @@ int main()
 		}
 		case Turn_AI:
 		{
-			auto const& turn = state.Get<Turn_AI>();
+			Riichi::TableStates::Turn_AI const& turn = state.Get<Turn_AI>();
 			std::cout << "AI in seat " << ToString( turn.Seat() ) << " taking turn" << std::endl;
 			turn.Discard();
 			break;
 		}
 		case Turn_Player:
 		{
-			auto const& turn = state.Get<Turn_Player>();
+			Riichi::TableStates::Turn_Player const& turn = state.Get<Turn_Player>();
 			std::cout << "Player in seat " << ToString( turn.Seat() ) << " taking turn" << std::endl;
 			turn.Discard( Riichi::DragonTileType::White );
 			break;
@@ -89,7 +89,7 @@ int main()
 
 		// Then, get resulting event, and process into output. This part is technically optional,
 		// but required if you want meaningful output
-		auto const& event = table.GetEvent();
+		Riichi::TableEvent const& event = table.GetEvent();
 		switch ( event.Type() )
 		{
 		using enum Riichi::TableEventType;

@@ -77,51 +77,45 @@ inline constexpr char const* ToString( TableStateType i_type )
 	return strs[ ( size_t )i_type ];
 }
 
-template<PlayerCount t_PlayerCount>
 class Table;
 
 namespace TableStates
 {
 
-template<PlayerCount t_PlayerCount>
 struct Base
 {
-	Base( Table<t_PlayerCount>& i_table ) : m_table{ i_table } {}
-	std::reference_wrapper<Table<t_PlayerCount>> m_table;
+	Base( Table& i_table ) : m_table{ i_table } {}
+	std::reference_wrapper<Table> m_table;
 };
 
-template<PlayerCount t_PlayerCount>
 struct Setup
-	: Base<t_PlayerCount>
+	: Base
 {
-	using Base<t_PlayerCount>::Base;
+	using Base::Base;
 
 	void StartGame() const;
 };
 
-template<PlayerCount t_PlayerCount>
 struct BetweenRounds
-	: Base<t_PlayerCount>
+	: Base
 {
-	using Base<t_PlayerCount>::Base;
+	using Base::Base;
 
 	void StartRound() const;
 };
 
-template<PlayerCount t_PlayerCount>
 struct GameOver
-	: Base<t_PlayerCount>
+	: Base
 {
-	using Base<t_PlayerCount>::Base;
+	using Base::Base;
 
 	// No options
 };
 
-template<PlayerCount t_PlayerCount>
 struct Turn_AI
-	: Base<t_PlayerCount>
+	: Base
 {
-	using Base<t_PlayerCount>::Base;
+	using Base::Base;
 
 	// TODO data
 	Seat Seat() const { return Seat::East; }
@@ -129,11 +123,10 @@ struct Turn_AI
 	void Discard() const;
 };
 
-template<PlayerCount t_PlayerCount>
 struct Turn_Player
-	: Base<t_PlayerCount>
+	: Base
 {
-	using Base<t_PlayerCount>::Base;
+	using Base::Base;
 
 	// TODO data
 	Seat Seat() const { return Seat::East; }
@@ -142,21 +135,19 @@ struct Turn_Player
 	void Discard( Tile const& i_tile ) const;
 };
 
-template<PlayerCount t_PlayerCount>
 struct BetweenTurns
-	: Base<t_PlayerCount>
+	: Base
 {
-	using Base<t_PlayerCount>::Base;
+	using Base::Base;
 
 	// TODO other options
 	void Pass() const;
 };
 
-template<PlayerCount t_PlayerCount>
 struct RobAKanChance
-	: Base<t_PlayerCount>
+	: Base
 {
-	using Base<t_PlayerCount>::Base;
+	using Base::Base;
 
 	// TODO other options
 	void Pass() const;
@@ -164,17 +155,16 @@ struct RobAKanChance
 
 }
 
-template<PlayerCount t_PlayerCount>
 using TableState = Utils::NamedVariant<
 	TableStateType,
 
-	TableStates::Setup<t_PlayerCount>,
-	TableStates::BetweenRounds<t_PlayerCount>,
-	TableStates::GameOver<t_PlayerCount>,
-	TableStates::Turn_AI<t_PlayerCount>,
-	TableStates::Turn_Player<t_PlayerCount>,
-	TableStates::BetweenTurns<t_PlayerCount>,
-	TableStates::RobAKanChance<t_PlayerCount>
+	TableStates::Setup,
+	TableStates::BetweenRounds,
+	TableStates::GameOver,
+	TableStates::Turn_AI,
+	TableStates::Turn_Player,
+	TableStates::BetweenTurns,
+	TableStates::RobAKanChance
 >;
 
 }
