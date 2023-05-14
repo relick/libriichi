@@ -30,13 +30,74 @@ int main()
 		Riichi::PlayerType::AI
 	} );
 
+
+	// TODO: Let's start with the manual loop + manual switch approach
+	// then see if we can tidy it up with something better later
 	do
 	{
-		Riichi::TableEvent event = table.Step();
+		// First, get current state, and process (providing any input necessary)
+		auto const& state = table.GetState();
+		switch ( state.Type() )
+		{
+		using enum Riichi::TableStateType;
+
+		case Setup:
+		{
+			std::cout << "Starting game" << std::endl;
+			state.Get<Setup>().StartGame();
+			break;
+		}
+		case BetweenRounds:
+		{
+			std::cout << "Starting next round" << std::endl;
+			state.Get<BetweenRounds>().StartRound();
+			break;
+		}
+		case GameOver:
+		{
+			std::cout << "Nothing to do, game is over" << std::endl;
+			break;
+		}
+		case Turn_AI:
+		{
+			auto const& turn = state.Get<Turn_AI>();
+			std::cout << "AI in seat " << ToString( turn.Seat() ) << " taking turn" << std::endl;
+			turn.Discard();
+			break;
+		}
+		case Turn_Player:
+		{
+			auto const& turn = state.Get<Turn_Player>();
+			std::cout << "Player in seat " << ToString( turn.Seat() ) << " taking turn" << std::endl;
+			turn.Discard( Riichi::DragonTileType::White );
+			break;
+		}
+		case BetweenTurns:
+		{
+			std::cout << "Passing to next turn" << std::endl;
+			state.Get<BetweenTurns>().Pass();
+			break;
+		}
+		case RobAKanChance:
+		{
+			std::cout << "Passing on rob-a-kan chance" << std::endl;
+			state.Get<RobAKanChance>().Pass();
+			break;
+		}
+
+		}
+
+		// Then, get resulting event, and process into output. This part is technically optional,
+		// but required if you want meaningful output
+		auto const& event = table.GetEvent();
 		switch ( event.Type() )
 		{
 		using enum Riichi::TableEventType;
 
+		case None:
+		{
+			break;
+		}
 		case Error:
 		{
 			std::cerr << "Error: " << event.Get<Error>() << std::endl;
@@ -44,13 +105,15 @@ int main()
 		}
 		default:
 		{
-			std::cout << "Event: " << ToString(event.Type()) << std::endl;
+			std::cout << "Event: " << ToString( event.Type() ) << std::endl;
 			break;
 		}
 
 		}
+
 	} while ( table.Playing() );
 
+	std::cout << "Game over!\n";
 	std::cout << table.Standings() << std::endl;
 
 	return 0;

@@ -1,9 +1,12 @@
 #pragma once
 
 #include "player.hpp"
+#include "playercount.hpp"
 #include "round.hpp"
 #include "rules.hpp"
 #include "seat.hpp"
+#include "tablestate.hpp"
+#include "tableevent.hpp"
 #include "utils.hpp"
 
 #include <array>
@@ -15,6 +18,8 @@
 
 namespace Riichi
 {
+
+// The table runs the game, including each round - let's work on the basis that a round is not self-sufficient
 
 template<PlayerCount t_PlayerCount>
 struct Standings
@@ -36,87 +41,20 @@ struct Standings
 	}
 };
 
-enum class TableEventType
-{
-	Error,
-	RoundStart,
-	PlayerDraw,
-	PlayerDiscard,
-	PlayerChance,
-	PlayerPon,
-	PlayerChi,
-	PlayerKan,
-	PlayerRon,
-	PlayerTsumo,
-};
-
-inline constexpr char const* ToString( TableEventType i_type )
-{
-	constexpr char const* strs[] =
-	{
-		"Error",
-		"RoundStart",
-		"PlayerDraw",
-		"PlayerDiscard",
-		"PlayerChance",
-		"PlayerPon",
-		"PlayerChi",
-		"PlayerKan",
-		"PlayerRon",
-		"PlayerTsumo",
-	};
-	return strs[ ( size_t )i_type ];
-}
-
-using TableEvent = Utils::NamedVariant<
-	TableEventType,
-
-	std::string,
-	Utils::NullType,
-	Utils::NullType,
-	Utils::NullType,
-	Utils::NullType,
-	Utils::NullType,
-	Utils::NullType,
-	Utils::NullType,
-	Utils::NullType,
-	Utils::NullType,
-	Utils::NullType,
-	Utils::NullType
->;
-
-enum class TableInputType
-{
-	None,
-	PlayerDiscard,
-	PlayerChance,
-};
-
-using TableInput = Utils::NamedVariant<
-	TableInputType,
-
-	Utils::NullType,
-	Utils::NullType,
-	Utils::NullType
->;
-
 template<PlayerCount t_PlayerCount>
 class Table
 {
-private:
-	enum class State
-	{
-		Setup,
-		PlayingRound,
-		GameOver,
-	};
+public:
+	using State = TableState<t_PlayerCount>;
+	using Event = TableEvent;
 
 private:
 	std::unique_ptr<Rules<t_PlayerCount>> m_rules;
 	std::array<std::optional<Player>, t_PlayerCount> m_players;
 	Standings<t_PlayerCount> m_standings;
 	std::vector<Round> m_rounds;
-	State m_state{ State::Setup };
+	State m_state;
+	Event m_mostRecentEvent;
 
 public:
 	Table
@@ -127,6 +65,7 @@ public:
 	)
 		: m_rules{ std::move( i_rules ) }
 		, m_standings{ m_rules->InitialPoints() }
+		, m_state{ typename State::template Tag<TableStateType::Setup>{}, *this }
 	{}
 
 	// Setup
@@ -142,7 +81,8 @@ public:
 
 	// Simulation
 	bool Playing() const;
-	TableEvent Step( TableInput&& i_input = TableInput() );
+	State const& GetState() { return m_state; }
+	Event const& GetEvent() const { return m_mostRecentEvent; }
 };
 
 }

@@ -1,24 +1,13 @@
 #pragma once
 
+#include "playercount.hpp"
 #include "utils.hpp"
 #include "yaku.hpp"
 
 namespace Riichi
 {
 
-using PlayerCount = Utils::RestrictedIntegral<size_t, 1, 4, 4>;
-
 using Points = unsigned int;
-
-}
-
-constexpr Riichi::PlayerCount operator""_Players(unsigned long long int n)
-{
-	return Riichi::PlayerCount{n};
-}
-
-namespace Riichi
-{
 
 template<PlayerCount t_PlayerCount>
 struct Rules

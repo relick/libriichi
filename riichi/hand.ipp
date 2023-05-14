@@ -14,7 +14,7 @@ HandGroup::HandGroup
 	GroupType i_type,
 	bool i_open
 )
-	: m_tiles{ std::move( i_tiles ) }
+	: m_tiles( std::move( i_tiles ) )
 	, m_type{ i_type }
 	, m_open{ i_open }
 {

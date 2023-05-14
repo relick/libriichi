@@ -53,7 +53,7 @@ public:
 };
 
 template<typename T, typename S>
-concept NotSameAs = !std::same_as<T, S>;
+concept DifferentTypes = !std::same_as<std::remove_cvref_t<T>, std::remove_cvref_t<S>>;
 
 template<typename T_Tags, T_Tags t_Tag>
 class NamedVariantTagHelper
@@ -62,7 +62,7 @@ class NamedVariantTagHelper
 template<typename T_Tags, typename... T_Types>
 class NamedVariant
 {
-public:
+public: 
 	using Data = std::variant<T_Types...>;
 	template<T_Tags t_Tag>
 	using Tag = NamedVariantTagHelper<T_Tags, t_Tag>;
@@ -75,30 +75,30 @@ private:
 public:
 	NamedVariant() = default;
 
-	template<typename T_Type>
-	NamedVariant( T_Type&& i_type )
-		requires NotSameAs<T_Type, NamedVariant<T_Tags, T_Types>>
-		: m_data{ std::move( i_type ) }
-	{}
-
-	template<T_Tags t_Tag, typename... T_Args>
-	NamedVariant( Tag<t_Tag>, T_Args&&... i_args )
-		: m_data{ std::in_place_index_t<( size_t )t_Tag>(), std::forward<T_Args>( i_args )... }
-	{}
-
 	NamedVariant( NamedVariant&& ) = default;
 	NamedVariant( NamedVariant const& ) = default;
 
 	template<typename T_Type>
+	NamedVariant( T_Type&& i_type )
+		requires DifferentTypes<T_Type, NamedVariant<T_Tags, T_Types...>>
+		: m_data( std::move( i_type ) )
+	{}
+
+	template<T_Tags t_Tag, typename... T_Args>
+	NamedVariant( Tag<t_Tag>, T_Args&&... i_args )
+		: m_data( std::in_place_index<( size_t )t_Tag>, std::forward<T_Args>( i_args )... )
+	{}
+
+	NamedVariant& operator=( NamedVariant&& ) = default;
+	NamedVariant& operator=( NamedVariant const& ) = default;
+
+	template<typename T_Type>
 	NamedVariant& operator=( T_Type&& i_type )
-		requires NotSameAs<T_Type, NamedVariant<T_Tags, T_Types>>
+		requires DifferentTypes<T_Type, NamedVariant<T_Tags, T_Types...>>
 	{
 		m_data = std::move( i_type );
 		return *this;
 	}
-
-	NamedVariant& operator=( NamedVariant&& ) = default;
-	NamedVariant& operator=( NamedVariant const& ) = default;
 
 	T_Tags Type() const { return ( T_Tags )m_data.index(); }
 
