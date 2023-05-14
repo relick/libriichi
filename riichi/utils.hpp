@@ -148,4 +148,14 @@ T_Container Append( T_Container i_c, T_Value i_v )
 	return r;
 }
 
+template<std::integral T_Value, typename T_Pred>
+T_Value NextFree( T_Value i_val, T_Pred&& i_pred )
+{
+	while ( !i_pred( i_val ) )
+	{
+		++i_val;
+	}
+	return i_val;
+}
+
 }
