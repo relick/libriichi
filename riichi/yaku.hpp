@@ -1302,7 +1302,7 @@ struct Ryanpeikou
 					if ( IsMatchingSequence( i_interp.m_groups[ groupI ], i_interp.m_groups[ secondGroupI ] ) )
 					{
 						// We got one! Check the other!
-						auto fnNextFree = [ = ]( size_t i ) { i != groupI && i != secondGroupI; };
+						auto fnNextFree = [ = ]( size_t i ) { return i != groupI && i != secondGroupI; };
 						size_t const thirdGroupI = Utils::NextFree( size_t( 0 ), fnNextFree );
 						size_t const fourthGroupI = Utils::NextFree( thirdGroupI + 1, fnNextFree );
 						return IsMatchingSequence( i_interp.m_groups[ thirdGroupI ], i_interp.m_groups[ fourthGroupI ] ) ? 3 : NoYaku;
@@ -1320,7 +1320,7 @@ struct Ryanpeikou
 				if ( IsMatchingSequence(  finalGroup, i_interp.m_groups[ groupI ] ) )
 				{
 					// We got one! Check the other!
-					auto fnNextFree = [ & ]( size_t i ) { i != groupI && i_interp.m_groups[ i ].Type() != GroupType::Pair; };
+					auto fnNextFree = [ & ]( size_t i ) { return i != groupI && i_interp.m_groups[ i ].Type() != GroupType::Pair; };
 					size_t const thirdGroupI = Utils::NextFree( size_t( 0 ), fnNextFree );
 					size_t const fourthGroupI = Utils::NextFree( thirdGroupI + 1, fnNextFree );
 					return IsMatchingSequence( i_interp.m_groups[ thirdGroupI ], i_interp.m_groups[ fourthGroupI ] ) ? 3 : NoYaku;
