@@ -256,8 +256,7 @@ struct Iipeikou
 			return NoYaku;
 		}
 
-		// God, calculating this sucks.
-		// what an annoying yaku
+		// TODO: I wonder if there's a more efficient way of assessing this than just comparing all groups
 
 		if ( SequenceWait( i_interp.m_waitType ) )
 		{
@@ -692,7 +691,7 @@ struct SanshokuDoujun
 			return NoYaku;
 		}
 
-		// the literal worst yaku
+		// TODO: I wonder if there's a more efficient way of assessing this than just comparing all triples of groups
 
 		if ( SequenceWait( i_interp.m_waitType ) )
 		{
@@ -773,7 +772,7 @@ struct Ikkitsuukan
 		TileDrawType i_nextTileType
 	) const final
 	{
-		// This one isn't so bad. We'll make a matrix and just search all our groups
+		// This one isn't so bad. We'll make a matrix of suit x sequence and just search for all the groups we need
 
 		Utils::EnumIndexedArray<std::array<bool, 3>, Suit, c_suitCount> groupsPerSuit{};
 
@@ -921,7 +920,7 @@ struct SanshokuDoukou
 			return NoYaku;
 		}
 
-		// the literal second worst yaku
+		// TODO: I wonder if there's a more efficient way of assessing this than just comparing all triples of groups
 
 		if ( i_interp.m_waitType == WaitType::Shanpon )
 		{
@@ -1036,6 +1035,8 @@ struct Chiitoitsu
 		{
 			return NoYaku;
 		}
+
+		// TODO: Can we do this without filling a container?
 
 		std::unordered_set<Tile> uniqueTiles;
 		uniqueTiles.insert( i_nextTile );
@@ -1282,15 +1283,15 @@ struct Ryanpeikou
 		TileDrawType i_nextTileType
 	) const final
 	{
+		// Note 1: It's impossible to 'pick' a wrong pairing if we find an iipeikou. So just find one then check the remaining 2 groups
+		// Note 2: Ryanpeikou needs 4 sequences, therefore it must involve the winning group unless it's a tanki wait
+
 		if ( i_assessment.m_open || i_interp.m_waitType == WaitType::Shanpon )
 		{
 			return NoYaku;
 		}
 
-		// All my homies hate ryanpeikou
-		// Alright, note 1: if we find an iipeikou, it's sufficient to check for another iipeikou in the remaining groups i.e. there's no way we'd miss it by selecting a 'wrong' different pair
-		// Note 2: ryanpeikou needs 4 sequences, therefore it must involve the winning group unless it's a tanki wait
-		// this actually makes it slightly simpler than iipeikou, in a way
+		// TODO: I wonder if there's a more efficient way of assessing this than just comparing all groups
 
 		if ( i_interp.m_waitType == WaitType::Tanki )
 		{
@@ -1302,7 +1303,7 @@ struct Ryanpeikou
 					{
 						// We got one! Check the other!
 
-						// I don't like this code, but it works I guess
+						// TODO: I don't really like this code for getting the 3rd + 4th indices, though this seems to be the clearest way to do this
 						size_t thirdGroupI = 0;
 						size_t fourthGroupI = 0;
 						while ( thirdGroupI == groupI || thirdGroupI == secondGroupI )
@@ -1330,11 +1331,11 @@ struct Ryanpeikou
 					// We got one! Check the other!
 					size_t thirdGroupI = 0;
 					size_t fourthGroupI = 0;
-					while ( thirdGroupI == groupI )
+					while ( thirdGroupI == groupI || i_interp.m_groups[ thirdGroupI ].Type() == GroupType::Pair )
 					{
 						thirdGroupI++;
 					}
-					while ( fourthGroupI == groupI || fourthGroupI == thirdGroupI )
+					while ( fourthGroupI == groupI || fourthGroupI == thirdGroupI || i_interp.m_groups[ fourthGroupI ].Type() == GroupType::Pair )
 					{
 						fourthGroupI++;
 					}
@@ -1420,6 +1421,8 @@ struct KokushiMusou
 		{
 			return NoYaku;
 		}
+
+		// TODO: Can we do this without filling a container?
 
 		// Sufficient to check that all tiles are terminals/honors and that the distinct tile count >= 13
 		std::unordered_set<Tile> uniqueTiles;
