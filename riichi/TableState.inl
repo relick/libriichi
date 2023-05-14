@@ -9,12 +9,16 @@ namespace Riichi::TableStates
 void Setup::StartGame
 (
 )	const
-{}
+{
+	m_table.get().m_state = TableStates::BetweenRounds{ m_table.get() };
+}
 
 void BetweenRounds::StartRound
 (
 )	const
-{}
+{
+	m_table.get().m_state = TableStates::GameOver{ m_table.get() };
+}
 
 void Turn_AI::Discard
 (

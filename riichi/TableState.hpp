@@ -168,5 +168,3 @@ using TableState = Utils::NamedVariant<
 >;
 
 }
-
-#include "TableState.inl"

@@ -43,6 +43,15 @@ struct Standings
 
 class Table
 {
+	// Table states all considered an extension of the table class
+	friend TableStates::Setup;
+	friend TableStates::BetweenRounds;
+	friend TableStates::GameOver;
+	friend TableStates::Turn_AI;
+	friend TableStates::Turn_Player;
+	friend TableStates::BetweenTurns;
+	friend TableStates::RobAKanChance;
+
 private:
 	std::unique_ptr<Rules> m_rules;
 	std::vector<Player> m_players;
@@ -82,3 +91,4 @@ public:
 }
 
 #include "Table.inl"
+#include "TableState.inl" // Table state impl here as it relies on Table
