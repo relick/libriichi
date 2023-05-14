@@ -1,9 +1,9 @@
 #pragma once
 
-#include "playercount.hpp"
-#include "seat.hpp"
-#include "tile.hpp"
-#include "utils.hpp"
+#include "PlayerCount.hpp"
+#include "Seat.hpp"
+#include "Tile.hpp"
+#include "Utils.hpp"
 
 namespace Riichi
 {
@@ -169,4 +169,4 @@ using TableState = Utils::NamedVariant<
 
 }
 
-#include "tablestate.ipp"
+#include "TableState.inl"

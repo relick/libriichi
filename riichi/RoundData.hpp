@@ -1,13 +1,13 @@
 #pragma once
 
-#include "seat.hpp"
+#include "Seat.hpp"
 
 #include <vector>
 
 namespace Riichi
 {
 
-class Round
+class RoundData
 {
 public:
 	// TODO

@@ -1,8 +1,8 @@
 #pragma once
 
-#include "playercount.hpp"
-#include "utils.hpp"
-#include "yaku.hpp"
+#include "PlayerCount.hpp"
+#include "Utils.hpp"
+#include "Yaku.hpp"
 
 namespace Riichi
 {

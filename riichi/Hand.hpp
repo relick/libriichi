@@ -1,8 +1,8 @@
 #pragma once
 
-#include "seat.hpp"
-#include "tile.hpp"
-#include "utils.hpp"
+#include "Seat.hpp"
+#include "Tile.hpp"
+#include "Utils.hpp"
 
 #include <unordered_set>
 #include <vector>
@@ -112,4 +112,4 @@ private:
 
 }
 
-#include "hand.ipp"
+#include "Hand.inl"

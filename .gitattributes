@@ -2,5 +2,5 @@
 * text=auto
 
 *.hpp linguist-language=C++
-*.ipp linguist-language=C++
+*.inl linguist-language=C++
 *.cpp linguist-language=C++

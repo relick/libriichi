@@ -1,6 +1,6 @@
 #pragma once
 
-#include "hand.hpp"
+#include "Hand.hpp"
 
 #include <algorithm>
 #include <ranges>

@@ -1,13 +1,13 @@
 #pragma once
 
-#include "player.hpp"
-#include "playercount.hpp"
-#include "round.hpp"
-#include "rules.hpp"
-#include "seat.hpp"
-#include "tablestate.hpp"
-#include "tableevent.hpp"
-#include "utils.hpp"
+#include "Player.hpp"
+#include "PlayerCount.hpp"
+#include "RoundData.hpp"
+#include "Rules.hpp"
+#include "Seat.hpp"
+#include "TableState.hpp"
+#include "TableEvent.hpp"
+#include "Utils.hpp"
 
 #include <array>
 #include <algorithm>
@@ -47,7 +47,7 @@ private:
 	std::unique_ptr<Rules> m_rules;
 	std::vector<Player> m_players;
 	Standings m_standings;
-	std::vector<Round> m_rounds;
+	std::vector<RoundData> m_rounds;
 	TableState m_state;
 	TableEvent m_mostRecentEvent;
 
@@ -81,4 +81,4 @@ public:
 
 }
 
-#include "table.ipp"
+#include "Table.inl"

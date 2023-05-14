@@ -1,6 +1,6 @@
 #pragma once
 
-#include "table.hpp"
+#include "Table.hpp"
 
 namespace Riichi
 {

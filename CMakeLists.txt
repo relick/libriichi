@@ -12,7 +12,7 @@ endif()
 project ("libriichi")
 
 # Add source to this project's executable.
-add_executable (libriichi "libriichi.cpp" )
+add_executable (libriichi "demo.cpp" )
 
 if (CMAKE_VERSION VERSION_GREATER 3.12)
   set_property(TARGET libriichi PROPERTY CXX_STANDARD 23)

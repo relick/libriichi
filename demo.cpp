@@ -1,4 +1,4 @@
-﻿#include "riichi/riichi.hpp"
+﻿#include "Riichi.hpp"
 
 #include <iostream>
 #include <random>

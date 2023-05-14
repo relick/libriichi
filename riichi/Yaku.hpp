@@ -1,10 +1,10 @@
 #pragma once
 
-#include "hand.hpp"
-#include "player.hpp"
-#include "round.hpp"
-#include "tile.hpp"
-#include "utils.hpp"
+#include "Hand.hpp"
+#include "Player.hpp"
+#include "RoundData.hpp"
+#include "Tile.hpp"
+#include "Utils.hpp"
 
 #include <optional>
 #include <numeric>
@@ -54,7 +54,7 @@ struct Yaku
 	// NB do not need to check whether i_nextTile is in the interp's waits - it will be
 	virtual HanValue CalculateValue
 	(
-		Round const& i_round,
+		RoundData const& i_round,
 		Seat const& i_playerSeat,
 		Player const& i_player,
 		Hand const& i_hand,
@@ -101,7 +101,7 @@ struct MenzenchinTsumohou
 
 	HanValue CalculateValue
 	(
-		Round const& i_round,
+		RoundData const& i_round,
 		Seat const& i_playerSeat,
 		Player const& i_player,
 		Hand const& i_hand,
@@ -127,7 +127,7 @@ struct Riichi
 
 	HanValue CalculateValue
 	(
-		Round const& i_round,
+		RoundData const& i_round,
 		Seat const& i_playerSeat,
 		Player const& i_player,
 		Hand const& i_hand,
@@ -148,7 +148,7 @@ struct Ippatsu
 
 	HanValue CalculateValue
 	(
-		Round const& i_round,
+		RoundData const& i_round,
 		Seat const& i_playerSeat,
 		Player const& i_player,
 		Hand const& i_hand,
@@ -176,7 +176,7 @@ struct Pinfu
 
 	HanValue CalculateValue
 	(
-		Round const& i_round,
+		RoundData const& i_round,
 		Seat const& i_playerSeat,
 		Player const& i_player,
 		Hand const& i_hand,
@@ -241,7 +241,7 @@ struct Iipeikou
 
 	HanValue CalculateValue
 	(
-		Round const& i_round,
+		RoundData const& i_round,
 		Seat const& i_playerSeat,
 		Player const& i_player,
 		Hand const& i_hand,
@@ -304,7 +304,7 @@ struct HaiteiRaoyue
 
 	HanValue CalculateValue
 	(
-		Round const& i_round,
+		RoundData const& i_round,
 		Seat const& i_playerSeat,
 		Player const& i_player,
 		Hand const& i_hand,
@@ -330,7 +330,7 @@ struct HouteiRaoyui
 
 	HanValue CalculateValue
 	(
-		Round const& i_round,
+		RoundData const& i_round,
 		Seat const& i_playerSeat,
 		Player const& i_player,
 		Hand const& i_hand,
@@ -356,7 +356,7 @@ struct RinshanKaihou
 
 	HanValue CalculateValue
 	(
-		Round const& i_round,
+		RoundData const& i_round,
 		Seat const& i_playerSeat,
 		Player const& i_player,
 		Hand const& i_hand,
@@ -377,7 +377,7 @@ struct Chankan
 
 	HanValue CalculateValue
 	(
-		Round const& i_round,
+		RoundData const& i_round,
 		Seat const& i_playerSeat,
 		Player const& i_player,
 		Hand const& i_hand,
@@ -399,7 +399,7 @@ struct Tanyao
 
 	HanValue CalculateValue
 	(
-		Round const& i_round,
+		RoundData const& i_round,
 		Seat const& i_playerSeat,
 		Player const& i_player,
 		Hand const& i_hand,
@@ -465,7 +465,7 @@ struct DragonYakuhai
 
 	HanValue CalculateValue
 	(
-		Round const& i_round,
+		RoundData const& i_round,
 		Seat const& i_playerSeat,
 		Player const& i_player,
 		Hand const& i_hand,
@@ -519,7 +519,7 @@ struct Yakuhai_RoundWind
 
 	HanValue CalculateValue
 	(
-		Round const& i_round,
+		RoundData const& i_round,
 		Seat const& i_playerSeat,
 		Player const& i_player,
 		Hand const& i_hand,
@@ -561,7 +561,7 @@ struct Yakuhai_SeatWind
 
 	HanValue CalculateValue
 	(
-		Round const& i_round,
+		RoundData const& i_round,
 		Seat const& i_playerSeat,
 		Player const& i_player,
 		Hand const& i_hand,
@@ -603,7 +603,7 @@ struct DoubleRiichi
 
 	HanValue CalculateValue
 	(
-		Round const& i_round,
+		RoundData const& i_round,
 		Seat const& i_playerSeat,
 		Player const& i_player,
 		Hand const& i_hand,
@@ -624,7 +624,7 @@ struct Chantaiyao
 
 	HanValue CalculateValue
 	(
-		Round const& i_round,
+		RoundData const& i_round,
 		Seat const& i_playerSeat,
 		Player const& i_player,
 		Hand const& i_hand,
@@ -673,7 +673,7 @@ struct SanshokuDoujun
 
 	HanValue CalculateValue
 	(
-		Round const& i_round,
+		RoundData const& i_round,
 		Seat const& i_playerSeat,
 		Player const& i_player,
 		Hand const& i_hand,
@@ -762,7 +762,7 @@ struct Ikkitsuukan
 
 	HanValue CalculateValue
 	(
-		Round const& i_round,
+		RoundData const& i_round,
 		Seat const& i_playerSeat,
 		Player const& i_player,
 		Hand const& i_hand,
@@ -825,7 +825,7 @@ struct Toitoi
 
 	HanValue CalculateValue
 	(
-		Round const& i_round,
+		RoundData const& i_round,
 		Seat const& i_playerSeat,
 		Player const& i_player,
 		Hand const& i_hand,
@@ -861,7 +861,7 @@ struct Sanankou
 
 	HanValue CalculateValue
 	(
-		Round const& i_round,
+		RoundData const& i_round,
 		Seat const& i_playerSeat,
 		Player const& i_player,
 		Hand const& i_hand,
@@ -902,7 +902,7 @@ struct SanshokuDoukou
 
 	HanValue CalculateValue
 	(
-		Round const& i_round,
+		RoundData const& i_round,
 		Seat const& i_playerSeat,
 		Player const& i_player,
 		Hand const& i_hand,
@@ -983,7 +983,7 @@ struct Sankantsu
 
 	HanValue CalculateValue
 	(
-		Round const& i_round,
+		RoundData const& i_round,
 		Seat const& i_playerSeat,
 		Player const& i_player,
 		Hand const& i_hand,
@@ -1021,7 +1021,7 @@ struct Chiitoitsu
 
 	HanValue CalculateValue
 	(
-		Round const& i_round,
+		RoundData const& i_round,
 		Seat const& i_playerSeat,
 		Player const& i_player,
 		Hand const& i_hand,
@@ -1073,7 +1073,7 @@ struct Honroutou
 
 	HanValue CalculateValue
 	(
-		Round const& i_round,
+		RoundData const& i_round,
 		Seat const& i_playerSeat,
 		Player const& i_player,
 		Hand const& i_hand,
@@ -1122,7 +1122,7 @@ struct Shousangen
 
 	HanValue CalculateValue
 	(
-		Round const& i_round,
+		RoundData const& i_round,
 		Seat const& i_playerSeat,
 		Player const& i_player,
 		Hand const& i_hand,
@@ -1183,7 +1183,7 @@ struct Honitsu
 
 	HanValue CalculateValue
 	(
-		Round const& i_round,
+		RoundData const& i_round,
 		Seat const& i_playerSeat,
 		Player const& i_player,
 		Hand const& i_hand,
@@ -1219,7 +1219,7 @@ struct JunchanTaiyao
 
 	HanValue CalculateValue
 	(
-		Round const& i_round,
+		RoundData const& i_round,
 		Seat const& i_playerSeat,
 		Player const& i_player,
 		Hand const& i_hand,
@@ -1273,7 +1273,7 @@ struct Ryanpeikou
 
 	HanValue CalculateValue
 	(
-		Round const& i_round,
+		RoundData const& i_round,
 		Seat const& i_playerSeat,
 		Player const& i_player,
 		Hand const& i_hand,
@@ -1349,7 +1349,7 @@ struct Chinitsu
 
 	HanValue CalculateValue
 	(
-		Round const& i_round,
+		RoundData const& i_round,
 		Seat const& i_playerSeat,
 		Player const& i_player,
 		Hand const& i_hand,
@@ -1391,7 +1391,7 @@ struct KokushiMusou
 
 	HanValue CalculateValue
 	(
-		Round const& i_round,
+		RoundData const& i_round,
 		Seat const& i_playerSeat,
 		Player const& i_player,
 		Hand const& i_hand,
@@ -1466,7 +1466,7 @@ struct Suuankou
 
 	HanValue CalculateValue
 	(
-		Round const& i_round,
+		RoundData const& i_round,
 		Seat const& i_playerSeat,
 		Player const& i_player,
 		Hand const& i_hand,
@@ -1508,7 +1508,7 @@ struct Daisangen
 
 	HanValue CalculateValue
 	(
-		Round const& i_round,
+		RoundData const& i_round,
 		Seat const& i_playerSeat,
 		Player const& i_player,
 		Hand const& i_hand,
@@ -1558,7 +1558,7 @@ struct Shousuushii
 
 	HanValue CalculateValue
 	(
-		Round const& i_round,
+		RoundData const& i_round,
 		Seat const& i_playerSeat,
 		Player const& i_player,
 		Hand const& i_hand,
@@ -1620,7 +1620,7 @@ struct Daisuushii
 
 	HanValue CalculateValue
 	(
-		Round const& i_round,
+		RoundData const& i_round,
 		Seat const& i_playerSeat,
 		Player const& i_player,
 		Hand const& i_hand,
@@ -1669,7 +1669,7 @@ struct Tsuuiisou
 
 	HanValue CalculateValue
 	(
-		Round const& i_round,
+		RoundData const& i_round,
 		Seat const& i_playerSeat,
 		Player const& i_player,
 		Hand const& i_hand,
@@ -1695,7 +1695,7 @@ struct Chinroutou
 
 	HanValue CalculateValue
 	(
-		Round const& i_round,
+		RoundData const& i_round,
 		Seat const& i_playerSeat,
 		Player const& i_player,
 		Hand const& i_hand,
@@ -1742,7 +1742,7 @@ struct Ryuuiisou
 
 	HanValue CalculateValue
 	(
-		Round const& i_round,
+		RoundData const& i_round,
 		Seat const& i_playerSeat,
 		Player const& i_player,
 		Hand const& i_hand,
@@ -1807,7 +1807,7 @@ struct ChuurenPoutou
 
 	HanValue CalculateValue
 	(
-		Round const& i_round,
+		RoundData const& i_round,
 		Seat const& i_playerSeat,
 		Player const& i_player,
 		Hand const& i_hand,
@@ -1880,7 +1880,7 @@ struct Suukantsu
 
 	HanValue CalculateValue
 	(
-		Round const& i_round,
+		RoundData const& i_round,
 		Seat const& i_playerSeat,
 		Player const& i_player,
 		Hand const& i_hand,
@@ -1917,7 +1917,7 @@ struct Tenhou
 
 	HanValue CalculateValue
 	(
-		Round const& i_round,
+		RoundData const& i_round,
 		Seat const& i_playerSeat,
 		Player const& i_player,
 		Hand const& i_hand,
@@ -1943,7 +1943,7 @@ struct Chihou
 
 	HanValue CalculateValue
 	(
-		Round const& i_round,
+		RoundData const& i_round,
 		Seat const& i_playerSeat,
 		Player const& i_player,
 		Hand const& i_hand,

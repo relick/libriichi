@@ -1,7 +1,7 @@
 #pragma once
 
-#include "table.hpp"
-#include "tablestate.hpp"
+#include "Table.hpp"
+#include "TableState.hpp"
 
 namespace Riichi::TableStates
 {
