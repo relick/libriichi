@@ -33,6 +33,7 @@ struct SuitTile
 	SuitTileValue m_value;
 
 	friend bool operator==( SuitTile const&, SuitTile const& ) = default;
+	friend std::strong_ordering operator<=>( SuitTile const&, SuitTile const& ) = default;
 };
 
 enum class DragonTileType : uint8_t

@@ -3,6 +3,7 @@
 #include <cassert>
 #include <concepts>
 #include <cstdint>
+#include <iterator>
 #include <limits>
 #include <variant>
 
@@ -12,7 +13,7 @@ namespace Riichi::Utils
 #if NDEBUG
 #define ensure(...)
 #else
-#define ensure(...) assert(__VA_ARGS__)
+#define ensure(TEST, ...) assert((__VA_ARGS__, TEST))
 #endif
 
 template<
@@ -138,5 +139,13 @@ struct EnumIndexedArray
 	auto begin() const { return data.begin(); }
 	auto end() const { return data.end(); }
 };
+
+template<typename T_Container, typename T_Value>
+T_Container Append( T_Container i_c, T_Value i_v )
+{
+	T_Container r = std::move( i_c );
+	std::back_inserter( r ) = std::move( i_v );
+	return r;
+}
 
 }

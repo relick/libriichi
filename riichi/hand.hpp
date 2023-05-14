@@ -50,16 +50,30 @@ enum class WaitType
 	Shanpon, // Triplet
 };
 
+inline GroupType WaitTypeToGroupType( WaitType i_wait )
+{
+	if ( i_wait == WaitType::Shanpon ) { return GroupType::Triplet; }
+	if ( i_wait == WaitType::Tanki ) { return GroupType::Pair; }
+	return GroupType::Sequence;
+}
+
+struct HandInterpretation;
+
+struct HandGroup
+{
+	std::vector<Tile> m_tiles; // Sorted, if a sequence
+	GroupType m_type{ GroupType::Sequence };
+	bool m_open{ true };
+
+	HandGroup( std::vector<Tile> i_tiles, GroupType i_type, bool i_open );
+	HandGroup( HandInterpretation const& i_interp, Tile i_winningTile ); // Make a group from the ungrouped + winning tile
+	HandGroup( HandGroup const& ) = default;
+	HandGroup( HandGroup&& ) = default;
+};
+
 struct HandInterpretation
 {
-	struct Group
-	{
-		std::vector<Tile> m_tiles;
-		GroupType m_type{ GroupType::Sequence };
-		bool m_open{ true };
-	};
-
-	std::vector<Group> m_groups;
+	std::vector<HandGroup> m_groups;
 	std::vector<Tile> m_ungrouped;
 	std::unordered_set<Tile> m_waits;
 	WaitType m_waitType;

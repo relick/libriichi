@@ -195,7 +195,7 @@ struct Pinfu
 		}
 
 		bool invalidGroups = false;
-		for ( HandInterpretation::Group const& group : i_interp.m_groups )
+		for ( HandGroup const& group : i_interp.m_groups )
 		{
 			switch ( group.m_type )
 			{
@@ -265,12 +265,9 @@ struct Iipeikou
 		if ( i_interp.m_waitType != WaitType::Shanpon && i_interp.m_waitType != WaitType::Tanki )
 		{
 			// Need to consider the final group, as it completed a sequence
-			HandInterpretation::Group finalGroup;
-			finalGroup.m_type = GroupType::Sequence;
-			finalGroup.m_tiles = i_interp.m_ungrouped;
-			finalGroup.m_tiles.push_back( i_nextTile );
+			HandGroup const finalGroup( i_interp, i_nextTile );
 
-			for ( HandInterpretation::Group const& group : i_interp.m_groups )
+			for ( HandGroup const& group : i_interp.m_groups )
 			{
 				if ( IsMatchingSequence( finalGroup, group ) )
 				{
@@ -294,13 +291,11 @@ struct Iipeikou
 		return NoYaku;
 	}
 private:
-	static bool IsMatchingSequence( HandInterpretation::Group const& i_a, HandInterpretation::Group const& i_b )
+	static bool IsMatchingSequence( HandGroup const& i_a, HandGroup const& i_b )
 	{
 		if ( i_a.m_type == GroupType::Sequence && i_b.m_type == GroupType::Sequence )
 		{
-			return std::ranges::contains( i_b.m_tiles, i_a.m_tiles[ 0 ] )
-				&& std::ranges::contains( i_b.m_tiles, i_a.m_tiles[ 1 ] )
-				&& std::ranges::contains( i_b.m_tiles, i_a.m_tiles[ 2 ] );
+			return i_a.m_tiles == i_b.m_tiles;
 		}
 		return false;
 	}
@@ -432,7 +427,7 @@ struct Tanyao
 			return NoYaku;
 		}
 
-		for ( HandInterpretation::Group const& group : i_interp.m_groups )
+		for ( HandGroup const& group : i_interp.m_groups )
 		{
 			for ( Tile const& tile : group.m_tiles )
 			{
@@ -484,7 +479,7 @@ struct DragonYakuhai
 		TileDrawType i_nextTileType
 	) const final
 	{
-		for ( HandInterpretation::Group const& group : i_interp.m_groups )
+		for ( HandGroup const& group : i_interp.m_groups )
 		{
 			if ( group.m_type == GroupType::Quad || group.m_type == GroupType::Triplet )
 			{
@@ -538,7 +533,7 @@ struct Yakuhai_RoundWind
 		TileDrawType i_nextTileType
 	) const final
 	{
-		for ( HandInterpretation::Group const& group : i_interp.m_groups )
+		for ( HandGroup const& group : i_interp.m_groups )
 		{
 			if ( group.m_type == GroupType::Quad || group.m_type == GroupType::Triplet )
 			{
@@ -580,7 +575,7 @@ struct Yakuhai_SeatWind
 		TileDrawType i_nextTileType
 	) const final
 	{
-		for ( HandInterpretation::Group const& group : i_interp.m_groups )
+		for ( HandGroup const& group : i_interp.m_groups )
 		{
 			if ( group.m_type == GroupType::Quad || group.m_type == GroupType::Triplet )
 			{
@@ -643,7 +638,7 @@ struct Chantaiyao
 		TileDrawType i_nextTileType
 	) const final
 	{
-		for ( HandInterpretation::Group const& group : i_interp.m_groups )
+		for ( HandGroup const& group : i_interp.m_groups )
 		{
 			if ( !std::ranges::any_of( group.m_tiles, RequiredTile ) )
 			{
@@ -705,10 +700,7 @@ struct SanshokuDoujun
 		if ( i_interp.m_waitType != WaitType::Shanpon && i_interp.m_waitType != WaitType::Tanki )
 		{
 			// Need to consider the final group, as it completed a sequence
-			HandInterpretation::Group finalGroup;
-			finalGroup.m_type = GroupType::Sequence;
-			finalGroup.m_tiles = i_interp.m_ungrouped;
-			finalGroup.m_tiles.push_back( i_nextTile );
+			HandGroup const finalGroup( i_interp, i_nextTile );
 
 			for ( size_t groupI = 0; groupI < i_interp.m_groups.size(); ++groupI )
 			{
@@ -741,7 +733,7 @@ struct SanshokuDoujun
 		return NoYaku;
 	}
 private:
-	static bool Sanshoku( HandInterpretation::Group const& i_a, HandInterpretation::Group const& i_b, HandInterpretation::Group const& i_c )
+	static bool Sanshoku( HandGroup const& i_a, HandGroup const& i_b, HandGroup const& i_c )
 	{
 		if ( i_a.m_type != GroupType::Sequence || i_b.m_type != GroupType::Sequence || i_c.m_type != GroupType::Sequence )
 		{
@@ -757,14 +749,15 @@ private:
 			return false;
 		}
 
-		// I am too tired with yaku at this point to care how shit this code is
-		// TODO
-		return std::ranges::contains( i_b.m_tiles | std::views::transform( []( Tile const& i_t ) { return i_t.Get<TileType::Suit>().m_value; } ), i_a.m_tiles[ 0 ].Get<TileType::Suit>().m_value )
-			&& std::ranges::contains( i_b.m_tiles | std::views::transform( []( Tile const& i_t ) { return i_t.Get<TileType::Suit>().m_value; } ), i_a.m_tiles[ 1 ].Get<TileType::Suit>().m_value )
-			&& std::ranges::contains( i_b.m_tiles | std::views::transform( []( Tile const& i_t ) { return i_t.Get<TileType::Suit>().m_value; } ), i_a.m_tiles[ 2 ].Get<TileType::Suit>().m_value )
-			&& std::ranges::contains( i_c.m_tiles | std::views::transform( []( Tile const& i_t ) { return i_t.Get<TileType::Suit>().m_value; } ), i_a.m_tiles[ 0 ].Get<TileType::Suit>().m_value )
-			&& std::ranges::contains( i_c.m_tiles | std::views::transform( []( Tile const& i_t ) { return i_t.Get<TileType::Suit>().m_value; } ), i_a.m_tiles[ 1 ].Get<TileType::Suit>().m_value )
-			&& std::ranges::contains( i_c.m_tiles | std::views::transform( []( Tile const& i_t ) { return i_t.Get<TileType::Suit>().m_value; } ), i_a.m_tiles[ 2 ].Get<TileType::Suit>().m_value );
+		return std::ranges::all_of(
+			std::views::zip( i_a.m_tiles, i_b.m_tiles, i_c.m_tiles ),
+			[]( auto const& i_tileSet )
+			{
+				auto const& [tileA, tileB, tileC] = i_tileSet;
+				return tileA.Get<TileType::Suit>().m_value == tileB.Get<TileType::Suit>().m_value
+					&& tileB.Get<TileType::Suit>().m_value == tileC.Get<TileType::Suit>().m_value;
+			}
+		);
 	}
 };
 
@@ -791,47 +784,34 @@ struct Ikkitsuukan
 
 		Utils::EnumIndexedArray<std::array<bool, 3>, Suit, c_suitCount> groupsPerSuit{};
 
-		auto fnEvalGroup = [ &groupsPerSuit ]( HandInterpretation::Group const& i_group )
+		auto fnEvalGroup = [ &groupsPerSuit ]( HandGroup const& i_group )
 		{
 			if ( i_group.m_type != GroupType::Sequence )
 			{
 				return;
 			}
 
-			// TODO
-			// This bit's kinda disgusting
-			if ( std::ranges::contains( i_group.m_tiles | std::views::transform( []( Tile const& i_t ) { return i_t.Get<TileType::Suit>().m_value; } ), SuitTileValue( 1 ) )
-				&& std::ranges::contains( i_group.m_tiles | std::views::transform( []( Tile const& i_t ) { return i_t.Get<TileType::Suit>().m_value; } ), SuitTileValue( 2 ) ) 
-				&& std::ranges::contains( i_group.m_tiles | std::views::transform( []( Tile const& i_t ) { return i_t.Get<TileType::Suit>().m_value; } ), SuitTileValue( 3 ) ) )
+			for ( uint8_t i = 1; i <= 3; ++i )
 			{
-				groupsPerSuit[ i_group.m_tiles.front().Get<TileType::Suit>().m_suit ][ 0 ] = true;
-			}
-			else if ( std::ranges::contains( i_group.m_tiles | std::views::transform( []( Tile const& i_t ) { return i_t.Get<TileType::Suit>().m_value; } ), SuitTileValue( 4 ) )
-				&& std::ranges::contains( i_group.m_tiles | std::views::transform( []( Tile const& i_t ) { return i_t.Get<TileType::Suit>().m_value; } ), SuitTileValue( 5 ) )
-				&& std::ranges::contains( i_group.m_tiles | std::views::transform( []( Tile const& i_t ) { return i_t.Get<TileType::Suit>().m_value; } ), SuitTileValue( 6 ) ) )
-			{
-				groupsPerSuit[ i_group.m_tiles.front().Get<TileType::Suit>().m_suit ][ 1 ] = true;
-			}
-			else if ( std::ranges::contains( i_group.m_tiles | std::views::transform( []( Tile const& i_t ) { return i_t.Get<TileType::Suit>().m_value; } ), SuitTileValue( 7 ) )
-				&& std::ranges::contains( i_group.m_tiles | std::views::transform( []( Tile const& i_t ) { return i_t.Get<TileType::Suit>().m_value; } ), SuitTileValue( 8 ) )
-				&& std::ranges::contains( i_group.m_tiles | std::views::transform( []( Tile const& i_t ) { return i_t.Get<TileType::Suit>().m_value; } ), SuitTileValue( 9 ) ) )
-			{
-				groupsPerSuit[ i_group.m_tiles.front().Get<TileType::Suit>().m_suit ][ 2 ] = true;
+				if ( i_group.m_tiles[ 0 ].Get<TileType::Suit>().m_value == ( SuitTileValue::Set<1>() * i )
+					&& i_group.m_tiles[ 1 ].Get<TileType::Suit>().m_value == ( SuitTileValue::Set<2>() * i )
+					&& i_group.m_tiles[ 2 ].Get<TileType::Suit>().m_value == ( SuitTileValue::Set<3>() * i ) )
+				{
+					groupsPerSuit[ i_group.m_tiles.front().Get<TileType::Suit>().m_suit ][ i - 1 ] = true;
+					break;
+				}
 			}
 		};
 
 		if ( i_interp.m_waitType != WaitType::Shanpon && i_interp.m_waitType != WaitType::Tanki )
 		{
 			// Need to consider the final group, as it completed a sequence
-			HandInterpretation::Group finalGroup;
-			finalGroup.m_type = GroupType::Sequence;
-			finalGroup.m_tiles = i_interp.m_ungrouped;
-			finalGroup.m_tiles.push_back( i_nextTile );
+			HandGroup const finalGroup( i_interp, i_nextTile );
 
 			fnEvalGroup( finalGroup );
 		}
 
-		for ( HandInterpretation::Group const& group : i_interp.m_groups )
+		for ( HandGroup const& group : i_interp.m_groups )
 		{
 			fnEvalGroup( group );
 		}
@@ -863,7 +843,7 @@ struct Toitoi
 		TileDrawType i_nextTileType
 	) const final
 	{
-		for ( HandInterpretation::Group const& group : i_interp.m_groups )
+		for ( HandGroup const& group : i_interp.m_groups )
 		{
 			if ( group.m_type == GroupType::Sequence )
 			{
@@ -900,7 +880,7 @@ struct Sanankou
 	) const final
 	{
 		int concealedTripleCount = 0;
-		for ( HandInterpretation::Group const& group : i_interp.m_groups )
+		for ( HandGroup const& group : i_interp.m_groups )
 		{
 			if ( !group.m_open && ( group.m_type == GroupType::Quad || group.m_type == GroupType::Triplet ) )
 			{
@@ -953,10 +933,7 @@ struct SanshokuDoukou
 		if ( i_interp.m_waitType == WaitType::Shanpon )
 		{
 			// Need to consider the final group, as it completed a triplet
-			HandInterpretation::Group finalGroup;
-			finalGroup.m_type = GroupType::Triplet;
-			finalGroup.m_tiles = i_interp.m_ungrouped;
-			finalGroup.m_tiles.push_back( i_nextTile );
+			HandGroup const finalGroup( i_interp, i_nextTile );
 
 			for ( size_t groupI = 0; groupI < i_interp.m_groups.size(); ++groupI )
 			{
@@ -989,7 +966,7 @@ struct SanshokuDoukou
 		return NoYaku;
 	}
 private:
-	static bool Sanshoku( HandInterpretation::Group const& i_a, HandInterpretation::Group const& i_b, HandInterpretation::Group const& i_c )
+	static bool Sanshoku( HandGroup const& i_a, HandGroup const& i_b, HandGroup const& i_c )
 	{
 		if ( ( i_a.m_type != GroupType::Triplet && i_a.m_type != GroupType::Quad )
 			|| ( i_b.m_type != GroupType::Triplet && i_b.m_type != GroupType::Quad )
@@ -1033,7 +1010,7 @@ struct Sankantsu
 	{
 		// NB don't need to check winning group as it can't be a quad
 		int quadCount = 0;
-		for ( HandInterpretation::Group const& group : i_interp.m_groups )
+		for ( HandGroup const& group : i_interp.m_groups )
 		{
 			if ( group.m_type == GroupType::Quad )
 			{
@@ -1077,7 +1054,7 @@ struct Chiitoitsu
 		std::unordered_set<Tile> uniqueTiles;
 		uniqueTiles.insert( i_nextTile );
 		
-		for ( HandInterpretation::Group const& group : i_interp.m_groups )
+		for ( HandGroup const& group : i_interp.m_groups )
 		{
 			if ( group.m_type != GroupType::Pair )
 			{
@@ -1119,7 +1096,7 @@ struct Honroutou
 		TileDrawType i_nextTileType
 	) const final
 	{
-		for ( HandInterpretation::Group const& group : i_interp.m_groups )
+		for ( HandGroup const& group : i_interp.m_groups )
 		{
 			if ( !std::ranges::all_of( group.m_tiles, ValidTile ) )
 			{
@@ -1175,7 +1152,7 @@ struct Shousangen
 
 		int dragonTripletCount = 0; // can't have more than one triplet of the same dragon so 2 triplets = 2 different dragons
 
-		for ( HandInterpretation::Group const& group : i_interp.m_groups )
+		for ( HandGroup const& group : i_interp.m_groups )
 		{
 			if ( group.m_type == GroupType::Triplet || group.m_type == GroupType::Quad )
 			{
@@ -1271,7 +1248,7 @@ struct JunchanTaiyao
 			return NoYaku;
 		}
 
-		for ( HandInterpretation::Group const& group : i_interp.m_groups )
+		for ( HandGroup const& group : i_interp.m_groups )
 		{
 			if ( !std::ranges::any_of( group.m_tiles, RequiredTile ) )
 			{
@@ -1302,7 +1279,6 @@ private:
 	}
 };
 
-// TODO
 struct Ryanpeikou
 	: public NamedYaku<"Ryanpeikou">
 {
@@ -1359,10 +1335,7 @@ struct Ryanpeikou
 		else
 		{
 			// Need to consider the final group, as it completed a sequence
-			HandInterpretation::Group finalGroup;
-			finalGroup.m_type = GroupType::Sequence;
-			finalGroup.m_tiles = i_interp.m_ungrouped;
-			finalGroup.m_tiles.push_back( i_nextTile );
+			HandGroup const finalGroup( i_interp, i_nextTile );
 
 			for ( size_t groupI = 0; groupI < i_interp.m_groups.size(); ++groupI )
 			{
@@ -1388,13 +1361,11 @@ struct Ryanpeikou
 		return NoYaku;
 	}
 private:
-	static bool IsMatchingSequence( HandInterpretation::Group const& i_a, HandInterpretation::Group const& i_b )
+	static bool IsMatchingSequence( HandGroup const& i_a, HandGroup const& i_b )
 	{
 		if ( i_a.m_type == GroupType::Sequence && i_b.m_type == GroupType::Sequence )
 		{
-			return std::ranges::contains( i_b.m_tiles, i_a.m_tiles[ 0 ] )
-				&& std::ranges::contains( i_b.m_tiles, i_a.m_tiles[ 1 ] )
-				&& std::ranges::contains( i_b.m_tiles, i_a.m_tiles[ 2 ] );
+			return i_a.m_tiles == i_b.m_tiles;
 		}
 		return false;
 	}
@@ -1468,7 +1439,7 @@ struct KokushiMusou
 		std::unordered_set<Tile> uniqueTiles;
 		uniqueTiles.reserve( 14 );
 
-		for ( HandInterpretation::Group const& group : i_interp.m_groups )
+		for ( HandGroup const& group : i_interp.m_groups )
 		{
 			for ( Tile const& tile : group.m_tiles )
 			{
@@ -1533,7 +1504,7 @@ struct Suuankou
 	) const final
 	{
 		int concealedTripleCount = 0;
-		for ( HandInterpretation::Group const& group : i_interp.m_groups )
+		for ( HandGroup const& group : i_interp.m_groups )
 		{
 			if ( !group.m_open && ( group.m_type == GroupType::Quad || group.m_type == GroupType::Triplet ) )
 			{
@@ -1581,7 +1552,7 @@ struct Daisangen
 
 		int dragonTripletCount = 0; // can't have more than one triplet of the same dragon so 3 triplets = 3 dragon types
 
-		for ( HandInterpretation::Group const& group : i_interp.m_groups )
+		for ( HandGroup const& group : i_interp.m_groups )
 		{
 			if ( group.m_type == GroupType::Triplet || group.m_type == GroupType::Quad )
 			{
@@ -1631,7 +1602,7 @@ struct Shousuushii
 
 		int windTripletCount = 0; // can't have more than one triplet of the same wind so 3 triplets = 3 different winds
 
-		for ( HandInterpretation::Group const& group : i_interp.m_groups )
+		for ( HandGroup const& group : i_interp.m_groups )
 		{
 			if ( group.m_type == GroupType::Triplet || group.m_type == GroupType::Quad )
 			{
@@ -1693,7 +1664,7 @@ struct Daisuushii
 
 		int windTripletCount = 0; // can't have more than one triplet of the same wind so 4 triplets = 4 big winds
 
-		for ( HandInterpretation::Group const& group : i_interp.m_groups )
+		for ( HandGroup const& group : i_interp.m_groups )
 		{
 			if ( group.m_type == GroupType::Triplet || group.m_type == GroupType::Quad )
 			{
@@ -1766,7 +1737,7 @@ struct Chinroutou
 			return NoYaku;
 		}
 
-		for ( HandInterpretation::Group const& group : i_interp.m_groups )
+		for ( HandGroup const& group : i_interp.m_groups )
 		{
 			if ( !std::ranges::all_of( group.m_tiles, RequiredTile ) )
 			{
@@ -1819,7 +1790,7 @@ struct Ryuuiisou
 			return NoYaku;
 		}
 
-		for ( HandInterpretation::Group const& group : i_interp.m_groups )
+		for ( HandGroup const& group : i_interp.m_groups )
 		{
 			if ( !std::ranges::all_of( group.m_tiles, RequiredTile ) )
 			{
@@ -1896,7 +1867,7 @@ struct ChuurenPoutou
 			return true;
 		};
 
-		for ( HandInterpretation::Group const& group : i_interp.m_groups )
+		for ( HandGroup const& group : i_interp.m_groups )
 		{
 			for ( Tile const& tile : group.m_tiles )
 			{
@@ -1947,7 +1918,7 @@ struct Suukantsu
 	) const final
 	{
 		int kanCount = 0;
-		for ( HandInterpretation::Group const& group : i_interp.m_groups )
+		for ( HandGroup const& group : i_interp.m_groups )
 		{
 			if ( group.m_type == GroupType::Quad )
 			{

@@ -8,6 +8,68 @@
 namespace Riichi
 {
 
+HandGroup::HandGroup
+(
+	std::vector<Tile> i_tiles,
+	GroupType i_type,
+	bool i_open
+)
+	: m_tiles{ std::move( i_tiles ) }
+	, m_type{ i_type }
+	, m_open{ i_open }
+{
+	// Verify tiles are acceptable groups
+#ifndef NDEBUG
+	switch ( m_type )
+	{
+		using enum GroupType;
+	case Pair:
+	{
+		ensure( m_tiles.size() == 2, "Pair group didn't have 2 tiles" );
+		ensure( std::ranges::adjacent_find( m_tiles, std::not_equal_to{} ) == m_tiles.end(), "Pair group didn't have matching tiles" );
+		break;
+	}
+	case Sequence:
+	{
+		ensure( m_tiles.size() == 3, "Sequence group didn't have 3 tiles" );
+		ensure( std::ranges::all_of( m_tiles, []( Tile const& i_t ) { return i_t.Type() == TileType::Suit; } ), "Sequence group has a non-suit tile" );
+		ensure( std::ranges::adjacent_find( m_tiles, std::not_equal_to{}, []( Tile const& i_t ) { return i_t.Get<TileType::Suit>().m_suit; } ) == m_tiles.end(), "Sequence group didn't have matching suits" );
+		break;
+	}
+	case Triplet:
+	{
+		ensure( m_tiles.size() == 3, "Triplet group didn't have 3 tiles" );
+		ensure( std::ranges::adjacent_find( m_tiles, std::not_equal_to{} ) == m_tiles.end(), "Triplet group didn't have matching tiles" );
+		break;
+	}
+	case Quad:
+	{
+		ensure( m_tiles.size() == 4, "Quad group didn't have 4 tiles" );
+		ensure( std::ranges::adjacent_find( m_tiles, std::not_equal_to{} ) == m_tiles.end(), "Quad group didn't have matching tiles" );
+		break;
+	}
+	}
+#endif
+
+	// Do a quick sort, though only need to for sequences
+	if ( m_type == GroupType::Sequence )
+	{
+		std::ranges::sort( m_tiles );
+	}
+}
+
+HandGroup::HandGroup
+(
+	HandInterpretation const& i_interp,
+	Tile i_winningTile
+)
+	: HandGroup(
+		Utils::Append( i_interp.m_ungrouped, i_winningTile ),
+		WaitTypeToGroupType( i_interp.m_waitType ),
+		false
+	)
+{}
+
 HandAssessment::HandAssessment
 (
 	Hand const& i_hand
@@ -48,11 +110,11 @@ HandAssessment::HandAssessment
 	HandInterpretation fixedPart;
 	for ( Meld const& meld : i_hand.Melds() )
 	{
-		HandInterpretation::Group& group = fixedPart.m_groups.emplace_back();
-		group.m_tiles.reserve( meld.m_tiles.size() );
-		group.m_tiles.insert_range( group.m_tiles.end(), std::views::elements<0>( meld.m_tiles ) );
-		group.m_type = meld.m_type;
-		group.m_open = meld.m_open;
+		fixedPart.m_groups.emplace_back(
+			std::ranges::to<std::vector>( std::views::elements<0>( meld.m_tiles ) ),
+			meld.m_type,
+			meld.m_open
+		);
 	}
 
 	// Aim: calculate all possible arrangements that could form (part of) a winning hand, excluding special arrangements (13 orphans + 7 pairs)
