@@ -32,9 +32,4 @@ inline bool operator==( Seat i_seat, WindTileType i_windTile )
 	return static_cast< uint8_t >( i_seat ) == static_cast< uint8_t >( i_windTile );
 }
 
-inline bool operator==( WindTileType i_windTile, Seat i_seat )
-{
-	return i_seat == i_windTile;
-}
-
 }
