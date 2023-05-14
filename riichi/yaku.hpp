@@ -90,6 +90,10 @@ struct NamedYaku
 namespace MainYaku
 {
 
+// Overall TODO: Lots of the yaku need to assess the 'final group' separately from the rest of the groups. This is to avoid creating a container and doing a bunch of copies where unnecessary
+// It would be nice to clean this up somehow. It would also be nice if all the yaku could be made to avoid allocating entirely when assessing!
+
+
 struct MenzenchinTsumohou
 	: public NamedYaku<"MenzenchinTsumohou">
 {
@@ -194,27 +198,25 @@ struct Pinfu
 			return NoYaku;
 		}
 
-		bool invalidGroups = false;
 		for ( HandGroup const& group : i_interp.m_groups )
 		{
-			switch ( group.m_type )
+			switch ( group.Type() )
 			{
 			using enum GroupType;
 			case Triplet:
 			case Quad:
 			{
-				invalidGroups = true;
-				break;
+				return NoYaku;
 			}
 			case Pair:
 			{
-				if ( group.m_tiles.front().Type() == TileType::Wind )
+				if ( group.TilesType() == TileType::Wind )
 				{
-					WindTileType const wind = group.m_tiles.front().Get<TileType::Wind>();
+					WindTileType const wind = group[ 0 ].Get<TileType::Wind>();
 					if ( wind == i_playerSeat || wind == i_round.Wind() )
 					{
 						// No Fu in my pinfu :(
-						invalidGroups = true;
+						return NoYaku;
 					}
 				}
 				break;
@@ -225,11 +227,6 @@ struct Pinfu
 				break;
 			}
 			}
-		}
-
-		if ( invalidGroups )
-		{
-			return NoYaku;
 		}
 
 		// Passed all checks
@@ -262,7 +259,7 @@ struct Iipeikou
 		// God, calculating this sucks.
 		// what an annoying yaku
 
-		if ( i_interp.m_waitType != WaitType::Shanpon && i_interp.m_waitType != WaitType::Tanki )
+		if ( SequenceWait( i_interp.m_waitType ) )
 		{
 			// Need to consider the final group, as it completed a sequence
 			HandGroup const finalGroup( i_interp, i_nextTile );
@@ -293,9 +290,9 @@ struct Iipeikou
 private:
 	static bool IsMatchingSequence( HandGroup const& i_a, HandGroup const& i_b )
 	{
-		if ( i_a.m_type == GroupType::Sequence && i_b.m_type == GroupType::Sequence )
+		if ( i_a.Type() == GroupType::Sequence && i_b.Type() == GroupType::Sequence )
 		{
-			return i_a.m_tiles == i_b.m_tiles;
+			return i_a.Tiles() == i_b.Tiles();
 		}
 		return false;
 	}
@@ -429,7 +426,7 @@ struct Tanyao
 
 		for ( HandGroup const& group : i_interp.m_groups )
 		{
-			for ( Tile const& tile : group.m_tiles )
+			for ( Tile const& tile : group.Tiles() )
 			{
 				if ( InvalidTile( tile ) )
 				{
@@ -481,9 +478,9 @@ struct DragonYakuhai
 	{
 		for ( HandGroup const& group : i_interp.m_groups )
 		{
-			if ( group.m_type == GroupType::Quad || group.m_type == GroupType::Triplet )
+			if ( TripletCompatible( group.Type() ) )
 			{
-				if ( ValidTile( group.m_tiles.front() ) )
+				if ( ValidTile( group[ 0 ] ) )
 				{
 					return 1;
 				}
@@ -535,9 +532,9 @@ struct Yakuhai_RoundWind
 	{
 		for ( HandGroup const& group : i_interp.m_groups )
 		{
-			if ( group.m_type == GroupType::Quad || group.m_type == GroupType::Triplet )
+			if ( TripletCompatible( group.Type() ) )
 			{
-				if ( ValidTile( group.m_tiles.front(), i_round.Wind() ) )
+				if ( ValidTile( group[ 0 ], i_round.Wind() ) )
 				{
 					return 1;
 				}
@@ -577,9 +574,9 @@ struct Yakuhai_SeatWind
 	{
 		for ( HandGroup const& group : i_interp.m_groups )
 		{
-			if ( group.m_type == GroupType::Quad || group.m_type == GroupType::Triplet )
+			if ( TripletCompatible( group.Type() ) )
 			{
-				if ( ValidTile( group.m_tiles.front(), i_playerSeat ) )
+				if ( ValidTile( group[ 0 ], i_playerSeat ) )
 				{
 					return 1;
 				}
@@ -640,7 +637,7 @@ struct Chantaiyao
 	{
 		for ( HandGroup const& group : i_interp.m_groups )
 		{
-			if ( !std::ranges::any_of( group.m_tiles, RequiredTile ) )
+			if ( !std::ranges::any_of( group.Tiles(), RequiredTile ) )
 			{
 				return NoYaku;
 			}
@@ -697,7 +694,7 @@ struct SanshokuDoujun
 
 		// the literal worst yaku
 
-		if ( i_interp.m_waitType != WaitType::Shanpon && i_interp.m_waitType != WaitType::Tanki )
+		if ( SequenceWait( i_interp.m_waitType ) )
 		{
 			// Need to consider the final group, as it completed a sequence
 			HandGroup const finalGroup( i_interp, i_nextTile );
@@ -735,22 +732,18 @@ struct SanshokuDoujun
 private:
 	static bool Sanshoku( HandGroup const& i_a, HandGroup const& i_b, HandGroup const& i_c )
 	{
-		if ( i_a.m_type != GroupType::Sequence || i_b.m_type != GroupType::Sequence || i_c.m_type != GroupType::Sequence )
+		if ( i_a.Type() != GroupType::Sequence || i_b.Type() != GroupType::Sequence || i_c.Type() != GroupType::Sequence )
 		{
 			return false;
 		}
 
-		Utils::EnumIndexedArray<bool, Suit, c_suitCount> suits;
-		suits[ i_a.m_tiles.front().Get<TileType::Suit>().m_suit ] = true;
-		suits[ i_b.m_tiles.front().Get<TileType::Suit>().m_suit ] = true;
-		suits[ i_c.m_tiles.front().Get<TileType::Suit>().m_suit ] = true;
-		if ( !std::ranges::all_of( suits, std::identity{} ) )
+		if ( i_a.CommonSuit() == i_b.CommonSuit() || i_b.CommonSuit() == i_c.CommonSuit() || i_a.CommonSuit() == i_c.CommonSuit() )
 		{
 			return false;
 		}
 
 		return std::ranges::all_of(
-			std::views::zip( i_a.m_tiles, i_b.m_tiles, i_c.m_tiles ),
+			std::views::zip( i_a.Tiles(), i_b.Tiles(), i_c.Tiles() ),
 			[]( auto const& i_tileSet )
 			{
 				auto const& [tileA, tileB, tileC] = i_tileSet;
@@ -786,24 +779,24 @@ struct Ikkitsuukan
 
 		auto fnEvalGroup = [ &groupsPerSuit ]( HandGroup const& i_group )
 		{
-			if ( i_group.m_type != GroupType::Sequence )
+			if ( i_group.Type() != GroupType::Sequence )
 			{
 				return;
 			}
 
 			for ( uint8_t i = 1; i <= 3; ++i )
 			{
-				if ( i_group.m_tiles[ 0 ].Get<TileType::Suit>().m_value == ( SuitTileValue::Set<1>() * i )
-					&& i_group.m_tiles[ 1 ].Get<TileType::Suit>().m_value == ( SuitTileValue::Set<2>() * i )
-					&& i_group.m_tiles[ 2 ].Get<TileType::Suit>().m_value == ( SuitTileValue::Set<3>() * i ) )
+				if ( i_group[ 0 ].Get<TileType::Suit>().m_value == ( SuitTileValue::Set<1>() * i )
+					&& i_group[ 1 ].Get<TileType::Suit>().m_value == ( SuitTileValue::Set<2>() * i )
+					&& i_group[ 2 ].Get<TileType::Suit>().m_value == ( SuitTileValue::Set<3>() * i ) )
 				{
-					groupsPerSuit[ i_group.m_tiles.front().Get<TileType::Suit>().m_suit ][ i - 1 ] = true;
+					groupsPerSuit[ i_group.CommonSuit() ][ i - 1 ] = true;
 					break;
 				}
 			}
 		};
 
-		if ( i_interp.m_waitType != WaitType::Shanpon && i_interp.m_waitType != WaitType::Tanki )
+		if ( SequenceWait( i_interp.m_waitType ) )
 		{
 			// Need to consider the final group, as it completed a sequence
 			HandGroup const finalGroup( i_interp, i_nextTile );
@@ -845,14 +838,14 @@ struct Toitoi
 	{
 		for ( HandGroup const& group : i_interp.m_groups )
 		{
-			if ( group.m_type == GroupType::Sequence )
+			if ( group.Type() == GroupType::Sequence )
 			{
 				return NoYaku;
 			}
 		}
 
 		// Check if we're completing a sequence too
-		if ( i_interp.m_waitType != WaitType::Shanpon || i_interp.m_waitType != WaitType::Tanki )
+		if ( SequenceWait( i_interp.m_waitType ) )
 		{
 			// Sequence wait
 			return NoYaku;
@@ -882,7 +875,7 @@ struct Sanankou
 		int concealedTripleCount = 0;
 		for ( HandGroup const& group : i_interp.m_groups )
 		{
-			if ( !group.m_open && ( group.m_type == GroupType::Quad || group.m_type == GroupType::Triplet ) )
+			if ( !group.Open() && TripletCompatible( group.Type() ) )
 			{
 				++concealedTripleCount;
 			}
@@ -968,26 +961,19 @@ struct SanshokuDoukou
 private:
 	static bool Sanshoku( HandGroup const& i_a, HandGroup const& i_b, HandGroup const& i_c )
 	{
-		if ( ( i_a.m_type != GroupType::Triplet && i_a.m_type != GroupType::Quad )
-			|| ( i_b.m_type != GroupType::Triplet && i_b.m_type != GroupType::Quad )
-			|| ( i_c.m_type != GroupType::Triplet && i_c.m_type != GroupType::Quad ) )
+		if ( !TripletCompatible( i_a.Type() ) || !TripletCompatible( i_b.Type() ) || !TripletCompatible( i_c.Type() ) )
 		{
 			return false;
 		}
 
 		// Check suits
-		Utils::EnumIndexedArray<bool, Suit, c_suitCount> suits;
-		suits[ i_a.m_tiles.front().Get<TileType::Suit>().m_suit ] = true;
-		suits[ i_b.m_tiles.front().Get<TileType::Suit>().m_suit ] = true;
-		suits[ i_c.m_tiles.front().Get<TileType::Suit>().m_suit ] = true;
-		if ( !std::ranges::all_of( suits, std::identity{} ) )
+		if ( i_a.CommonSuit() == i_b.CommonSuit() || i_b.CommonSuit() == i_c.CommonSuit() || i_a.CommonSuit() == i_c.CommonSuit() )
 		{
 			return false;
 		}
 		
 		// Check values match
-		return i_a.m_tiles.front().Get<TileType::Suit>().m_value == i_b.m_tiles.front().Get<TileType::Suit>().m_value
-			&& i_b.m_tiles.front().Get<TileType::Suit>().m_value == i_c.m_tiles.front().Get<TileType::Suit>().m_value;
+		return i_a.CommonSuitTileValue() == i_b.CommonSuitTileValue() && i_b.CommonSuitTileValue() == i_c.CommonSuitTileValue();
 	}
 };
 
@@ -1012,7 +998,7 @@ struct Sankantsu
 		int quadCount = 0;
 		for ( HandGroup const& group : i_interp.m_groups )
 		{
-			if ( group.m_type == GroupType::Quad )
+			if ( group.Type() == GroupType::Quad )
 			{
 				++quadCount;
 			}
@@ -1056,11 +1042,11 @@ struct Chiitoitsu
 		
 		for ( HandGroup const& group : i_interp.m_groups )
 		{
-			if ( group.m_type != GroupType::Pair )
+			if ( group.Type() != GroupType::Pair )
 			{
 				return NoYaku;
 			}
-			uniqueTiles.insert( group.m_tiles.front() );
+			uniqueTiles.insert( group[ 0 ] );
 		}
 
 		return uniqueTiles.size() == 7 ? 2 : NoYaku;
@@ -1098,7 +1084,7 @@ struct Honroutou
 	{
 		for ( HandGroup const& group : i_interp.m_groups )
 		{
-			if ( !std::ranges::all_of( group.m_tiles, ValidTile ) )
+			if ( !std::ranges::all_of( group.Tiles(), ValidTile ) )
 			{
 				return NoYaku;
 			}
@@ -1154,16 +1140,16 @@ struct Shousangen
 
 		for ( HandGroup const& group : i_interp.m_groups )
 		{
-			if ( group.m_type == GroupType::Triplet || group.m_type == GroupType::Quad )
+			if ( TripletCompatible( group.Type() ) )
 			{
-				if ( group.m_tiles.front().Type() == TileType::Dragon )
+				if ( group.TilesType() == TileType::Dragon )
 				{
 					++dragonTripletCount;
 				}
 			}
-			else if ( group.m_type == GroupType::Pair )
+			else if ( group.Type() == GroupType::Pair )
 			{
-				if ( group.m_tiles.front().Type() != TileType::Dragon )
+				if ( group.TilesType() != TileType::Dragon )
 				{
 					return NoYaku;
 				}
@@ -1250,7 +1236,7 @@ struct JunchanTaiyao
 
 		for ( HandGroup const& group : i_interp.m_groups )
 		{
-			if ( !std::ranges::any_of( group.m_tiles, RequiredTile ) )
+			if ( !std::ranges::any_of( group.Tiles(), RequiredTile ) )
 			{
 				return NoYaku;
 			}
@@ -1363,9 +1349,9 @@ struct Ryanpeikou
 private:
 	static bool IsMatchingSequence( HandGroup const& i_a, HandGroup const& i_b )
 	{
-		if ( i_a.m_type == GroupType::Sequence && i_b.m_type == GroupType::Sequence )
+		if ( i_a.Type() == GroupType::Sequence && i_b.Type() == GroupType::Sequence )
 		{
-			return i_a.m_tiles == i_b.m_tiles;
+			return i_a.Tiles() == i_b.Tiles();
 		}
 		return false;
 	}
@@ -1441,7 +1427,7 @@ struct KokushiMusou
 
 		for ( HandGroup const& group : i_interp.m_groups )
 		{
-			for ( Tile const& tile : group.m_tiles )
+			for ( Tile const& tile : group.Tiles() )
 			{
 				if ( !RequiredTile( tile ) )
 				{
@@ -1506,7 +1492,7 @@ struct Suuankou
 		int concealedTripleCount = 0;
 		for ( HandGroup const& group : i_interp.m_groups )
 		{
-			if ( !group.m_open && ( group.m_type == GroupType::Quad || group.m_type == GroupType::Triplet ) )
+			if ( !group.Open() && TripletCompatible( group.Type() ) )
 			{
 				++concealedTripleCount;
 			}
@@ -1554,9 +1540,9 @@ struct Daisangen
 
 		for ( HandGroup const& group : i_interp.m_groups )
 		{
-			if ( group.m_type == GroupType::Triplet || group.m_type == GroupType::Quad )
+			if ( TripletCompatible( group.Type() ) )
 			{
-				if ( group.m_tiles.front().Type() == TileType::Dragon )
+				if ( group.TilesType() == TileType::Dragon )
 				{
 					++dragonTripletCount;
 				}
@@ -1604,16 +1590,16 @@ struct Shousuushii
 
 		for ( HandGroup const& group : i_interp.m_groups )
 		{
-			if ( group.m_type == GroupType::Triplet || group.m_type == GroupType::Quad )
+			if ( TripletCompatible( group.Type() ) )
 			{
-				if ( group.m_tiles.front().Type() == TileType::Wind )
+				if ( group.TilesType() == TileType::Wind )
 				{
 					++windTripletCount;
 				}
 			}
-			else if ( group.m_type == GroupType::Pair )
+			else if ( group.Type() == GroupType::Pair )
 			{
-				if ( group.m_tiles.front().Type() != TileType::Wind )
+				if ( group.TilesType() != TileType::Wind )
 				{
 					return NoYaku;
 				}
@@ -1666,9 +1652,9 @@ struct Daisuushii
 
 		for ( HandGroup const& group : i_interp.m_groups )
 		{
-			if ( group.m_type == GroupType::Triplet || group.m_type == GroupType::Quad )
+			if ( TripletCompatible( group.Type() ) )
 			{
-				if ( group.m_tiles.front().Type() == TileType::Wind )
+				if ( group.TilesType() == TileType::Wind )
 				{
 					++windTripletCount;
 				}
@@ -1739,7 +1725,7 @@ struct Chinroutou
 
 		for ( HandGroup const& group : i_interp.m_groups )
 		{
-			if ( !std::ranges::all_of( group.m_tiles, RequiredTile ) )
+			if ( !std::ranges::all_of( group.Tiles(), RequiredTile ) )
 			{
 				return NoYaku;
 			}
@@ -1792,7 +1778,7 @@ struct Ryuuiisou
 
 		for ( HandGroup const& group : i_interp.m_groups )
 		{
-			if ( !std::ranges::all_of( group.m_tiles, RequiredTile ) )
+			if ( !std::ranges::all_of( group.Tiles(), RequiredTile ) )
 			{
 				return NoYaku;
 			}
@@ -1869,7 +1855,7 @@ struct ChuurenPoutou
 
 		for ( HandGroup const& group : i_interp.m_groups )
 		{
-			for ( Tile const& tile : group.m_tiles )
+			for ( Tile const& tile : group.Tiles() )
 			{
 				if ( !fnEvalTile( tile ) )
 				{
@@ -1920,7 +1906,7 @@ struct Suukantsu
 		int kanCount = 0;
 		for ( HandGroup const& group : i_interp.m_groups )
 		{
-			if ( group.m_type == GroupType::Quad )
+			if ( group.Type() == GroupType::Quad )
 			{
 				++kanCount;
 			}

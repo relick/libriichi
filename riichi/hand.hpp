@@ -17,6 +17,7 @@ enum class GroupType : uint8_t
 	Triplet,
 	Quad, // Kan only - we never assess a quad inside a hand interpretation (other than to offer the option to the player)
 };
+inline bool TripletCompatible( GroupType i_type ) { return i_type == GroupType::Triplet || i_type == GroupType::Quad; }
 
 // Meld is made up of tiles that may have come from a different seat to the owner of the meld
 // A meld can also be closed (e.g. closed kan), in which it is locked in but doesn't affect open-ness of the hand
@@ -49,6 +50,7 @@ enum class WaitType
 	Ryanmen, // Open
 	Shanpon, // Triplet
 };
+inline bool SequenceWait( WaitType i_type ) { return i_type != WaitType::Tanki && i_type == WaitType::Shanpon; }
 
 inline GroupType WaitTypeToGroupType( WaitType i_wait )
 {
@@ -59,16 +61,25 @@ inline GroupType WaitTypeToGroupType( WaitType i_wait )
 
 struct HandInterpretation;
 
-struct HandGroup
+class HandGroup
 {
 	std::vector<Tile> m_tiles; // Sorted, if a sequence
 	GroupType m_type{ GroupType::Sequence };
 	bool m_open{ true };
 
+public:
 	HandGroup( std::vector<Tile> i_tiles, GroupType i_type, bool i_open );
 	HandGroup( HandInterpretation const& i_interp, Tile i_winningTile ); // Make a group from the ungrouped + winning tile
 	HandGroup( HandGroup const& ) = default;
 	HandGroup( HandGroup&& ) = default;
+
+	std::vector<Tile> const& Tiles() const { return m_tiles; }
+	Tile const& operator[]( size_t i ) const { return m_tiles[ i ]; }
+	GroupType Type() const { return m_type; }
+	bool Open() const { return m_open; }
+	TileType TilesType() const;
+	Suit CommonSuit() const;
+	SuitTileValue CommonSuitTileValue() const;
 };
 
 struct HandInterpretation

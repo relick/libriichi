@@ -70,6 +70,29 @@ HandGroup::HandGroup
 	)
 {}
 
+TileType HandGroup::TilesType
+(
+)	const
+{
+	return m_tiles.front().Type();
+}
+
+Suit HandGroup::CommonSuit
+(
+)	const
+{
+	ensure( TilesType() == TileType::Suit, "Cannot call CommonSuit when not a suit group" );
+	return m_tiles.front().Get<TileType::Suit>().m_suit;
+}
+
+SuitTileValue HandGroup::CommonSuitTileValue
+(
+)	const
+{
+	ensure( TilesType() == TileType::Suit, "Cannot call CommonSuitTileValue when not a suit group" );
+	return m_tiles.front().Get<TileType::Suit>().m_value;
+}
+
 HandAssessment::HandAssessment
 (
 	Hand const& i_hand
