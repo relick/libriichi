@@ -75,7 +75,7 @@ public:
 	// Setup
 	void AddPlayer( Player&& i_player )
 	{
-		ensure( m_players.size() < m_rules->GetPlayerCount(), "Too many players added" );
+		Ensure( m_players.size() < m_rules->GetPlayerCount(), "Too many players added" );
 		m_players.emplace_back( std::move( i_player ) );
 	}
 	

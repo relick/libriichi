@@ -11,9 +11,11 @@ namespace Riichi::Utils
 {
 
 #if NDEBUG
-#define ensure(...)
+#define Ensure(...)
+#define Error(MSG)
 #else
-#define ensure(TEST, ...) assert((__VA_ARGS__, TEST))
+#define Ensure(TEST, ...) assert((__VA_ARGS__, TEST))
+#define Error(MSG) Ensure(false, MSG)
 #endif
 
 template<

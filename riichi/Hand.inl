@@ -25,27 +25,27 @@ HandGroup::HandGroup
 		using enum GroupType;
 	case Pair:
 	{
-		ensure( m_tiles.size() == 2, "Pair group didn't have 2 tiles" );
-		ensure( std::ranges::adjacent_find( m_tiles, std::not_equal_to{} ) == m_tiles.end(), "Pair group didn't have matching tiles" );
+		Ensure( m_tiles.size() == 2, "Pair group didn't have 2 tiles" );
+		Ensure( std::ranges::adjacent_find( m_tiles, std::not_equal_to{} ) == m_tiles.end(), "Pair group didn't have matching tiles" );
 		break;
 	}
 	case Sequence:
 	{
-		ensure( m_tiles.size() == 3, "Sequence group didn't have 3 tiles" );
-		ensure( std::ranges::all_of( m_tiles, []( Tile const& i_t ) { return i_t.Type() == TileType::Suit; } ), "Sequence group has a non-suit tile" );
-		ensure( std::ranges::adjacent_find( m_tiles, std::not_equal_to{}, []( Tile const& i_t ) { return i_t.Get<TileType::Suit>().m_suit; } ) == m_tiles.end(), "Sequence group didn't have matching suits" );
+		Ensure( m_tiles.size() == 3, "Sequence group didn't have 3 tiles" );
+		Ensure( std::ranges::all_of( m_tiles, []( Tile const& i_t ) { return i_t.Type() == TileType::Suit; } ), "Sequence group has a non-suit tile" );
+		Ensure( std::ranges::adjacent_find( m_tiles, std::not_equal_to{}, []( Tile const& i_t ) { return i_t.Get<TileType::Suit>().m_suit; } ) == m_tiles.end(), "Sequence group didn't have matching suits" );
 		break;
 	}
 	case Triplet:
 	{
-		ensure( m_tiles.size() == 3, "Triplet group didn't have 3 tiles" );
-		ensure( std::ranges::adjacent_find( m_tiles, std::not_equal_to{} ) == m_tiles.end(), "Triplet group didn't have matching tiles" );
+		Ensure( m_tiles.size() == 3, "Triplet group didn't have 3 tiles" );
+		Ensure( std::ranges::adjacent_find( m_tiles, std::not_equal_to{} ) == m_tiles.end(), "Triplet group didn't have matching tiles" );
 		break;
 	}
 	case Quad:
 	{
-		ensure( m_tiles.size() == 4, "Quad group didn't have 4 tiles" );
-		ensure( std::ranges::adjacent_find( m_tiles, std::not_equal_to{} ) == m_tiles.end(), "Quad group didn't have matching tiles" );
+		Ensure( m_tiles.size() == 4, "Quad group didn't have 4 tiles" );
+		Ensure( std::ranges::adjacent_find( m_tiles, std::not_equal_to{} ) == m_tiles.end(), "Quad group didn't have matching tiles" );
 		break;
 	}
 	}
@@ -81,7 +81,7 @@ Suit HandGroup::CommonSuit
 (
 )	const
 {
-	ensure( TilesType() == TileType::Suit, "Cannot call CommonSuit when not a suit group" );
+	Ensure( TilesType() == TileType::Suit, "Cannot call CommonSuit when not a suit group" );
 	return m_tiles.front().Get<TileType::Suit>().m_suit;
 }
 
@@ -89,7 +89,7 @@ SuitTileValue HandGroup::CommonSuitTileValue
 (
 )	const
 {
-	ensure( TilesType() == TileType::Suit, "Cannot call CommonSuitTileValue when not a suit group" );
+	Ensure( TilesType() == TileType::Suit, "Cannot call CommonSuitTileValue when not a suit group" );
 	return m_tiles.front().Get<TileType::Suit>().m_value;
 }
 
