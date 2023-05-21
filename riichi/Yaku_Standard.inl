@@ -3,7 +3,6 @@
 #include "Yaku_Standard.hpp"
 
 #include "Hand.hpp"
-#include "Player.hpp"
 #include "RoundData.hpp"
 #include "Tile.hpp"
 #include "Utils.hpp"
@@ -19,7 +18,6 @@ HanValue DragonYakuhai<t_YakuhaiName, t_DragonType>::CalculateValue
 (
 	RoundData const& i_round,
 	Seat const& i_playerSeat,
-	Player const& i_player,
 	Hand const& i_hand,
 	HandAssessment const& i_assessment,
 	HandInterpretation const& i_interp,

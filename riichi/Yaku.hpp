@@ -50,7 +50,6 @@ struct Yaku
 	(
 		RoundData const& i_round,
 		Seat const& i_playerSeat,
-		Player const& i_player,
 		Hand const& i_hand,
 		HandAssessment const& i_assessment,
 		HandInterpretation const& i_interp,

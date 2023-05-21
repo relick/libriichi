@@ -1,7 +1,6 @@
 #include "Yaku_Standard.hpp"
 
 #include "Hand.hpp"
-#include "Player.hpp"
 #include "RoundData.hpp"
 #include "Tile.hpp"
 #include "Utils.hpp"
@@ -20,7 +19,6 @@ HanValue MenzenchinTsumohou::CalculateValue
 (
 	RoundData const& i_round,
 	Seat const& i_playerSeat,
-	Player const& i_player,
 	Hand const& i_hand,
 	HandAssessment const& i_assessment,
 	HandInterpretation const& i_interp,
@@ -40,7 +38,6 @@ HanValue Riichi::CalculateValue
 (
 	RoundData const& i_round,
 	Seat const& i_playerSeat,
-	Player const& i_player,
 	Hand const& i_hand,
 	HandAssessment const& i_assessment,
 	HandInterpretation const& i_interp,
@@ -60,7 +57,6 @@ HanValue Ippatsu::CalculateValue
 (
 	RoundData const& i_round,
 	Seat const& i_playerSeat,
-	Player const& i_player,
 	Hand const& i_hand,
 	HandAssessment const& i_assessment,
 	HandInterpretation const& i_interp,
@@ -82,7 +78,6 @@ HanValue Pinfu::CalculateValue
 (
 	RoundData const& i_round,
 	Seat const& i_playerSeat,
-	Player const& i_player,
 	Hand const& i_hand,
 	HandAssessment const& i_assessment,
 	HandInterpretation const& i_interp,
@@ -142,7 +137,6 @@ HanValue Iipeikou::CalculateValue
 (
 	RoundData const& i_round,
 	Seat const& i_playerSeat,
-	Player const& i_player,
 	Hand const& i_hand,
 	HandAssessment const& i_assessment,
 	HandInterpretation const& i_interp,
@@ -200,7 +194,6 @@ HanValue HaiteiRaoyue::CalculateValue
 (
 	RoundData const& i_round,
 	Seat const& i_playerSeat,
-	Player const& i_player,
 	Hand const& i_hand,
 	HandAssessment const& i_assessment,
 	HandInterpretation const& i_interp,
@@ -221,7 +214,6 @@ HanValue HouteiRaoyui::CalculateValue
 (
 	RoundData const& i_round,
 	Seat const& i_playerSeat,
-	Player const& i_player,
 	Hand const& i_hand,
 	HandAssessment const& i_assessment,
 	HandInterpretation const& i_interp,
@@ -242,7 +234,6 @@ HanValue RinshanKaihou::CalculateValue
 (
 	RoundData const& i_round,
 	Seat const& i_playerSeat,
-	Player const& i_player,
 	Hand const& i_hand,
 	HandAssessment const& i_assessment,
 	HandInterpretation const& i_interp,
@@ -262,7 +253,6 @@ HanValue Chankan::CalculateValue
 (
 	RoundData const& i_round,
 	Seat const& i_playerSeat,
-	Player const& i_player,
 	Hand const& i_hand,
 	HandAssessment const& i_assessment,
 	HandInterpretation const& i_interp,
@@ -283,7 +273,6 @@ HanValue Tanyao<t_KuitanEnabled>::CalculateValue
 (
 	RoundData const& i_round,
 	Seat const& i_playerSeat,
-	Player const& i_player,
 	Hand const& i_hand,
 	HandAssessment const& i_assessment,
 	HandInterpretation const& i_interp,
@@ -341,7 +330,6 @@ HanValue Yakuhai_RoundWind::CalculateValue
 (
 	RoundData const& i_round,
 	Seat const& i_playerSeat,
-	Player const& i_player,
 	Hand const& i_hand,
 	HandAssessment const& i_assessment,
 	HandInterpretation const& i_interp,
@@ -378,7 +366,6 @@ HanValue Yakuhai_SeatWind::CalculateValue
 (
 	RoundData const& i_round,
 	Seat const& i_playerSeat,
-	Player const& i_player,
 	Hand const& i_hand,
 	HandAssessment const& i_assessment,
 	HandInterpretation const& i_interp,
@@ -415,7 +402,6 @@ HanValue DoubleRiichi::CalculateValue
 (
 	RoundData const& i_round,
 	Seat const& i_playerSeat,
-	Player const& i_player,
 	Hand const& i_hand,
 	HandAssessment const& i_assessment,
 	HandInterpretation const& i_interp,
@@ -435,7 +421,6 @@ HanValue Chantaiyao::CalculateValue
 (
 	RoundData const& i_round,
 	Seat const& i_playerSeat,
-	Player const& i_player,
 	Hand const& i_hand,
 	HandAssessment const& i_assessment,
 	HandInterpretation const& i_interp,
@@ -477,7 +462,6 @@ HanValue SanshokuDoujun::CalculateValue
 (
 	RoundData const& i_round,
 	Seat const& i_playerSeat,
-	Player const& i_player,
 	Hand const& i_hand,
 	HandAssessment const& i_assessment,
 	HandInterpretation const& i_interp,
@@ -559,7 +543,6 @@ HanValue Ikkitsuukan::CalculateValue
 (
 	RoundData const& i_round,
 	Seat const& i_playerSeat,
-	Player const& i_player,
 	Hand const& i_hand,
 	HandAssessment const& i_assessment,
 	HandInterpretation const& i_interp,
@@ -617,7 +600,6 @@ HanValue Toitoi::CalculateValue
 (
 	RoundData const& i_round,
 	Seat const& i_playerSeat,
-	Player const& i_player,
 	Hand const& i_hand,
 	HandAssessment const& i_assessment,
 	HandInterpretation const& i_interp,
@@ -648,7 +630,6 @@ HanValue Sanankou::CalculateValue
 (
 	RoundData const& i_round,
 	Seat const& i_playerSeat,
-	Player const& i_player,
 	Hand const& i_hand,
 	HandAssessment const& i_assessment,
 	HandInterpretation const& i_interp,
@@ -684,7 +665,6 @@ HanValue SanshokuDoukou::CalculateValue
 (
 	RoundData const& i_round,
 	Seat const& i_playerSeat,
-	Player const& i_player,
 	Hand const& i_hand,
 	HandAssessment const& i_assessment,
 	HandInterpretation const& i_interp,
@@ -760,7 +740,6 @@ HanValue Sankantsu::CalculateValue
 (
 	RoundData const& i_round,
 	Seat const& i_playerSeat,
-	Player const& i_player,
 	Hand const& i_hand,
 	HandAssessment const& i_assessment,
 	HandInterpretation const& i_interp,
@@ -791,7 +770,6 @@ HanValue Chiitoitsu::CalculateValue
 (
 	RoundData const& i_round,
 	Seat const& i_playerSeat,
-	Player const& i_player,
 	Hand const& i_hand,
 	HandAssessment const& i_assessment,
 	HandInterpretation const& i_interp,
@@ -841,7 +819,6 @@ HanValue Honroutou::CalculateValue
 (
 	RoundData const& i_round,
 	Seat const& i_playerSeat,
-	Player const& i_player,
 	Hand const& i_hand,
 	HandAssessment const& i_assessment,
 	HandInterpretation const& i_interp,
@@ -883,7 +860,6 @@ HanValue Shousangen::CalculateValue
 (
 	RoundData const& i_round,
 	Seat const& i_playerSeat,
-	Player const& i_player,
 	Hand const& i_hand,
 	HandAssessment const& i_assessment,
 	HandInterpretation const& i_interp,
@@ -939,7 +915,6 @@ HanValue Honitsu::CalculateValue
 (
 	RoundData const& i_round,
 	Seat const& i_playerSeat,
-	Player const& i_player,
 	Hand const& i_hand,
 	HandAssessment const& i_assessment,
 	HandInterpretation const& i_interp,
@@ -970,7 +945,6 @@ HanValue JunchanTaiyao::CalculateValue
 (
 	RoundData const& i_round,
 	Seat const& i_playerSeat,
-	Player const& i_player,
 	Hand const& i_hand,
 	HandAssessment const& i_assessment,
 	HandInterpretation const& i_interp,
@@ -1018,7 +992,6 @@ HanValue Ryanpeikou::CalculateValue
 (
 	RoundData const& i_round,
 	Seat const& i_playerSeat,
-	Player const& i_player,
 	Hand const& i_hand,
 	HandAssessment const& i_assessment,
 	HandInterpretation const& i_interp,
@@ -1097,7 +1070,6 @@ HanValue Chinitsu::CalculateValue
 (
 	RoundData const& i_round,
 	Seat const& i_playerSeat,
-	Player const& i_player,
 	Hand const& i_hand,
 	HandAssessment const& i_assessment,
 	HandInterpretation const& i_interp,
@@ -1132,7 +1104,6 @@ HanValue KokushiMusou::CalculateValue
 (
 	RoundData const& i_round,
 	Seat const& i_playerSeat,
-	Player const& i_player,
 	Hand const& i_hand,
 	HandAssessment const& i_assessment,
 	HandInterpretation const& i_interp,
@@ -1202,7 +1173,6 @@ HanValue Suuankou::CalculateValue
 (
 	RoundData const& i_round,
 	Seat const& i_playerSeat,
-	Player const& i_player,
 	Hand const& i_hand,
 	HandAssessment const& i_assessment,
 	HandInterpretation const& i_interp,
@@ -1238,7 +1208,6 @@ HanValue Daisangen::CalculateValue
 (
 	RoundData const& i_round,
 	Seat const& i_playerSeat,
-	Player const& i_player,
 	Hand const& i_hand,
 	HandAssessment const& i_assessment,
 	HandInterpretation const& i_interp,
@@ -1282,7 +1251,6 @@ HanValue Shousuushii::CalculateValue
 (
 	RoundData const& i_round,
 	Seat const& i_playerSeat,
-	Player const& i_player,
 	Hand const& i_hand,
 	HandAssessment const& i_assessment,
 	HandInterpretation const& i_interp,
@@ -1338,7 +1306,6 @@ HanValue Daisuushii::CalculateValue
 (
 	RoundData const& i_round,
 	Seat const& i_playerSeat,
-	Player const& i_player,
 	Hand const& i_hand,
 	HandAssessment const& i_assessment,
 	HandInterpretation const& i_interp,
@@ -1382,7 +1349,6 @@ HanValue Tsuuiisou::CalculateValue
 (
 	RoundData const& i_round,
 	Seat const& i_playerSeat,
-	Player const& i_player,
 	Hand const& i_hand,
 	HandAssessment const& i_assessment,
 	HandInterpretation const& i_interp,
@@ -1403,7 +1369,6 @@ HanValue Chinroutou::CalculateValue
 (
 	RoundData const& i_round,
 	Seat const& i_playerSeat,
-	Player const& i_player,
 	Hand const& i_hand,
 	HandAssessment const& i_assessment,
 	HandInterpretation const& i_interp,
@@ -1444,7 +1409,6 @@ HanValue Ryuuiisou::CalculateValue
 (
 	RoundData const& i_round,
 	Seat const& i_playerSeat,
-	Player const& i_player,
 	Hand const& i_hand,
 	HandAssessment const& i_assessment,
 	HandInterpretation const& i_interp,
@@ -1503,7 +1467,6 @@ HanValue ChuurenPoutou::CalculateValue
 (
 	RoundData const& i_round,
 	Seat const& i_playerSeat,
-	Player const& i_player,
 	Hand const& i_hand,
 	HandAssessment const& i_assessment,
 	HandInterpretation const& i_interp,
@@ -1571,7 +1534,6 @@ HanValue Suukantsu::CalculateValue
 (
 	RoundData const& i_round,
 	Seat const& i_playerSeat,
-	Player const& i_player,
 	Hand const& i_hand,
 	HandAssessment const& i_assessment,
 	HandInterpretation const& i_interp,
@@ -1603,7 +1565,6 @@ HanValue Tenhou::CalculateValue
 (
 	RoundData const& i_round,
 	Seat const& i_playerSeat,
-	Player const& i_player,
 	Hand const& i_hand,
 	HandAssessment const& i_assessment,
 	HandInterpretation const& i_interp,
@@ -1624,7 +1585,6 @@ HanValue Chihou::CalculateValue
 (
 	RoundData const& i_round,
 	Seat const& i_playerSeat,
-	Player const& i_player,
 	Hand const& i_hand,
 	HandAssessment const& i_assessment,
 	HandInterpretation const& i_interp,

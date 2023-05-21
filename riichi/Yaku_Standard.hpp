@@ -21,7 +21,6 @@ struct MenzenchinTsumohou
 	(
 		RoundData const& i_round,
 		Seat const& i_playerSeat,
-		Player const& i_player,
 		Hand const& i_hand,
 		HandAssessment const& i_assessment,
 		HandInterpretation const& i_interp,
@@ -40,7 +39,6 @@ struct Riichi
 	(
 		RoundData const& i_round,
 		Seat const& i_playerSeat,
-		Player const& i_player,
 		Hand const& i_hand,
 		HandAssessment const& i_assessment,
 		HandInterpretation const& i_interp,
@@ -59,7 +57,6 @@ struct Ippatsu
 	(
 		RoundData const& i_round,
 		Seat const& i_playerSeat,
-		Player const& i_player,
 		Hand const& i_hand,
 		HandAssessment const& i_assessment,
 		HandInterpretation const& i_interp,
@@ -78,7 +75,6 @@ struct Pinfu
 	(
 		RoundData const& i_round,
 		Seat const& i_playerSeat,
-		Player const& i_player,
 		Hand const& i_hand,
 		HandAssessment const& i_assessment,
 		HandInterpretation const& i_interp,
@@ -97,7 +93,6 @@ struct Iipeikou
 	(
 		RoundData const& i_round,
 		Seat const& i_playerSeat,
-		Player const& i_player,
 		Hand const& i_hand,
 		HandAssessment const& i_assessment,
 		HandInterpretation const& i_interp,
@@ -119,7 +114,6 @@ struct HaiteiRaoyue
 	(
 		RoundData const& i_round,
 		Seat const& i_playerSeat,
-		Player const& i_player,
 		Hand const& i_hand,
 		HandAssessment const& i_assessment,
 		HandInterpretation const& i_interp,
@@ -138,7 +132,6 @@ struct HouteiRaoyui
 	(
 		RoundData const& i_round,
 		Seat const& i_playerSeat,
-		Player const& i_player,
 		Hand const& i_hand,
 		HandAssessment const& i_assessment,
 		HandInterpretation const& i_interp,
@@ -157,7 +150,6 @@ struct RinshanKaihou
 	(
 		RoundData const& i_round,
 		Seat const& i_playerSeat,
-		Player const& i_player,
 		Hand const& i_hand,
 		HandAssessment const& i_assessment,
 		HandInterpretation const& i_interp,
@@ -176,7 +168,6 @@ struct Chankan
 	(
 		RoundData const& i_round,
 		Seat const& i_playerSeat,
-		Player const& i_player,
 		Hand const& i_hand,
 		HandAssessment const& i_assessment,
 		HandInterpretation const& i_interp,
@@ -196,7 +187,6 @@ struct Tanyao
 	(
 		RoundData const& i_round,
 		Seat const& i_playerSeat,
-		Player const& i_player,
 		Hand const& i_hand,
 		HandAssessment const& i_assessment,
 		HandInterpretation const& i_interp,
@@ -222,7 +212,6 @@ struct DragonYakuhai
 	(
 		RoundData const& i_round,
 		Seat const& i_playerSeat,
-		Player const& i_player,
 		Hand const& i_hand,
 		HandAssessment const& i_assessment,
 		HandInterpretation const& i_interp,
@@ -259,7 +248,6 @@ struct Yakuhai_RoundWind
 	(
 		RoundData const& i_round,
 		Seat const& i_playerSeat,
-		Player const& i_player,
 		Hand const& i_hand,
 		HandAssessment const& i_assessment,
 		HandInterpretation const& i_interp,
@@ -281,7 +269,6 @@ struct Yakuhai_SeatWind
 	(
 		RoundData const& i_round,
 		Seat const& i_playerSeat,
-		Player const& i_player,
 		Hand const& i_hand,
 		HandAssessment const& i_assessment,
 		HandInterpretation const& i_interp,
@@ -303,7 +290,6 @@ struct DoubleRiichi
 	(
 		RoundData const& i_round,
 		Seat const& i_playerSeat,
-		Player const& i_player,
 		Hand const& i_hand,
 		HandAssessment const& i_assessment,
 		HandInterpretation const& i_interp,
@@ -322,7 +308,6 @@ struct Chantaiyao
 	(
 		RoundData const& i_round,
 		Seat const& i_playerSeat,
-		Player const& i_player,
 		Hand const& i_hand,
 		HandAssessment const& i_assessment,
 		HandInterpretation const& i_interp,
@@ -345,7 +330,6 @@ struct SanshokuDoujun
 	(
 		RoundData const& i_round,
 		Seat const& i_playerSeat,
-		Player const& i_player,
 		Hand const& i_hand,
 		HandAssessment const& i_assessment,
 		HandInterpretation const& i_interp,
@@ -369,7 +353,6 @@ struct Ikkitsuukan
 	(
 		RoundData const& i_round,
 		Seat const& i_playerSeat,
-		Player const& i_player,
 		Hand const& i_hand,
 		HandAssessment const& i_assessment,
 		HandInterpretation const& i_interp,
@@ -388,7 +371,6 @@ struct Toitoi
 	(
 		RoundData const& i_round,
 		Seat const& i_playerSeat,
-		Player const& i_player,
 		Hand const& i_hand,
 		HandAssessment const& i_assessment,
 		HandInterpretation const& i_interp,
@@ -407,7 +389,6 @@ struct Sanankou
 	(
 		RoundData const& i_round,
 		Seat const& i_playerSeat,
-		Player const& i_player,
 		Hand const& i_hand,
 		HandAssessment const& i_assessment,
 		HandInterpretation const& i_interp,
@@ -426,7 +407,6 @@ struct SanshokuDoukou
 	(
 		RoundData const& i_round,
 		Seat const& i_playerSeat,
-		Player const& i_player,
 		Hand const& i_hand,
 		HandAssessment const& i_assessment,
 		HandInterpretation const& i_interp,
@@ -448,7 +428,6 @@ struct Sankantsu
 	(
 		RoundData const& i_round,
 		Seat const& i_playerSeat,
-		Player const& i_player,
 		Hand const& i_hand,
 		HandAssessment const& i_assessment,
 		HandInterpretation const& i_interp,
@@ -470,7 +449,6 @@ struct Chiitoitsu
 	(
 		RoundData const& i_round,
 		Seat const& i_playerSeat,
-		Player const& i_player,
 		Hand const& i_hand,
 		HandAssessment const& i_assessment,
 		HandInterpretation const& i_interp,
@@ -492,7 +470,6 @@ struct Honroutou
 	(
 		RoundData const& i_round,
 		Seat const& i_playerSeat,
-		Player const& i_player,
 		Hand const& i_hand,
 		HandAssessment const& i_assessment,
 		HandInterpretation const& i_interp,
@@ -515,7 +492,6 @@ struct Shousangen
 	(
 		RoundData const& i_round,
 		Seat const& i_playerSeat,
-		Player const& i_player,
 		Hand const& i_hand,
 		HandAssessment const& i_assessment,
 		HandInterpretation const& i_interp,
@@ -534,7 +510,6 @@ struct Honitsu
 	(
 		RoundData const& i_round,
 		Seat const& i_playerSeat,
-		Player const& i_player,
 		Hand const& i_hand,
 		HandAssessment const& i_assessment,
 		HandInterpretation const& i_interp,
@@ -553,7 +528,6 @@ struct JunchanTaiyao
 	(
 		RoundData const& i_round,
 		Seat const& i_playerSeat,
-		Player const& i_player,
 		Hand const& i_hand,
 		HandAssessment const& i_assessment,
 		HandInterpretation const& i_interp,
@@ -575,7 +549,6 @@ struct Ryanpeikou
 	(
 		RoundData const& i_round,
 		Seat const& i_playerSeat,
-		Player const& i_player,
 		Hand const& i_hand,
 		HandAssessment const& i_assessment,
 		HandInterpretation const& i_interp,
@@ -597,7 +570,6 @@ struct Chinitsu
 	(
 		RoundData const& i_round,
 		Seat const& i_playerSeat,
-		Player const& i_player,
 		Hand const& i_hand,
 		HandAssessment const& i_assessment,
 		HandInterpretation const& i_interp,
@@ -619,7 +591,6 @@ struct KokushiMusou
 	(
 		RoundData const& i_round,
 		Seat const& i_playerSeat,
-		Player const& i_player,
 		Hand const& i_hand,
 		HandAssessment const& i_assessment,
 		HandInterpretation const& i_interp,
@@ -641,7 +612,6 @@ struct Suuankou
 	(
 		RoundData const& i_round,
 		Seat const& i_playerSeat,
-		Player const& i_player,
 		Hand const& i_hand,
 		HandAssessment const& i_assessment,
 		HandInterpretation const& i_interp,
@@ -661,7 +631,6 @@ struct Daisangen
 	(
 		RoundData const& i_round,
 		Seat const& i_playerSeat,
-		Player const& i_player,
 		Hand const& i_hand,
 		HandAssessment const& i_assessment,
 		HandInterpretation const& i_interp,
@@ -681,7 +650,6 @@ struct Shousuushii
 	(
 		RoundData const& i_round,
 		Seat const& i_playerSeat,
-		Player const& i_player,
 		Hand const& i_hand,
 		HandAssessment const& i_assessment,
 		HandInterpretation const& i_interp,
@@ -701,7 +669,6 @@ struct Daisuushii
 	(
 		RoundData const& i_round,
 		Seat const& i_playerSeat,
-		Player const& i_player,
 		Hand const& i_hand,
 		HandAssessment const& i_assessment,
 		HandInterpretation const& i_interp,
@@ -720,7 +687,6 @@ struct Tsuuiisou
 	(
 		RoundData const& i_round,
 		Seat const& i_playerSeat,
-		Player const& i_player,
 		Hand const& i_hand,
 		HandAssessment const& i_assessment,
 		HandInterpretation const& i_interp,
@@ -739,7 +705,6 @@ struct Chinroutou
 	(
 		RoundData const& i_round,
 		Seat const& i_playerSeat,
-		Player const& i_player,
 		Hand const& i_hand,
 		HandAssessment const& i_assessment,
 		HandInterpretation const& i_interp,
@@ -762,7 +727,6 @@ struct Ryuuiisou
 	(
 		RoundData const& i_round,
 		Seat const& i_playerSeat,
-		Player const& i_player,
 		Hand const& i_hand,
 		HandAssessment const& i_assessment,
 		HandInterpretation const& i_interp,
@@ -785,7 +749,6 @@ struct ChuurenPoutou
 	(
 		RoundData const& i_round,
 		Seat const& i_playerSeat,
-		Player const& i_player,
 		Hand const& i_hand,
 		HandAssessment const& i_assessment,
 		HandInterpretation const& i_interp,
@@ -804,7 +767,6 @@ struct Suukantsu
 	(
 		RoundData const& i_round,
 		Seat const& i_playerSeat,
-		Player const& i_player,
 		Hand const& i_hand,
 		HandAssessment const& i_assessment,
 		HandInterpretation const& i_interp,
@@ -823,7 +785,6 @@ struct Tenhou
 	(
 		RoundData const& i_round,
 		Seat const& i_playerSeat,
-		Player const& i_player,
 		Hand const& i_hand,
 		HandAssessment const& i_assessment,
 		HandInterpretation const& i_interp,
@@ -842,7 +803,6 @@ struct Chihou
 	(
 		RoundData const& i_round,
 		Seat const& i_playerSeat,
-		Player const& i_player,
 		Hand const& i_hand,
 		HandAssessment const& i_assessment,
 		HandInterpretation const& i_interp,
