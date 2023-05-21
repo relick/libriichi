@@ -10,11 +10,11 @@
 
 namespace Riichi::Utils
 {
-//-----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // A hodge-podge of useful functions and classes
-//-----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 
-//-----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 #if NDEBUG
 #define Ensure(...)
 #define Error(MSG)
@@ -23,7 +23,7 @@ namespace Riichi::Utils
 #define Error(MSG) Ensure(false, MSG)
 #endif
 
-//-----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 template<
 	std::integral T_Integral,
 	T_Integral t_Min = std::numeric_limits<T_Integral>::min(),
@@ -60,16 +60,16 @@ public:
 	constexpr RestrictedType& operator=( RestrictedType const& i_o ) { m_val = i_o.m_val; return *this; }
 };
 
-//-----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 template<typename T, typename S>
 concept DifferentTypes = !std::same_as<std::remove_cvref_t<T>, std::remove_cvref_t<S>>;
 
-//-----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 template<typename T_Tags, T_Tags t_Tag>
 class NamedVariantTagHelper
 {};
 
-//-----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 template<typename T_Tags, typename... T_Types>
 class NamedVariant
 {
@@ -123,10 +123,10 @@ public:
 	friend auto operator<=>( NamedVariant const&, NamedVariant const& ) = default;
 };
 
-//-----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 struct NullType{};
 
-//-----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 template<typename T_Enum, size_t t_EnumCount>
 struct EnumRange
 {
@@ -143,7 +143,7 @@ struct EnumRange
 	static EnumIter end() { return EnumIter{ t_EnumCount }; }
 };
 
-//-----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 template<typename T_Value, typename T_Enum, size_t t_EnumCount>
 struct EnumIndexedArray
 {
@@ -154,7 +154,7 @@ struct EnumIndexedArray
 	auto end() const { return data.end(); }
 };
 
-//-----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 template<typename T_Container, typename T_Value>
 T_Container Append( T_Container i_c, T_Value i_v )
 {
@@ -163,7 +163,7 @@ T_Container Append( T_Container i_c, T_Value i_v )
 	return r;
 }
 
-//-----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 template<std::integral T_Value, std::predicate<T_Value> T_Pred>
 T_Value NextFree( T_Value i_val, T_Pred&& i_pred )
 {

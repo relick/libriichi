@@ -14,7 +14,7 @@
 namespace Riichi
 {
 
-//-----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 struct Standings
 {
 	// TODO: how do we relate these points with the players? Should we handle this differently?
@@ -25,9 +25,9 @@ struct Standings
 	friend std::ostream& operator<<( std::ostream& io_out, Standings const& i_standings );
 };
 
-//-----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // The table runs the game, including each round (rounds are not self-sufficient)
-//-----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 class Table
 {
 	// Table states all considered an extension of the table class

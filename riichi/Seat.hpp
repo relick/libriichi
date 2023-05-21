@@ -6,7 +6,7 @@
 namespace Riichi
 {
 
-//-----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 enum class Seat : EnumValueType
 {
 	East,
@@ -15,7 +15,7 @@ enum class Seat : EnumValueType
 	North,
 };
 
-//-----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 inline constexpr char const* ToString( Seat i_seat )
 {
 	constexpr char const* strs[] = {
@@ -28,7 +28,7 @@ inline constexpr char const* ToString( Seat i_seat )
 	return strs[ ( size_t )i_seat ];
 }
 
-//-----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 inline bool operator==( Seat i_seat, WindTileType i_windTile )
 {
 	return static_cast< EnumValueType >( i_seat ) == static_cast< EnumValueType >( i_windTile );

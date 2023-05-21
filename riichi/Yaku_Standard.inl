@@ -12,7 +12,7 @@
 namespace Riichi::StandardYaku
 {
 
-//-----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 template<YakuNameString t_YakuhaiName, DragonTileType t_DragonType>
 HanValue DragonYakuhai<t_YakuhaiName, t_DragonType>::CalculateValue
 (

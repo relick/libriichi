@@ -6,7 +6,7 @@
 namespace Riichi
 {
 
-//-----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 HandGroup::HandGroup
 (
 	std::vector<Tile> i_tiles,
@@ -57,7 +57,7 @@ HandGroup::HandGroup
 	}
 }
 
-//-----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 HandGroup::HandGroup
 (
 	HandInterpretation const& i_interp,
@@ -70,7 +70,7 @@ HandGroup::HandGroup
 	)
 {}
 
-//-----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 TileType HandGroup::TilesType
 (
 )	const
@@ -78,7 +78,7 @@ TileType HandGroup::TilesType
 	return m_tiles.front().Type();
 }
 
-//-----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 Suit HandGroup::CommonSuit
 (
 )	const
@@ -87,7 +87,7 @@ Suit HandGroup::CommonSuit
 	return m_tiles.front().Get<TileType::Suit>().m_suit;
 }
 
-//-----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 SuitTileValue HandGroup::CommonSuitTileValue
 (
 )	const
@@ -96,7 +96,7 @@ SuitTileValue HandGroup::CommonSuitTileValue
 	return m_tiles.front().Get<TileType::Suit>().m_value;
 }
 
-//-----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 HandAssessment::HandAssessment
 (
 	Hand const& i_hand
@@ -175,7 +175,7 @@ HandAssessment::HandAssessment
 	m_interpretations = GenerateInterpretations( fixedPart, i_hand.FreeTiles() );
 }
 
-//-----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 /*static*/ std::vector<HandInterpretation> HandAssessment::GenerateInterpretations
 (
 	HandInterpretation const& i_fixedPart,

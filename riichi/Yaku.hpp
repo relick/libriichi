@@ -8,13 +8,13 @@
 namespace Riichi
 {
 
-//-----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 struct NoYakuType {};
 inline constexpr NoYakuType NoYaku;
 struct YakumanType {};
 inline constexpr YakumanType Yakuman;
 
-//-----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 class HanValue
 {
 	static constexpr Han c_yakumanValue = 13;
@@ -38,7 +38,7 @@ public:
 	Han Get() const { return m_value.value(); }
 };
 
-//-----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 struct Yaku
 {
 	virtual ~Yaku() = default;
@@ -58,7 +58,7 @@ struct Yaku
 	) const = 0;
 };
 
-//-----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 template<size_t N>
 struct YakuNameString
 {
@@ -70,7 +70,7 @@ struct YakuNameString
 	char m_str[ N ];
 };
 
-//-----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 template<YakuNameString t_YakuName>
 struct NamedYaku
 	: public Yaku
@@ -78,12 +78,12 @@ struct NamedYaku
 	char const* Name() const final { return t_YakuName.m_str; }
 };
 
-//-----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // Helper macros for reducing boilerplate. Define a yaku class just by giving a name
 // Use DECLARE_YAKU(name); to declare a whole class in one go
 // Use BEGIN_YAKU(name) and END_YAKU(); to add your own (private) contents to the class
 // Finally, use YAKU_CALCULATEVALUE_PARAMS() to cut all the parameter boilerplate
-//-----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 #define YAKU_CALCULATEVALUE_PARAMS()		\
 RoundData const& i_round,					\
 Seat const& i_playerSeat,					\

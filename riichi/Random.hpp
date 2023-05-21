@@ -5,12 +5,12 @@
 namespace Riichi
 {
 
-//-----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // Class for random numbers that:
 // - allows for serialisation that avoids the ostream nonsense
 // - encapsulates engine choice from usage
 // - separates the types of engines used for different purposes to prevent misuse
-//-----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 template<typename T_Disambiguator, typename T_EngineType = std::mt19937>
 class RandomEngine
 {
@@ -46,7 +46,7 @@ public:
 	friend bool operator==( RandomEngine const& i_a, RandomEngine const& i_b ) = default;
 };
 
-//-----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 using ShuffleRNG = RandomEngine<struct ShuffleRNGType>;
 using AIRNG = RandomEngine<struct AIRNGType>;
 

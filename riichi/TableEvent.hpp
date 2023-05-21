@@ -6,7 +6,7 @@
 namespace Riichi
 {
 
-//-----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 enum class TableEventType : EnumValueType
 {
 	None,
@@ -29,7 +29,7 @@ enum class TableEventType : EnumValueType
 	Error,
 };
 
-//-----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 inline constexpr char const* ToString( TableEventType i_type )
 {
 	constexpr char const* strs[] =
@@ -51,7 +51,7 @@ inline constexpr char const* ToString( TableEventType i_type )
 	return strs[ ( size_t )i_type ];
 }
 
-//-----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 using TableEvent = Utils::NamedVariant<
 	TableEventType,
 

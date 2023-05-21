@@ -14,7 +14,7 @@ namespace Riichi::StandardYaku
 // Overall TODO: Lots of the yaku need to assess the 'final group' separately from the rest of the groups. This is to avoid creating a container and doing a bunch of copies where unnecessary
 // It would be nice to clean this up somehow. It would also be nice if all the yaku could be made to avoid allocating entirely when assessing!
 
-//-----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 HanValue MenzenchinTsumohou::CalculateValue
 (
 	YAKU_CALCULATEVALUE_PARAMS()
@@ -27,7 +27,7 @@ HanValue MenzenchinTsumohou::CalculateValue
 	return NoYaku;
 }
 
-//-----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 HanValue Riichi::CalculateValue
 (
 	YAKU_CALCULATEVALUE_PARAMS()
@@ -40,7 +40,7 @@ HanValue Riichi::CalculateValue
 	return NoYaku;
 }
 
-//-----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 HanValue Ippatsu::CalculateValue
 (
 	YAKU_CALCULATEVALUE_PARAMS()
@@ -55,7 +55,7 @@ HanValue Ippatsu::CalculateValue
 	return NoYaku;
 }
 
-//-----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 HanValue Pinfu::CalculateValue
 (
 	YAKU_CALCULATEVALUE_PARAMS()
@@ -108,7 +108,7 @@ HanValue Pinfu::CalculateValue
 	return 1;
 }
 
-//-----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 HanValue Iipeikou::CalculateValue
 (
 	YAKU_CALCULATEVALUE_PARAMS()
@@ -159,7 +159,7 @@ HanValue Iipeikou::CalculateValue
 	return false;
 }
 
-//-----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 HanValue HaiteiRaoyue::CalculateValue
 (
 	YAKU_CALCULATEVALUE_PARAMS()
@@ -173,7 +173,7 @@ HanValue HaiteiRaoyue::CalculateValue
 	return NoYaku;
 }
 
-//-----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 HanValue HouteiRaoyui::CalculateValue
 (
 	YAKU_CALCULATEVALUE_PARAMS()
@@ -187,7 +187,7 @@ HanValue HouteiRaoyui::CalculateValue
 	return NoYaku;
 }
 
-//-----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 HanValue RinshanKaihou::CalculateValue
 (
 	YAKU_CALCULATEVALUE_PARAMS()
@@ -200,7 +200,7 @@ HanValue RinshanKaihou::CalculateValue
 	return NoYaku;
 }
 
-//-----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 HanValue Chankan::CalculateValue
 (
 	YAKU_CALCULATEVALUE_PARAMS()
@@ -213,7 +213,7 @@ HanValue Chankan::CalculateValue
 	return NoYaku;
 }
 
-//-----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 template<bool t_KuitanEnabled>
 HanValue Tanyao<t_KuitanEnabled>::CalculateValue
 (
@@ -265,7 +265,7 @@ template<bool t_KuitanEnabled>
 	return false;
 }
 
-//-----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 HanValue Bakaze::CalculateValue
 (
 	YAKU_CALCULATEVALUE_PARAMS()
@@ -295,7 +295,7 @@ HanValue Bakaze::CalculateValue
 	return i_tile.Type() == TileType::Wind && i_tile.Get<TileType::Wind>() == i_roundWind;
 }
 
-//-----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 HanValue Jikaze::CalculateValue
 (
 	YAKU_CALCULATEVALUE_PARAMS()
@@ -325,7 +325,7 @@ HanValue Jikaze::CalculateValue
 	return i_tile.Type() == TileType::Wind && i_tile.Get<TileType::Wind>() == i_playerSeat;
 }
 
-//-----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 HanValue DoubleRiichi::CalculateValue
 (
 	YAKU_CALCULATEVALUE_PARAMS()
@@ -338,7 +338,7 @@ HanValue DoubleRiichi::CalculateValue
 	return NoYaku;
 }
 
-//-----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 HanValue Chantaiyao::CalculateValue
 (
 	YAKU_CALCULATEVALUE_PARAMS()
@@ -373,7 +373,7 @@ HanValue Chantaiyao::CalculateValue
 	return suitTile.m_value == 1 || suitTile.m_value == 9;
 }
 
-//-----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 HanValue SanshokuDoujun::CalculateValue
 (
 	YAKU_CALCULATEVALUE_PARAMS()
@@ -448,7 +448,7 @@ HanValue SanshokuDoujun::CalculateValue
 	);
 }
 
-//-----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 HanValue Ikkitsuukan::CalculateValue
 (
 	YAKU_CALCULATEVALUE_PARAMS()
@@ -499,7 +499,7 @@ HanValue Ikkitsuukan::CalculateValue
 	return NoYaku;
 }
 
-//-----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 HanValue Toitoi::CalculateValue
 (
 	YAKU_CALCULATEVALUE_PARAMS()
@@ -523,7 +523,7 @@ HanValue Toitoi::CalculateValue
 	return 2;
 }
 
-//-----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 HanValue Sanankou::CalculateValue
 (
 	YAKU_CALCULATEVALUE_PARAMS()
@@ -552,7 +552,7 @@ HanValue Sanankou::CalculateValue
 	return NoYaku;
 }
 
-//-----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 HanValue SanshokuDoukou::CalculateValue
 (
 	YAKU_CALCULATEVALUE_PARAMS()
@@ -621,7 +621,7 @@ HanValue SanshokuDoukou::CalculateValue
 	return i_a.CommonSuitTileValue() == i_b.CommonSuitTileValue() && i_b.CommonSuitTileValue() == i_c.CommonSuitTileValue();
 }
 
-//-----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 HanValue Sankantsu::CalculateValue
 (
 	YAKU_CALCULATEVALUE_PARAMS()
@@ -645,7 +645,7 @@ HanValue Sankantsu::CalculateValue
 	return NoYaku;
 }
 
-//-----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 HanValue Chiitoitsu::CalculateValue
 (
 	YAKU_CALCULATEVALUE_PARAMS()
@@ -688,7 +688,7 @@ HanValue Chiitoitsu::CalculateValue
 	return suitTile.m_value == 1 || suitTile.m_value == 9;
 }
 
-//-----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 HanValue Honroutou::CalculateValue
 (
 	YAKU_CALCULATEVALUE_PARAMS()
@@ -723,7 +723,7 @@ HanValue Honroutou::CalculateValue
 	return suitTile.m_value == 1 || suitTile.m_value == 9;
 }
 
-//-----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 HanValue Shousangen::CalculateValue
 (
 	YAKU_CALCULATEVALUE_PARAMS()
@@ -772,7 +772,7 @@ HanValue Shousangen::CalculateValue
 	return NoYaku;
 }
 
-//-----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 HanValue Honitsu::CalculateValue
 (
 	YAKU_CALCULATEVALUE_PARAMS()
@@ -796,7 +796,7 @@ HanValue Honitsu::CalculateValue
 	return NoYaku;
 }
 
-//-----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 HanValue JunchanTaiyao::CalculateValue
 (
 	YAKU_CALCULATEVALUE_PARAMS()
@@ -837,7 +837,7 @@ HanValue JunchanTaiyao::CalculateValue
 	return suitTile.m_value == 1 || suitTile.m_value == 9;
 }
 
-//-----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 HanValue Ryanpeikou::CalculateValue
 (
 	YAKU_CALCULATEVALUE_PARAMS()
@@ -909,7 +909,7 @@ HanValue Ryanpeikou::CalculateValue
 	return false;
 }
 
-//-----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 HanValue Chinitsu::CalculateValue
 (
 	YAKU_CALCULATEVALUE_PARAMS()
@@ -937,7 +937,7 @@ HanValue Chinitsu::CalculateValue
 	return NoYaku;
 }
 
-//-----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 HanValue KokushiMusou::CalculateValue
 (
 	YAKU_CALCULATEVALUE_PARAMS()
@@ -1000,7 +1000,7 @@ HanValue KokushiMusou::CalculateValue
 	return suitTile.m_value == 1 || suitTile.m_value == 9;
 }
 
-//-----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 HanValue Suuankou::CalculateValue
 (
 	YAKU_CALCULATEVALUE_PARAMS()
@@ -1029,7 +1029,7 @@ HanValue Suuankou::CalculateValue
 	return NoYaku;
 }
 
-//-----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 HanValue Daisangen::CalculateValue
 (
 	YAKU_CALCULATEVALUE_PARAMS()
@@ -1066,7 +1066,7 @@ HanValue Daisangen::CalculateValue
 	return NoYaku;
 }
 
-//-----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 HanValue Shousuushii::CalculateValue
 (
 	YAKU_CALCULATEVALUE_PARAMS()
@@ -1115,7 +1115,7 @@ HanValue Shousuushii::CalculateValue
 	return NoYaku;
 }
 
-//-----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 HanValue Daisuushii::CalculateValue
 (
 	YAKU_CALCULATEVALUE_PARAMS()
@@ -1152,7 +1152,7 @@ HanValue Daisuushii::CalculateValue
 	return NoYaku;
 }
 
-//-----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 HanValue Tsuuiisou::CalculateValue
 (
 	YAKU_CALCULATEVALUE_PARAMS()
@@ -1166,7 +1166,7 @@ HanValue Tsuuiisou::CalculateValue
 	return Yakuman;
 }
 
-//-----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 HanValue Chinroutou::CalculateValue
 (
 	YAKU_CALCULATEVALUE_PARAMS()
@@ -1200,7 +1200,7 @@ HanValue Chinroutou::CalculateValue
 	return suitTile.m_value == 1 || suitTile.m_value == 9;
 }
 
-//-----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 HanValue Ryuuiisou::CalculateValue
 (
 	YAKU_CALCULATEVALUE_PARAMS()
@@ -1252,7 +1252,7 @@ HanValue Ryuuiisou::CalculateValue
 	return i_tile.Get<TileType::Dragon>() == DragonTileType::Green;
 }
 
-//-----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 HanValue ChuurenPoutou::CalculateValue
 (
 	YAKU_CALCULATEVALUE_PARAMS()
@@ -1313,7 +1313,7 @@ HanValue ChuurenPoutou::CalculateValue
 	return NoYaku;
 }
 
-//-----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 HanValue Suukantsu::CalculateValue
 (
 	YAKU_CALCULATEVALUE_PARAMS()
@@ -1338,7 +1338,7 @@ HanValue Suukantsu::CalculateValue
 	return NoYaku;
 }
 
-//-----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 HanValue Tenhou::CalculateValue
 (
 	YAKU_CALCULATEVALUE_PARAMS()
@@ -1352,7 +1352,7 @@ HanValue Tenhou::CalculateValue
 	return NoYaku;
 }
 
-//-----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 HanValue Chihou::CalculateValue
 (
 	YAKU_CALCULATEVALUE_PARAMS()

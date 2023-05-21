@@ -7,7 +7,7 @@
 namespace Riichi
 {
 
-//-----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 enum class TileType : EnumValueType
 {
 	Suit,
@@ -17,7 +17,7 @@ enum class TileType : EnumValueType
 inline constexpr size_t c_tileTypeCount = 3;
 using TileTypes = Utils::EnumRange<TileType, c_tileTypeCount>;
 
-//-----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 enum class Suit : EnumValueType
 {
 	Manzu,
@@ -27,10 +27,10 @@ enum class Suit : EnumValueType
 inline constexpr size_t c_suitCount = 3;
 using Suits = Utils::EnumRange<Suit, c_suitCount>;
 
-//-----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 using SuitTileValue = Utils::RestrictedIntegral<uint8_t, 1, 1, 9>;
 
-//-----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 struct SuitTile
 {
 	Suit m_suit;
@@ -40,7 +40,7 @@ struct SuitTile
 	friend std::strong_ordering operator<=>( SuitTile const&, SuitTile const& ) = default;
 };
 
-//-----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 enum class DragonTileType : EnumValueType
 {
 	White,
@@ -48,7 +48,7 @@ enum class DragonTileType : EnumValueType
 	Red,
 };
 
-//-----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 enum class WindTileType : EnumValueType
 {
 	East,
@@ -57,7 +57,7 @@ enum class WindTileType : EnumValueType
 	North,
 };
 
-//-----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 using Tile = Utils::NamedVariant<
 	TileType,
 
@@ -66,7 +66,7 @@ using Tile = Utils::NamedVariant<
 	WindTileType
 >;
 
-//-----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 enum class TileDrawType : EnumValueType
 {
 	SelfDraw,
@@ -77,7 +77,7 @@ enum class TileDrawType : EnumValueType
 
 }
 
-//-----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 template<>
 struct std::hash<Riichi::Tile>
 {

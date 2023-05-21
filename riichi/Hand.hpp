@@ -11,7 +11,7 @@
 namespace Riichi
 {
 
-//-----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 enum class GroupType : EnumValueType
 {
 	Pair,
@@ -19,13 +19,13 @@ enum class GroupType : EnumValueType
 	Triplet,
 	Quad, // Kan only - we never assess a quad inside a hand interpretation (other than to offer the option to the player)
 };
-//-----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 inline bool TripletCompatible( GroupType i_type ) { return i_type == GroupType::Triplet || i_type == GroupType::Quad; }
 
-//-----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // Meld is made up of tiles that may have come from a different seat to the owner of the meld
 // A meld can also be closed (e.g. closed kan), in which it is locked in but doesn't affect open-ness of the hand
-//-----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 struct Meld
 {
 	using MeldTile = std::pair<Tile, Seat>;
@@ -35,10 +35,10 @@ struct Meld
 	bool m_open{ true };
 };
 
-//-----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // A hand is made up of free tiles, and a set of melds
 // Melds are ordered in the order they occurred
-//-----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 class Hand
 {
 	std::vector<Tile> m_freeTiles;
@@ -49,7 +49,7 @@ public:
 	std::vector<Meld> const& Melds() const { return m_melds; }
 };
 
-//-----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 enum class WaitType : EnumValueType
 {
 	Tanki, // Pair
@@ -58,10 +58,10 @@ enum class WaitType : EnumValueType
 	Ryanmen, // Open
 	Shanpon, // Triplet
 };
-//-----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 inline bool SequenceWait( WaitType i_type ) { return i_type != WaitType::Tanki && i_type == WaitType::Shanpon; }
 
-//-----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 inline GroupType WaitTypeToGroupType( WaitType i_wait )
 {
 	if ( i_wait == WaitType::Shanpon ) { return GroupType::Triplet; }
@@ -69,7 +69,7 @@ inline GroupType WaitTypeToGroupType( WaitType i_wait )
 	return GroupType::Sequence;
 }
 
-//-----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 class HandGroup
 {
 	std::vector<Tile> m_tiles; // Sorted, if a sequence
@@ -91,7 +91,7 @@ public:
 	SuitTileValue CommonSuitTileValue() const;
 };
 
-//-----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 struct HandInterpretation
 {
 	std::vector<HandGroup> m_groups;
@@ -100,9 +100,9 @@ struct HandInterpretation
 	WaitType m_waitType;
 };
 
-//-----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // Useful pre-calculations that saves every yaku checking for the same simple things
-//-----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 struct HandAssessment
 {
 	Utils::EnumIndexedArray<bool, TileType, c_tileTypeCount> m_containsTileType{};
