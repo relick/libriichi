@@ -17,13 +17,7 @@ namespace Riichi::StandardYaku
 //-----------------------------------------------------------------------------
 HanValue MenzenchinTsumohou::CalculateValue
 (
-	RoundData const& i_round,
-	Seat const& i_playerSeat,
-	Hand const& i_hand,
-	HandAssessment const& i_assessment,
-	HandInterpretation const& i_interp,
-	Tile const& i_nextTile,
-	TileDrawType i_nextTileType
+	YAKU_CALCULATEVALUE_PARAMS()
 )	const
 {
 	if ( !i_assessment.m_open && i_nextTileType != TileDrawType::DiscardDraw )
@@ -36,13 +30,7 @@ HanValue MenzenchinTsumohou::CalculateValue
 //-----------------------------------------------------------------------------
 HanValue Riichi::CalculateValue
 (
-	RoundData const& i_round,
-	Seat const& i_playerSeat,
-	Hand const& i_hand,
-	HandAssessment const& i_assessment,
-	HandInterpretation const& i_interp,
-	Tile const& i_nextTile,
-	TileDrawType i_nextTileType
+	YAKU_CALCULATEVALUE_PARAMS()
 )	const
 {
 	if ( i_round.CalledRiichi( i_playerSeat ) )
@@ -55,13 +43,7 @@ HanValue Riichi::CalculateValue
 //-----------------------------------------------------------------------------
 HanValue Ippatsu::CalculateValue
 (
-	RoundData const& i_round,
-	Seat const& i_playerSeat,
-	Hand const& i_hand,
-	HandAssessment const& i_assessment,
-	HandInterpretation const& i_interp,
-	Tile const& i_nextTile,
-	TileDrawType i_nextTileType
+	YAKU_CALCULATEVALUE_PARAMS()
 )	const
 {
 	// Oh yeah, we're in 'hardcode the yaku' town
@@ -76,13 +58,7 @@ HanValue Ippatsu::CalculateValue
 //-----------------------------------------------------------------------------
 HanValue Pinfu::CalculateValue
 (
-	RoundData const& i_round,
-	Seat const& i_playerSeat,
-	Hand const& i_hand,
-	HandAssessment const& i_assessment,
-	HandInterpretation const& i_interp,
-	Tile const& i_nextTile,
-	TileDrawType i_nextTileType
+	YAKU_CALCULATEVALUE_PARAMS()
 )	const
 {
 	if ( i_assessment.m_open || i_assessment.m_containsTileType[ TileType::Dragon ] )
@@ -135,13 +111,7 @@ HanValue Pinfu::CalculateValue
 //-----------------------------------------------------------------------------
 HanValue Iipeikou::CalculateValue
 (
-	RoundData const& i_round,
-	Seat const& i_playerSeat,
-	Hand const& i_hand,
-	HandAssessment const& i_assessment,
-	HandInterpretation const& i_interp,
-	Tile const& i_nextTile,
-	TileDrawType i_nextTileType
+	YAKU_CALCULATEVALUE_PARAMS()
 )	const
 {
 	if ( i_assessment.m_open )
@@ -192,13 +162,7 @@ HanValue Iipeikou::CalculateValue
 //-----------------------------------------------------------------------------
 HanValue HaiteiRaoyue::CalculateValue
 (
-	RoundData const& i_round,
-	Seat const& i_playerSeat,
-	Hand const& i_hand,
-	HandAssessment const& i_assessment,
-	HandInterpretation const& i_interp,
-	Tile const& i_nextTile,
-	TileDrawType i_nextTileType
+	YAKU_CALCULATEVALUE_PARAMS()
 )	const
 {
 	if ( i_nextTileType == TileDrawType::SelfDraw && i_round.WallSize() == 0u )
@@ -212,13 +176,7 @@ HanValue HaiteiRaoyue::CalculateValue
 //-----------------------------------------------------------------------------
 HanValue HouteiRaoyui::CalculateValue
 (
-	RoundData const& i_round,
-	Seat const& i_playerSeat,
-	Hand const& i_hand,
-	HandAssessment const& i_assessment,
-	HandInterpretation const& i_interp,
-	Tile const& i_nextTile,
-	TileDrawType i_nextTileType
+	YAKU_CALCULATEVALUE_PARAMS()
 )	const
 {
 	if ( i_nextTileType == TileDrawType::DiscardDraw && i_round.WallSize() == 0u )
@@ -232,13 +190,7 @@ HanValue HouteiRaoyui::CalculateValue
 //-----------------------------------------------------------------------------
 HanValue RinshanKaihou::CalculateValue
 (
-	RoundData const& i_round,
-	Seat const& i_playerSeat,
-	Hand const& i_hand,
-	HandAssessment const& i_assessment,
-	HandInterpretation const& i_interp,
-	Tile const& i_nextTile,
-	TileDrawType i_nextTileType
+	YAKU_CALCULATEVALUE_PARAMS()
 )	const
 {
 	if ( i_nextTileType == TileDrawType::DeadWallDraw )
@@ -251,13 +203,7 @@ HanValue RinshanKaihou::CalculateValue
 //-----------------------------------------------------------------------------
 HanValue Chankan::CalculateValue
 (
-	RoundData const& i_round,
-	Seat const& i_playerSeat,
-	Hand const& i_hand,
-	HandAssessment const& i_assessment,
-	HandInterpretation const& i_interp,
-	Tile const& i_nextTile,
-	TileDrawType i_nextTileType
+	YAKU_CALCULATEVALUE_PARAMS()
 )	const
 {
 	if ( i_nextTileType == TileDrawType::KanTheft )
@@ -271,13 +217,7 @@ HanValue Chankan::CalculateValue
 template<bool t_KuitanEnabled>
 HanValue Tanyao<t_KuitanEnabled>::CalculateValue
 (
-	RoundData const& i_round,
-	Seat const& i_playerSeat,
-	Hand const& i_hand,
-	HandAssessment const& i_assessment,
-	HandInterpretation const& i_interp,
-	Tile const& i_nextTile,
-	TileDrawType i_nextTileType
+	YAKU_CALCULATEVALUE_PARAMS()
 )	const
 {
 	// Kuitan rule required for open tanyao hands
@@ -328,13 +268,7 @@ template<bool t_KuitanEnabled>
 //-----------------------------------------------------------------------------
 HanValue Bakaze::CalculateValue
 (
-	RoundData const& i_round,
-	Seat const& i_playerSeat,
-	Hand const& i_hand,
-	HandAssessment const& i_assessment,
-	HandInterpretation const& i_interp,
-	Tile const& i_nextTile,
-	TileDrawType i_nextTileType
+	YAKU_CALCULATEVALUE_PARAMS()
 )	const
 {
 	for ( HandGroup const& group : i_interp.m_groups )
@@ -364,13 +298,7 @@ HanValue Bakaze::CalculateValue
 //-----------------------------------------------------------------------------
 HanValue Jikaze::CalculateValue
 (
-	RoundData const& i_round,
-	Seat const& i_playerSeat,
-	Hand const& i_hand,
-	HandAssessment const& i_assessment,
-	HandInterpretation const& i_interp,
-	Tile const& i_nextTile,
-	TileDrawType i_nextTileType
+	YAKU_CALCULATEVALUE_PARAMS()
 )	const
 {
 	for ( HandGroup const& group : i_interp.m_groups )
@@ -400,13 +328,7 @@ HanValue Jikaze::CalculateValue
 //-----------------------------------------------------------------------------
 HanValue DoubleRiichi::CalculateValue
 (
-	RoundData const& i_round,
-	Seat const& i_playerSeat,
-	Hand const& i_hand,
-	HandAssessment const& i_assessment,
-	HandInterpretation const& i_interp,
-	Tile const& i_nextTile,
-	TileDrawType i_nextTileType
+	YAKU_CALCULATEVALUE_PARAMS()
 )	const
 {
 	if ( i_round.CalledDoubleRiichi( i_playerSeat ) )
@@ -419,13 +341,7 @@ HanValue DoubleRiichi::CalculateValue
 //-----------------------------------------------------------------------------
 HanValue Chantaiyao::CalculateValue
 (
-	RoundData const& i_round,
-	Seat const& i_playerSeat,
-	Hand const& i_hand,
-	HandAssessment const& i_assessment,
-	HandInterpretation const& i_interp,
-	Tile const& i_nextTile,
-	TileDrawType i_nextTileType
+	YAKU_CALCULATEVALUE_PARAMS()
 )	const
 {
 	for ( HandGroup const& group : i_interp.m_groups )
@@ -460,13 +376,7 @@ HanValue Chantaiyao::CalculateValue
 //-----------------------------------------------------------------------------
 HanValue SanshokuDoujun::CalculateValue
 (
-	RoundData const& i_round,
-	Seat const& i_playerSeat,
-	Hand const& i_hand,
-	HandAssessment const& i_assessment,
-	HandInterpretation const& i_interp,
-	Tile const& i_nextTile,
-	TileDrawType i_nextTileType
+	YAKU_CALCULATEVALUE_PARAMS()
 )	const
 {
 	// Note 1: Unfortunately, the fourth group and pair are totally unrelated, so we can't make quick rule-outs without checking all combos
@@ -541,13 +451,7 @@ HanValue SanshokuDoujun::CalculateValue
 //-----------------------------------------------------------------------------
 HanValue Ikkitsuukan::CalculateValue
 (
-	RoundData const& i_round,
-	Seat const& i_playerSeat,
-	Hand const& i_hand,
-	HandAssessment const& i_assessment,
-	HandInterpretation const& i_interp,
-	Tile const& i_nextTile,
-	TileDrawType i_nextTileType
+	YAKU_CALCULATEVALUE_PARAMS()
 )	const
 {
 	// This one isn't so bad. We'll make a matrix of suit x sequence and just search for all the groups we need
@@ -598,13 +502,7 @@ HanValue Ikkitsuukan::CalculateValue
 //-----------------------------------------------------------------------------
 HanValue Toitoi::CalculateValue
 (
-	RoundData const& i_round,
-	Seat const& i_playerSeat,
-	Hand const& i_hand,
-	HandAssessment const& i_assessment,
-	HandInterpretation const& i_interp,
-	Tile const& i_nextTile,
-	TileDrawType i_nextTileType
+	YAKU_CALCULATEVALUE_PARAMS()
 )	const
 {
 	for ( HandGroup const& group : i_interp.m_groups )
@@ -628,13 +526,7 @@ HanValue Toitoi::CalculateValue
 //-----------------------------------------------------------------------------
 HanValue Sanankou::CalculateValue
 (
-	RoundData const& i_round,
-	Seat const& i_playerSeat,
-	Hand const& i_hand,
-	HandAssessment const& i_assessment,
-	HandInterpretation const& i_interp,
-	Tile const& i_nextTile,
-	TileDrawType i_nextTileType
+	YAKU_CALCULATEVALUE_PARAMS()
 )	const
 {
 	int concealedTripleCount = 0;
@@ -663,13 +555,7 @@ HanValue Sanankou::CalculateValue
 //-----------------------------------------------------------------------------
 HanValue SanshokuDoukou::CalculateValue
 (
-	RoundData const& i_round,
-	Seat const& i_playerSeat,
-	Hand const& i_hand,
-	HandAssessment const& i_assessment,
-	HandInterpretation const& i_interp,
-	Tile const& i_nextTile,
-	TileDrawType i_nextTileType
+	YAKU_CALCULATEVALUE_PARAMS()
 )	const
 {
 	// Note 1: Unfortunately, the fourth group and pair are totally unrelated, so we can't make quick rule-outs without checking all combos
@@ -738,13 +624,7 @@ HanValue SanshokuDoukou::CalculateValue
 //-----------------------------------------------------------------------------
 HanValue Sankantsu::CalculateValue
 (
-	RoundData const& i_round,
-	Seat const& i_playerSeat,
-	Hand const& i_hand,
-	HandAssessment const& i_assessment,
-	HandInterpretation const& i_interp,
-	Tile const& i_nextTile,
-	TileDrawType i_nextTileType
+	YAKU_CALCULATEVALUE_PARAMS()
 )	const
 {
 	// NB don't need to check winning group as it can't be a quad
@@ -768,13 +648,7 @@ HanValue Sankantsu::CalculateValue
 //-----------------------------------------------------------------------------
 HanValue Chiitoitsu::CalculateValue
 (
-	RoundData const& i_round,
-	Seat const& i_playerSeat,
-	Hand const& i_hand,
-	HandAssessment const& i_assessment,
-	HandInterpretation const& i_interp,
-	Tile const& i_nextTile,
-	TileDrawType i_nextTileType
+	YAKU_CALCULATEVALUE_PARAMS()
 )	const
 {
 	if ( i_interp.m_waitType != WaitType::Tanki )
@@ -817,13 +691,7 @@ HanValue Chiitoitsu::CalculateValue
 //-----------------------------------------------------------------------------
 HanValue Honroutou::CalculateValue
 (
-	RoundData const& i_round,
-	Seat const& i_playerSeat,
-	Hand const& i_hand,
-	HandAssessment const& i_assessment,
-	HandInterpretation const& i_interp,
-	Tile const& i_nextTile,
-	TileDrawType i_nextTileType
+	YAKU_CALCULATEVALUE_PARAMS()
 )	const
 {
 	for ( HandGroup const& group : i_interp.m_groups )
@@ -858,13 +726,7 @@ HanValue Honroutou::CalculateValue
 //-----------------------------------------------------------------------------
 HanValue Shousangen::CalculateValue
 (
-	RoundData const& i_round,
-	Seat const& i_playerSeat,
-	Hand const& i_hand,
-	HandAssessment const& i_assessment,
-	HandInterpretation const& i_interp,
-	Tile const& i_nextTile,
-	TileDrawType i_nextTileType
+	YAKU_CALCULATEVALUE_PARAMS()
 )	const
 {
 	if ( !i_assessment.m_containsTileType[ TileType::Dragon ] )
@@ -913,13 +775,7 @@ HanValue Shousangen::CalculateValue
 //-----------------------------------------------------------------------------
 HanValue Honitsu::CalculateValue
 (
-	RoundData const& i_round,
-	Seat const& i_playerSeat,
-	Hand const& i_hand,
-	HandAssessment const& i_assessment,
-	HandInterpretation const& i_interp,
-	Tile const& i_nextTile,
-	TileDrawType i_nextTileType
+	YAKU_CALCULATEVALUE_PARAMS()
 )	const
 {
 	int suitTypeCount = 0;
@@ -943,13 +799,7 @@ HanValue Honitsu::CalculateValue
 //-----------------------------------------------------------------------------
 HanValue JunchanTaiyao::CalculateValue
 (
-	RoundData const& i_round,
-	Seat const& i_playerSeat,
-	Hand const& i_hand,
-	HandAssessment const& i_assessment,
-	HandInterpretation const& i_interp,
-	Tile const& i_nextTile,
-	TileDrawType i_nextTileType
+	YAKU_CALCULATEVALUE_PARAMS()
 )	const
 {
 	// Only suit groups possible in a junchan hand
@@ -990,13 +840,7 @@ HanValue JunchanTaiyao::CalculateValue
 //-----------------------------------------------------------------------------
 HanValue Ryanpeikou::CalculateValue
 (
-	RoundData const& i_round,
-	Seat const& i_playerSeat,
-	Hand const& i_hand,
-	HandAssessment const& i_assessment,
-	HandInterpretation const& i_interp,
-	Tile const& i_nextTile,
-	TileDrawType i_nextTileType
+	YAKU_CALCULATEVALUE_PARAMS()
 )	const
 {
 	// Note 1: It's impossible to 'pick' a wrong pairing if we find an iipeikou. So just find one then check the remaining 2 groups
@@ -1068,13 +912,7 @@ HanValue Ryanpeikou::CalculateValue
 //-----------------------------------------------------------------------------
 HanValue Chinitsu::CalculateValue
 (
-	RoundData const& i_round,
-	Seat const& i_playerSeat,
-	Hand const& i_hand,
-	HandAssessment const& i_assessment,
-	HandInterpretation const& i_interp,
-	Tile const& i_nextTile,
-	TileDrawType i_nextTileType
+	YAKU_CALCULATEVALUE_PARAMS()
 )	const
 {
 	if ( i_assessment.m_containsHonours || i_nextTile.Type() != TileType::Suit )
@@ -1102,13 +940,7 @@ HanValue Chinitsu::CalculateValue
 //-----------------------------------------------------------------------------
 HanValue KokushiMusou::CalculateValue
 (
-	RoundData const& i_round,
-	Seat const& i_playerSeat,
-	Hand const& i_hand,
-	HandAssessment const& i_assessment,
-	HandInterpretation const& i_interp,
-	Tile const& i_nextTile,
-	TileDrawType i_nextTileType
+	YAKU_CALCULATEVALUE_PARAMS()
 )	const
 {
 	if ( i_assessment.m_open )
@@ -1171,13 +1003,7 @@ HanValue KokushiMusou::CalculateValue
 //-----------------------------------------------------------------------------
 HanValue Suuankou::CalculateValue
 (
-	RoundData const& i_round,
-	Seat const& i_playerSeat,
-	Hand const& i_hand,
-	HandAssessment const& i_assessment,
-	HandInterpretation const& i_interp,
-	Tile const& i_nextTile,
-	TileDrawType i_nextTileType
+	YAKU_CALCULATEVALUE_PARAMS()
 )	const
 {
 	int concealedTripleCount = 0;
@@ -1206,13 +1032,7 @@ HanValue Suuankou::CalculateValue
 //-----------------------------------------------------------------------------
 HanValue Daisangen::CalculateValue
 (
-	RoundData const& i_round,
-	Seat const& i_playerSeat,
-	Hand const& i_hand,
-	HandAssessment const& i_assessment,
-	HandInterpretation const& i_interp,
-	Tile const& i_nextTile,
-	TileDrawType i_nextTileType
+	YAKU_CALCULATEVALUE_PARAMS()
 )	const
 {
 	if ( !i_assessment.m_containsTileType[ TileType::Dragon ] )
@@ -1249,13 +1069,7 @@ HanValue Daisangen::CalculateValue
 //-----------------------------------------------------------------------------
 HanValue Shousuushii::CalculateValue
 (
-	RoundData const& i_round,
-	Seat const& i_playerSeat,
-	Hand const& i_hand,
-	HandAssessment const& i_assessment,
-	HandInterpretation const& i_interp,
-	Tile const& i_nextTile,
-	TileDrawType i_nextTileType
+	YAKU_CALCULATEVALUE_PARAMS()
 )	const
 {
 	if ( !i_assessment.m_containsTileType[ TileType::Wind ] )
@@ -1304,13 +1118,7 @@ HanValue Shousuushii::CalculateValue
 //-----------------------------------------------------------------------------
 HanValue Daisuushii::CalculateValue
 (
-	RoundData const& i_round,
-	Seat const& i_playerSeat,
-	Hand const& i_hand,
-	HandAssessment const& i_assessment,
-	HandInterpretation const& i_interp,
-	Tile const& i_nextTile,
-	TileDrawType i_nextTileType
+	YAKU_CALCULATEVALUE_PARAMS()
 )	const
 {
 	if ( !i_assessment.m_containsTileType[ TileType::Wind ] )
@@ -1347,13 +1155,7 @@ HanValue Daisuushii::CalculateValue
 //-----------------------------------------------------------------------------
 HanValue Tsuuiisou::CalculateValue
 (
-	RoundData const& i_round,
-	Seat const& i_playerSeat,
-	Hand const& i_hand,
-	HandAssessment const& i_assessment,
-	HandInterpretation const& i_interp,
-	Tile const& i_nextTile,
-	TileDrawType i_nextTileType
+	YAKU_CALCULATEVALUE_PARAMS()
 )	const
 {
 	if ( i_assessment.m_containsTileType[ TileType::Suit ] || i_nextTile.Type() == TileType::Suit )
@@ -1367,13 +1169,7 @@ HanValue Tsuuiisou::CalculateValue
 //-----------------------------------------------------------------------------
 HanValue Chinroutou::CalculateValue
 (
-	RoundData const& i_round,
-	Seat const& i_playerSeat,
-	Hand const& i_hand,
-	HandAssessment const& i_assessment,
-	HandInterpretation const& i_interp,
-	Tile const& i_nextTile,
-	TileDrawType i_nextTileType
+	YAKU_CALCULATEVALUE_PARAMS()
 )	const
 {
 	if ( i_assessment.m_containsHonours || !i_assessment.m_containsTerminals || i_nextTile.Type() != TileType::Suit )
@@ -1407,13 +1203,7 @@ HanValue Chinroutou::CalculateValue
 //-----------------------------------------------------------------------------
 HanValue Ryuuiisou::CalculateValue
 (
-	RoundData const& i_round,
-	Seat const& i_playerSeat,
-	Hand const& i_hand,
-	HandAssessment const& i_assessment,
-	HandInterpretation const& i_interp,
-	Tile const& i_nextTile,
-	TileDrawType i_nextTileType
+	YAKU_CALCULATEVALUE_PARAMS()
 )	const
 {
 	// Early-out on some broad strokes, for optimisation
@@ -1465,13 +1255,7 @@ HanValue Ryuuiisou::CalculateValue
 //-----------------------------------------------------------------------------
 HanValue ChuurenPoutou::CalculateValue
 (
-	RoundData const& i_round,
-	Seat const& i_playerSeat,
-	Hand const& i_hand,
-	HandAssessment const& i_assessment,
-	HandInterpretation const& i_interp,
-	Tile const& i_nextTile,
-	TileDrawType i_nextTileType
+	YAKU_CALCULATEVALUE_PARAMS()
 )	const
 {
 	if ( i_assessment.m_open || i_assessment.m_containsHonours || i_nextTile.Type() != TileType::Suit )
@@ -1532,13 +1316,7 @@ HanValue ChuurenPoutou::CalculateValue
 //-----------------------------------------------------------------------------
 HanValue Suukantsu::CalculateValue
 (
-	RoundData const& i_round,
-	Seat const& i_playerSeat,
-	Hand const& i_hand,
-	HandAssessment const& i_assessment,
-	HandInterpretation const& i_interp,
-	Tile const& i_nextTile,
-	TileDrawType i_nextTileType
+	YAKU_CALCULATEVALUE_PARAMS()
 )	const
 {
 	int kanCount = 0;
@@ -1563,13 +1341,7 @@ HanValue Suukantsu::CalculateValue
 //-----------------------------------------------------------------------------
 HanValue Tenhou::CalculateValue
 (
-	RoundData const& i_round,
-	Seat const& i_playerSeat,
-	Hand const& i_hand,
-	HandAssessment const& i_assessment,
-	HandInterpretation const& i_interp,
-	Tile const& i_nextTile,
-	TileDrawType i_nextTileType
+	YAKU_CALCULATEVALUE_PARAMS()
 )	const
 {
 	if ( i_round.IsDealer( i_playerSeat ) && i_round.Discards( i_playerSeat ).empty() )
@@ -1583,13 +1355,7 @@ HanValue Tenhou::CalculateValue
 //-----------------------------------------------------------------------------
 HanValue Chihou::CalculateValue
 (
-	RoundData const& i_round,
-	Seat const& i_playerSeat,
-	Hand const& i_hand,
-	HandAssessment const& i_assessment,
-	HandInterpretation const& i_interp,
-	Tile const& i_nextTile,
-	TileDrawType i_nextTileType
+	YAKU_CALCULATEVALUE_PARAMS()
 )	const
 {
 	if ( i_nextTileType == TileDrawType::SelfDraw

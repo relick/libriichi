@@ -82,20 +82,24 @@ struct NamedYaku
 // Helper macros for reducing boilerplate. Define a yaku class just by giving a name
 // Use DECLARE_YAKU(name); to declare a whole class in one go
 // Use BEGIN_YAKU(name) and END_YAKU(); to add your own (private) contents to the class
+// Finally, use YAKU_CALCULATEVALUE_PARAMS() to cut all the parameter boilerplate
 //-----------------------------------------------------------------------------
+#define YAKU_CALCULATEVALUE_PARAMS()		\
+RoundData const& i_round,					\
+Seat const& i_playerSeat,					\
+Hand const& i_hand,							\
+HandAssessment const& i_assessment,			\
+HandInterpretation const& i_interp,			\
+Tile const& i_nextTile,						\
+TileDrawType i_nextTileType
+
 #define BEGIN_YAKU( NAME )					\
 struct NAME									\
 	: public NamedYaku< #NAME >				\
 {											\
 	HanValue CalculateValue					\
 	(										\
-		RoundData const& i_round,			\
-		Seat const& i_playerSeat,			\
-		Hand const& i_hand,					\
-		HandAssessment const& i_assessment,	\
-		HandInterpretation const& i_interp,	\
-		Tile const& i_nextTile,				\
-		TileDrawType i_nextTileType			\
+		YAKU_CALCULATEVALUE_PARAMS()		\
 	) const final;							\
 private:
 

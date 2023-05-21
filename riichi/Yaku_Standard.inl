@@ -16,13 +16,7 @@ namespace Riichi::StandardYaku
 template<YakuNameString t_YakuhaiName, DragonTileType t_DragonType>
 HanValue DragonYakuhai<t_YakuhaiName, t_DragonType>::CalculateValue
 (
-	RoundData const& i_round,
-	Seat const& i_playerSeat,
-	Hand const& i_hand,
-	HandAssessment const& i_assessment,
-	HandInterpretation const& i_interp,
-	Tile const& i_nextTile,
-	TileDrawType i_nextTileType
+	YAKU_CALCULATEVALUE_PARAMS()
 )	const
 {
 	for ( HandGroup const& group : i_interp.m_groups )
