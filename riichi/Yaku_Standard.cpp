@@ -326,7 +326,7 @@ template<bool t_KuitanEnabled>
 }
 
 //-----------------------------------------------------------------------------
-HanValue Yakuhai_RoundWind::CalculateValue
+HanValue Bakaze::CalculateValue
 (
 	RoundData const& i_round,
 	Seat const& i_playerSeat,
@@ -356,13 +356,13 @@ HanValue Yakuhai_RoundWind::CalculateValue
 	return NoYaku;
 }
 
-/*static*/ bool Yakuhai_RoundWind::ValidTile( Tile const& i_tile, Seat const& i_roundWind )
+/*static*/ bool Bakaze::ValidTile( Tile const& i_tile, Seat const& i_roundWind )
 {
 	return i_tile.Type() == TileType::Wind && i_tile.Get<TileType::Wind>() == i_roundWind;
 }
 
 //-----------------------------------------------------------------------------
-HanValue Yakuhai_SeatWind::CalculateValue
+HanValue Jikaze::CalculateValue
 (
 	RoundData const& i_round,
 	Seat const& i_playerSeat,
@@ -392,7 +392,7 @@ HanValue Yakuhai_SeatWind::CalculateValue
 	return NoYaku;
 }
 
-/*static*/ bool Yakuhai_SeatWind::ValidTile( Tile const& i_tile, Seat const& i_playerSeat )
+/*static*/ bool Jikaze::ValidTile( Tile const& i_tile, Seat const& i_playerSeat )
 {
 	return i_tile.Type() == TileType::Wind && i_tile.Get<TileType::Wind>() == i_playerSeat;
 }

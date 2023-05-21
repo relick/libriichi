@@ -78,4 +78,30 @@ struct NamedYaku
 	char const* Name() const final { return t_YakuName.m_str; }
 };
 
+//-----------------------------------------------------------------------------
+// Helper macros for reducing boilerplate. Define a yaku class just by giving a name
+// Use DECLARE_YAKU(name); to declare a whole class in one go
+// Use BEGIN_YAKU(name) and END_YAKU(); to add your own (private) contents to the class
+//-----------------------------------------------------------------------------
+#define BEGIN_YAKU( NAME )					\
+struct NAME									\
+	: public NamedYaku< #NAME >				\
+{											\
+	HanValue CalculateValue					\
+	(										\
+		RoundData const& i_round,			\
+		Seat const& i_playerSeat,			\
+		Hand const& i_hand,					\
+		HandAssessment const& i_assessment,	\
+		HandInterpretation const& i_interp,	\
+		Tile const& i_nextTile,				\
+		TileDrawType i_nextTileType			\
+	) const final;							\
+private:
+
+#define END_YAKU()							\
+}
+
+#define DECLARE_YAKU( NAME ) BEGIN_YAKU( NAME ) END_YAKU()
+
 }
