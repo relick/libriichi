@@ -400,3 +400,4 @@ FodyWeavers.xsd
 # Other
 out/*
 CMakePresets.json
+CMakeSettings.json

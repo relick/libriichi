@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Declare.hpp"
 #include "Hand.hpp"
 #include "Player.hpp"
 #include "RoundData.hpp"
@@ -12,16 +13,13 @@
 namespace Riichi
 {
 
-using Han = uint8_t;
+//-----------------------------------------------------------------------------
+struct NoYakuType {};
+inline constexpr NoYakuType NoYaku;
+struct YakumanType {};
+inline constexpr YakumanType Yakuman;
 
-enum NoYakuE
-{
-	NoYaku,
-};
-enum YakumanE
-{
-	Yakuman,
-};
+//-----------------------------------------------------------------------------
 class HanValue
 {
 	static constexpr Han c_yakumanValue = 13;
@@ -33,10 +31,10 @@ public:
 		: m_value{ i_value }
 	{}
 
-	HanValue( NoYakuE )
+	HanValue( NoYakuType )
 	{}
 
-	HanValue( YakumanE )
+	HanValue( YakumanType )
 		: m_value{ c_yakumanValue }
 	{}
 
@@ -45,6 +43,7 @@ public:
 	Han Get() const { return m_value.value(); }
 };
 
+//-----------------------------------------------------------------------------
 struct Yaku
 {
 	virtual ~Yaku() = default;
@@ -65,6 +64,7 @@ struct Yaku
 	) const = 0;
 };
 
+//-----------------------------------------------------------------------------
 template<size_t N>
 struct YakuNameString
 {
@@ -76,7 +76,7 @@ struct YakuNameString
 	char m_str[ N ];
 };
 
-// Single name Yaku should implement CalculateValue
+//-----------------------------------------------------------------------------
 template<YakuNameString t_YakuName>
 struct NamedYaku
 	: public Yaku
@@ -84,16 +84,16 @@ struct NamedYaku
 	char const* Name() const final { return t_YakuName.m_str; }
 };
 
-///////////////////
-// Riichi hands
-///////////////////
+//-----------------------------------------------------------------------------
+// Standard Riichi hands
+//-----------------------------------------------------------------------------
 namespace MainYaku
 {
 
 // Overall TODO: Lots of the yaku need to assess the 'final group' separately from the rest of the groups. This is to avoid creating a container and doing a bunch of copies where unnecessary
 // It would be nice to clean this up somehow. It would also be nice if all the yaku could be made to avoid allocating entirely when assessing!
 
-
+//-----------------------------------------------------------------------------
 struct MenzenchinTsumohou
 	: public NamedYaku<"MenzenchinTsumohou">
 {
@@ -120,6 +120,7 @@ struct MenzenchinTsumohou
 	}
 };
 
+//-----------------------------------------------------------------------------
 struct Riichi
 	: public NamedYaku<"Riichi">
 {
@@ -141,6 +142,7 @@ struct Riichi
 	}
 };
 
+//-----------------------------------------------------------------------------
 struct Ippatsu
 	: public NamedYaku<"Ippatsu">
 {
@@ -169,6 +171,7 @@ struct Ippatsu
 	}
 };
 
+//-----------------------------------------------------------------------------
 struct Pinfu
 	: public NamedYaku<"Pinfu">
 {
@@ -234,6 +237,7 @@ struct Pinfu
 	}
 };
 
+//-----------------------------------------------------------------------------
 struct Iipeikou
 	: public NamedYaku<"Iipeikou">
 {
@@ -297,6 +301,7 @@ private:
 	}
 };
 
+//-----------------------------------------------------------------------------
 struct HaiteiRaoyue
 	: public NamedYaku<"HaiteiRaoyue">
 {
@@ -323,6 +328,7 @@ struct HaiteiRaoyue
 	}
 };
 
+//-----------------------------------------------------------------------------
 struct HouteiRaoyui
 	: public NamedYaku<"HouteiRaoyui">
 {
@@ -349,6 +355,7 @@ struct HouteiRaoyui
 	}
 };
 
+//-----------------------------------------------------------------------------
 struct RinshanKaihou
 	: public NamedYaku<"RinshanKaihou">
 {
@@ -370,6 +377,7 @@ struct RinshanKaihou
 	}
 };
 
+//-----------------------------------------------------------------------------
 struct Chankan
 	: public NamedYaku<"Chankan">
 {
@@ -391,6 +399,7 @@ struct Chankan
 	}
 };
 
+//-----------------------------------------------------------------------------
 template<bool t_KuitanEnabled = true>
 struct Tanyao
 	: public NamedYaku<"Tanyao">
@@ -455,8 +464,10 @@ private:
 	}
 };
 
+//-----------------------------------------------------------------------------
 // There are 5 yakuhai, each with their own name
 // It's easier if we implement it in as few repetitions as possible
+//-----------------------------------------------------------------------------
 template<YakuNameString t_YakuhaiName, DragonTileType t_DragonType>
 struct DragonYakuhai
 	: public NamedYaku<t_YakuhaiName>
@@ -500,18 +511,22 @@ private:
 	}
 };
 
+//-----------------------------------------------------------------------------
 struct Yakuhai_Haku
 	: DragonYakuhai<"Haku", DragonTileType::White>
 {};
 
+//-----------------------------------------------------------------------------
 struct Yakuhai_Hatsu
 	: DragonYakuhai<"Hatsu", DragonTileType::Green>
 {};
 
+//-----------------------------------------------------------------------------
 struct Yakuhai_Chun
 	: DragonYakuhai<"Chun", DragonTileType::Red>
 {};
 
+//-----------------------------------------------------------------------------
 struct Yakuhai_RoundWind
 	: NamedYaku<"Bakaze">
 {
@@ -554,6 +569,7 @@ private:
 	}
 };
 
+//-----------------------------------------------------------------------------
 struct Yakuhai_SeatWind
 	: NamedYaku<"Jikaze">
 {
@@ -596,6 +612,7 @@ private:
 	}
 };
 
+//-----------------------------------------------------------------------------
 struct DoubleRiichi
 	: public NamedYaku<"Riichi">
 {
@@ -617,6 +634,7 @@ struct DoubleRiichi
 	}
 };
 
+//-----------------------------------------------------------------------------
 struct Chantaiyao
 	: public NamedYaku<"Chantaiyao">
 {
@@ -665,6 +683,7 @@ private:
 	}
 };
 
+//-----------------------------------------------------------------------------
 struct SanshokuDoujun
 	: public NamedYaku<"SanshokuDoujun">
 {
@@ -753,6 +772,7 @@ private:
 	}
 };
 
+//-----------------------------------------------------------------------------
 struct Ikkitsuukan
 	: public NamedYaku<"Ikkitsuukan">
 {
@@ -783,7 +803,7 @@ struct Ikkitsuukan
 				return;
 			}
 
-			for ( uint8_t i = 1; i <= 3; ++i )
+			for ( size_t i = 1; i <= 3; ++i )
 			{
 				if ( i_group[ 0 ].Get<TileType::Suit>().m_value == ( SuitTileValue::Set<1>() * i )
 					&& i_group[ 1 ].Get<TileType::Suit>().m_value == ( SuitTileValue::Set<2>() * i )
@@ -818,6 +838,7 @@ struct Ikkitsuukan
 	}
 };
 
+//-----------------------------------------------------------------------------
 struct Toitoi
 	: public NamedYaku<"Toitoi">
 {
@@ -854,6 +875,7 @@ struct Toitoi
 	}
 };
 
+//-----------------------------------------------------------------------------
 struct Sanankou
 	: public NamedYaku<"Sanankou">
 {
@@ -895,6 +917,7 @@ struct Sanankou
 	}
 };
 
+//-----------------------------------------------------------------------------
 struct SanshokuDoukou
 	: public NamedYaku<"SanshokuDoukou">
 {
@@ -976,6 +999,7 @@ private:
 	}
 };
 
+//-----------------------------------------------------------------------------
 struct Sankantsu
 	: public NamedYaku<"Sankantsu">
 {
@@ -1012,7 +1036,9 @@ struct Sankantsu
 	}
 };
 
-// TODO: The main and interpretations algorithm will fail to recognise 13 orphans
+//-----------------------------------------------------------------------------
+// TODO: The main and interpretations algorithm will fail to recognise 7 pairs
+//-----------------------------------------------------------------------------
 struct Chiitoitsu
 	: public NamedYaku<"Chiitoitsu">
 {
@@ -1066,6 +1092,7 @@ private:
 	}
 };
 
+//-----------------------------------------------------------------------------
 struct Honroutou
 	: public NamedYaku<"Honroutou">
 {
@@ -1114,6 +1141,7 @@ private:
 	}
 };
 
+//-----------------------------------------------------------------------------
 struct Shousangen
 	: public NamedYaku<"Shousangen">
 {
@@ -1176,6 +1204,7 @@ struct Shousangen
 	}
 };
 
+//-----------------------------------------------------------------------------
 struct Honitsu
 	: public NamedYaku<"Honitsu">
 {
@@ -1212,6 +1241,7 @@ struct Honitsu
 	}
 };
 
+//-----------------------------------------------------------------------------
 struct JunchanTaiyao
 	: public NamedYaku<"JunchanTaiyao">
 {
@@ -1266,6 +1296,7 @@ private:
 	}
 };
 
+//-----------------------------------------------------------------------------
 struct Ryanpeikou
 	: public NamedYaku<"Ryanpeikou">
 {
@@ -1342,6 +1373,7 @@ private:
 	}
 };
 
+//-----------------------------------------------------------------------------
 struct Chinitsu
 	: public NamedYaku<"Chinitsu">
 {
@@ -1382,7 +1414,9 @@ struct Chinitsu
 	}
 };
 
+//-----------------------------------------------------------------------------
 // TODO: The main and interpretations algorithm will fail to recognise 13 orphans
+//-----------------------------------------------------------------------------
 struct KokushiMusou
 	: public NamedYaku<"KokushiMusou">
 {
@@ -1459,6 +1493,7 @@ private:
 	}
 };
 
+//-----------------------------------------------------------------------------
 struct Suuankou
 	: public NamedYaku<"Suuankou">
 {
@@ -1500,6 +1535,7 @@ struct Suuankou
 	}
 };
 
+//-----------------------------------------------------------------------------
 struct Daisangen
 	: public NamedYaku<"Daisangen">
 {
@@ -1550,6 +1586,7 @@ struct Daisangen
 	}
 };
 
+//-----------------------------------------------------------------------------
 struct Shousuushii
 	: public NamedYaku<"Shousuushii">
 {
@@ -1612,6 +1649,7 @@ struct Shousuushii
 	}
 };
 
+//-----------------------------------------------------------------------------
 struct Daisuushii
 	: public NamedYaku<"Daisuushii">
 {
@@ -1662,6 +1700,7 @@ struct Daisuushii
 	}
 };
 
+//-----------------------------------------------------------------------------
 struct Tsuuiisou
 	: public NamedYaku<"Tsuuiisou">
 {
@@ -1688,6 +1727,7 @@ struct Tsuuiisou
 	}
 };
 
+//-----------------------------------------------------------------------------
 struct Chinroutou
 	: public NamedYaku<"Chinroutou">
 {
@@ -1734,6 +1774,7 @@ private:
 	}
 };
 
+//-----------------------------------------------------------------------------
 struct Ryuuiisou
 	: public NamedYaku<"Ryuuiisou">
 {
@@ -1799,6 +1840,7 @@ private:
 	}
 };
 
+//-----------------------------------------------------------------------------
 struct ChuurenPoutou
 	: public NamedYaku<"ChuurenPoutou">
 {
@@ -1873,6 +1915,7 @@ struct ChuurenPoutou
 	}
 };
 
+//-----------------------------------------------------------------------------
 struct Suukantsu
 	: public NamedYaku<"Suukantsu">
 {
@@ -1910,6 +1953,7 @@ struct Suukantsu
 	}
 };
 
+//-----------------------------------------------------------------------------
 struct Tenhou
 	: public NamedYaku<"Tenhou">
 {
@@ -1936,6 +1980,7 @@ struct Tenhou
 	}
 };
 
+//-----------------------------------------------------------------------------
 struct Chihou
 	: public NamedYaku<"Chihou">
 {

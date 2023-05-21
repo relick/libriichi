@@ -18,15 +18,19 @@ int main()
 	);
 
 	table.AddPlayer( Riichi::Player{
+		0,
 		Riichi::PlayerType::AI
 	} );
 	table.AddPlayer( Riichi::Player{
+		1,
 		Riichi::PlayerType::AI
 	} );
 	table.AddPlayer( Riichi::Player{
+		2,
 		Riichi::PlayerType::AI
 	} );
 	table.AddPlayer( Riichi::Player{
+		3,
 		Riichi::PlayerType::AI
 	} );
 

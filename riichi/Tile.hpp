@@ -7,7 +7,8 @@
 namespace Riichi
 {
 
-enum class TileType : uint8_t
+//-----------------------------------------------------------------------------
+enum class TileType : EnumValueType
 {
 	Suit,
 	Dragon,
@@ -16,7 +17,8 @@ enum class TileType : uint8_t
 inline constexpr size_t c_tileTypeCount = 3;
 using TileTypes = Utils::EnumRange<TileType, c_tileTypeCount>;
 
-enum class Suit : uint8_t
+//-----------------------------------------------------------------------------
+enum class Suit : EnumValueType
 {
 	Manzu,
 	Pinzu,
@@ -25,8 +27,10 @@ enum class Suit : uint8_t
 inline constexpr size_t c_suitCount = 3;
 using Suits = Utils::EnumRange<Suit, c_suitCount>;
 
+//-----------------------------------------------------------------------------
 using SuitTileValue = Utils::RestrictedIntegral<uint8_t, 1, 1, 9>;
 
+//-----------------------------------------------------------------------------
 struct SuitTile
 {
 	Suit m_suit;
@@ -36,14 +40,16 @@ struct SuitTile
 	friend std::strong_ordering operator<=>( SuitTile const&, SuitTile const& ) = default;
 };
 
-enum class DragonTileType : uint8_t
+//-----------------------------------------------------------------------------
+enum class DragonTileType : EnumValueType
 {
 	White,
 	Green,
 	Red,
 };
 
-enum class WindTileType : uint8_t
+//-----------------------------------------------------------------------------
+enum class WindTileType : EnumValueType
 {
 	East,
 	South,
@@ -51,6 +57,7 @@ enum class WindTileType : uint8_t
 	North,
 };
 
+//-----------------------------------------------------------------------------
 using Tile = Utils::NamedVariant<
 	TileType,
 
@@ -59,10 +66,8 @@ using Tile = Utils::NamedVariant<
 	WindTileType
 >;
 
-template<size_t t_TileSetSize>
-using TileSet = std::array<Tile, t_TileSetSize>;
-
-enum class TileDrawType
+//-----------------------------------------------------------------------------
+enum class TileDrawType : EnumValueType
 {
 	SelfDraw,
 	DiscardDraw,
@@ -72,31 +77,34 @@ enum class TileDrawType
 
 }
 
+//-----------------------------------------------------------------------------
 template<>
 struct std::hash<Riichi::Tile>
 {
 	std::size_t operator()( Riichi::Tile const& i_tile ) const noexcept
 	{
-		std::size_t h1 = std::hash<uint8_t>{}( static_cast< uint8_t >( i_tile.Type() ) );
+		using namespace Riichi;
+
+		std::size_t h1 = std::hash<EnumValueType>{}( static_cast< EnumValueType >( i_tile.Type() ) );
 		std::size_t h2;
 		switch ( i_tile.Type() )
 		{
-		using enum Riichi::TileType;
+		using enum TileType;
 		case Suit:
 		{
-			Riichi::SuitTile const& suitTile = i_tile.Get<Suit>();
-			std::size_t h3 = std::hash<uint8_t>{}( static_cast< uint8_t >( suitTile.m_suit ) );
+			SuitTile const& suitTile = i_tile.Get<Suit>();
+			std::size_t h3 = std::hash<EnumValueType>{}( static_cast< EnumValueType >( suitTile.m_suit ) );
 			h2 = std::hash<uint8_t>{}( suitTile.m_value ) ^ ( h3 << 1 );
 			break;
 		}
 		case Dragon:
 		{
-			h2 = std::hash<uint8_t>{}( static_cast< uint8_t >( i_tile.Get<Dragon>() ) );
+			h2 = std::hash<EnumValueType>{}( static_cast< EnumValueType >( i_tile.Get<Dragon>() ) );
 			break;
 		}
 		case Wind:
 		{
-			h2 = std::hash<uint8_t>{}( static_cast< uint8_t >( i_tile.Get<Wind>() ) );
+			h2 = std::hash<EnumValueType>{}( static_cast< EnumValueType >( i_tile.Get<Wind>() ) );
 			break;
 		}
 		}

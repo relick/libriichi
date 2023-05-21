@@ -1,21 +1,19 @@
-﻿# CMakeList.txt : CMake project for libriichi, include source and define
-# project specific logic here.
-#
-cmake_minimum_required (VERSION 3.8)
+﻿cmake_minimum_required (VERSION 3.8)
 
-# Enable Hot Reload for MSVC compilers if supported.
-if (POLICY CMP0141)
-  cmake_policy(SET CMP0141 NEW)
-  set(CMAKE_MSVC_DEBUG_INFORMATION_FORMAT "$<IF:$<AND:$<C_COMPILER_ID:MSVC>,$<CXX_COMPILER_ID:MSVC>>,$<$<CONFIG:Debug,RelWithDebInfo>:EditAndContinue>,$<$<CONFIG:Debug,RelWithDebInfo>:ProgramDatabase>>")
-endif()
+project ("libriichi_demo")
 
-project ("libriichi")
+# General settings
+set (CMAKE_CXX_STANDARD 23)
+set (CMAKE_TRY_COMPILE_TARGET_TYPE "STATIC_LIBRARY")
 
-# Add source to this project's executable.
-add_executable (libriichi "demo.cpp" )
+# Library
+set(LIBRIICHI_SOURCE
+ "riichi/Hand.cpp"
+ "riichi/Table.cpp"
+ "riichi/TableState.cpp"
+ "riichi/RoundData.cpp")
+add_library(libriichi STATIC ${LIBRIICHI_SOURCE})
 
-if (CMAKE_VERSION VERSION_GREATER 3.12)
-  set_property(TARGET libriichi PROPERTY CXX_STANDARD 23)
-endif()
-
-# TODO: Add tests and install targets if needed.
+# Demo
+add_executable (libriichi_demo "demo.cpp")
+target_link_libraries (libriichi_demo PRIVATE libriichi)

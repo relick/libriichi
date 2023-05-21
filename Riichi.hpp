@@ -1,4 +1,5 @@
 #pragma once
 
 // TODO: generate an actual single-header
-#include "Riichi/Table.hpp"
+#include "riichi/Table.hpp"
+#include "riichi/Rules.hpp"

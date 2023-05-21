@@ -1,14 +1,13 @@
 #pragma once
 
+#include "Declare.hpp"
 #include "PlayerCount.hpp"
 #include "Utils.hpp"
-#include "Yaku.hpp"
 
 namespace Riichi
 {
 
-using Points = unsigned int;
-
+//-----------------------------------------------------------------------------
 struct Rules
 {
 	virtual ~Rules() = default;
@@ -17,6 +16,7 @@ struct Rules
 	virtual Points InitialPoints() const = 0;
 };
 
+//-----------------------------------------------------------------------------
 class StandardYonma : public Rules
 {
 public:

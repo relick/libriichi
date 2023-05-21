@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Declare.hpp"
 #include "PlayerCount.hpp"
 #include "Seat.hpp"
 #include "Tile.hpp"
@@ -46,7 +47,8 @@ In other words! Game FSM is quite Simple!!
 
 */
 
-enum class TableStateType
+//-----------------------------------------------------------------------------
+enum class TableStateType : EnumValueType
 {
 	// Game not yet begun
 	Setup,
@@ -62,6 +64,7 @@ enum class TableStateType
 	RobAKanChance, // It's kinda amusing to me that this is a special state, but it makes sense
 };
 
+//-----------------------------------------------------------------------------
 inline constexpr char const* ToString( TableStateType i_type )
 {
 	constexpr char const* strs[] =
@@ -77,17 +80,18 @@ inline constexpr char const* ToString( TableStateType i_type )
 	return strs[ ( size_t )i_type ];
 }
 
-class Table;
-
+//-----------------------------------------------------------------------------
 namespace TableStates
 {
 
+//-----------------------------------------------------------------------------
 struct Base
 {
 	Base( Table& i_table ) : m_table{ i_table } {}
 	std::reference_wrapper<Table> m_table;
 };
 
+//-----------------------------------------------------------------------------
 struct Setup
 	: Base
 {
@@ -96,6 +100,7 @@ struct Setup
 	void StartGame() const;
 };
 
+//-----------------------------------------------------------------------------
 struct BetweenRounds
 	: Base
 {
@@ -104,6 +109,7 @@ struct BetweenRounds
 	void StartRound() const;
 };
 
+//-----------------------------------------------------------------------------
 struct GameOver
 	: Base
 {
@@ -112,6 +118,7 @@ struct GameOver
 	// No options
 };
 
+//-----------------------------------------------------------------------------
 struct Turn_AI
 	: Base
 {
@@ -123,6 +130,7 @@ struct Turn_AI
 	void Discard() const;
 };
 
+//-----------------------------------------------------------------------------
 struct Turn_Player
 	: Base
 {
@@ -135,6 +143,7 @@ struct Turn_Player
 	void Discard( Tile const& i_tile ) const;
 };
 
+//-----------------------------------------------------------------------------
 struct BetweenTurns
 	: Base
 {
@@ -144,6 +153,7 @@ struct BetweenTurns
 	void Pass() const;
 };
 
+//-----------------------------------------------------------------------------
 struct RobAKanChance
 	: Base
 {
@@ -155,6 +165,7 @@ struct RobAKanChance
 
 }
 
+//-----------------------------------------------------------------------------
 using TableState = Utils::NamedVariant<
 	TableStateType,
 
