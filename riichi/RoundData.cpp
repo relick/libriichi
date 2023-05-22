@@ -177,22 +177,21 @@ void RoundData::BreakWall
 	size_t const d2 = dice( i_shuffleRNG );
 	size_t const dTotal = d1 + d2;
 
-	// Start with turning dTotal into a player index:
-	// i = (dTotal - 1) % playerCount
-	// As our wall is clockwise but we want to count counter-clockwise, we can flip it around
-	// i_2 = (playerCount - i) % playerCount
-	// Multiplying this by the number of tiles in the wall per player, we should get the start of the wall
-	// It's a bit of an awkward calculation (especially doing mod twice) but simplifications involved floor/mod with negatives which isn't nice in C++ either so...
-	size_t const wallIndexCCW = ( m_players.size() - ( ( dTotal - 1 ) % m_players.size() ) ) % m_players.size();
-	size_t const perPlayerWall = m_wall.size() / m_players.size();
-	size_t const breakingWallStartTile = wallIndexCCW * perPlayerWall;
+	// Tiles are currently ordered clockwise from dealer's right, starting at the back of the vector
+	// We have to count down tiles, e.g. for yonma starting from 136 for (1)/5/9, 34 for 2/6/10, 68 for 3/7/11, 102 for 4/8/12
+	// Can note that we can treat it as tilesPerPlayer * ((dTotal - 1) % playerCount) as long as 0 is then treated as max afterwards
+	
+	size_t const wallIndexCCW = ( dTotal - 1 ) % m_players.size();
+	size_t const tilesPerPlayer = m_wall.size() / m_players.size();
+	
+	// Lastly we put it together and move it along the wall by the dice again for the point in the wall we actually break
+	size_t const breakingWallStartTile = ( wallIndexCCW == 0 ? m_wall.size() : wallIndexCCW * tilesPerPlayer ) - ( dTotal * 2 );
 
-	// Lastly we just add the dice again
-	m_breakPointFromDealerRight = breakingWallStartTile + dTotal;
+	// Reverse saved break point to make visuals easier (this number therefore starts from 0 and goes clockwise)
+	m_breakPointFromDealerRight = m_wall.size() - breakingWallStartTile;
 
-	// Tada! Put into position and reverse ready for draws
+	// Tada! Put into position ready for draws
 	std::ranges::rotate( m_wall, m_wall.begin() + m_breakPointFromDealerRight );
-	std::ranges::reverse( m_wall );
 }
 
 //------------------------------------------------------------------------------
