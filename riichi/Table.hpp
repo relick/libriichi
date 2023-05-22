@@ -1,15 +1,14 @@
 #pragma once
 
+#include "Containers.hpp"
 #include "Player.hpp"
 #include "Random.hpp"
 #include "RoundData.hpp"
 #include "TableState.hpp"
 #include "TableEvent.hpp"
-#include "Utils.hpp"
 
 #include <iostream>
 #include <memory>
-#include <vector>
 
 namespace Riichi
 {
@@ -18,7 +17,7 @@ namespace Riichi
 struct Standings
 {
 	// TODO: how do we relate these points with the players? Should we handle this differently?
-	std::vector<Points> m_points;
+	Vector<Points> m_points;
 
 	explicit Standings( Rules const& i_rules );
 
@@ -41,9 +40,9 @@ class Table
 
 private:
 	std::unique_ptr<Rules> m_rules;
-	std::vector<Player> m_players;
+	Vector<Player> m_players;
 	Standings m_standings;
-	std::vector<RoundData> m_rounds;
+	Vector<RoundData> m_rounds;
 	TableState m_state;
 	TableEvent m_mostRecentEvent;
 	ShuffleRNG m_shuffleRNG;

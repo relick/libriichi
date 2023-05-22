@@ -1,8 +1,8 @@
 ﻿#pragma once
 
+#include "NamedUnion.hpp"
 #include "Utils.hpp"
 
-#include <array>
 #include <iostream>
 
 namespace Riichi
@@ -63,7 +63,7 @@ inline constexpr size_t c_windTileTypeCount = 4;
 using WindTileTypes = Utils::EnumRange<WindTileType, c_windTileTypeCount>;
 
 //------------------------------------------------------------------------------
-using Tile = Utils::NamedVariant<
+using Tile = NamedUnion<
 	TileType,
 
 	SuitTile,

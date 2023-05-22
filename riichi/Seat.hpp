@@ -2,6 +2,7 @@
 
 #include "Base.hpp"
 #include "Tile.hpp" // to compare with wind tiles
+#include "Utils.hpp"
 
 namespace Riichi
 {

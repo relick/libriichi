@@ -1,9 +1,10 @@
 #pragma once
 
 #include "Base.hpp"
+#include "Containers.hpp"
+#include "NamedUnion.hpp"
 #include "Utils.hpp"
 
-#include <vector>
 #include <utility>
 
 namespace Riichi
@@ -150,15 +151,15 @@ public:
 class Ron
 {
 	Tile m_winningTile;
-	std::vector<Seat> m_winners;
+	Vector<Seat> m_winners;
 public:
-	explicit Ron( Tile const& i_winningTile, std::vector<Seat> i_winners )
+	explicit Ron( Tile const& i_winningTile, Vector<Seat> i_winners )
 		: m_winningTile{ i_winningTile }
 		, m_winners{ std::move( i_winners ) }
 	{}
 
 	Tile const& WinningTile() const { return m_winningTile; }
-	std::vector<Seat> const& Winners() const { return m_winners; }
+	Vector<Seat> const& Winners() const { return m_winners; }
 };
 
 //------------------------------------------------------------------------------
@@ -172,7 +173,7 @@ public:
 }
 
 //------------------------------------------------------------------------------
-using TableEvent = Utils::NamedVariant<
+using TableEvent = NamedUnion<
 	TableEventType,
 
 	Utils::NullType, // None

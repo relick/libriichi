@@ -1,12 +1,10 @@
 #pragma once
 
+#include "Containers.hpp"
 #include "Declare.hpp"
 #include "Seat.hpp"
 #include "Tile.hpp"
 #include "Utils.hpp"
-
-#include <unordered_set>
-#include <vector>
 
 namespace Riichi
 {
@@ -30,7 +28,7 @@ struct Meld
 {
 	using MeldTile = std::pair<Tile, Seat>;
 
-	std::vector<MeldTile> m_tiles;
+	Vector<MeldTile> m_tiles;
 	GroupType m_type{ GroupType::Sequence };
 	bool m_open{ true };
 };
@@ -41,13 +39,13 @@ struct Meld
 //------------------------------------------------------------------------------
 class Hand
 {
-	std::vector<Tile> m_freeTiles;
-	std::vector<Meld> m_melds;
+	Vector<Tile> m_freeTiles;
+	Vector<Meld> m_melds;
 public:
 
-	std::vector<Tile> const& FreeTiles() const { return m_freeTiles; }
-	std::vector<Meld> const& Melds() const { return m_melds; }
-	void AddFreeTiles( std::vector<Tile> const& i_newTiles );
+	Vector<Tile> const& FreeTiles() const { return m_freeTiles; }
+	Vector<Meld> const& Melds() const { return m_melds; }
+	void AddFreeTiles( Vector<Tile> const& i_newTiles );
 
 	friend std::ostream& operator<<( std::ostream& io_out, Hand const& i_hand );
 };
@@ -75,17 +73,17 @@ inline GroupType WaitTypeToGroupType( WaitType i_wait )
 //------------------------------------------------------------------------------
 class HandGroup
 {
-	std::vector<Tile> m_tiles; // Sorted, if a sequence
+	Vector<Tile> m_tiles; // Sorted, if a sequence
 	GroupType m_type{ GroupType::Sequence };
 	bool m_open{ true };
 
 public:
-	HandGroup( std::vector<Tile> i_tiles, GroupType i_type, bool i_open );
+	HandGroup( Vector<Tile> i_tiles, GroupType i_type, bool i_open );
 	HandGroup( HandInterpretation const& i_interp, Tile i_winningTile ); // Make a group from the ungrouped + winning tile
 	HandGroup( HandGroup const& ) = default;
 	HandGroup( HandGroup&& ) = default;
 
-	std::vector<Tile> const& Tiles() const { return m_tiles; }
+	Vector<Tile> const& Tiles() const { return m_tiles; }
 	Tile const& operator[]( size_t i ) const { return m_tiles[ i ]; }
 	GroupType Type() const { return m_type; }
 	bool Open() const { return m_open; }
@@ -97,9 +95,9 @@ public:
 //------------------------------------------------------------------------------
 struct HandInterpretation
 {
-	std::vector<HandGroup> m_groups;
-	std::vector<Tile> m_ungrouped;
-	std::unordered_set<Tile> m_waits;
+	Vector<HandGroup> m_groups;
+	Vector<Tile> m_ungrouped;
+	Set<Tile> m_waits;
 	WaitType m_waitType;
 };
 
@@ -117,11 +115,11 @@ struct HandAssessment
 	explicit HandAssessment( Hand const& i_hand );
 
 private:
-	std::vector<HandInterpretation> m_interpretations;
-	static std::vector<HandInterpretation> GenerateInterpretations
+	Vector<HandInterpretation> m_interpretations;
+	static Vector<HandInterpretation> GenerateInterpretations
 	(
 		HandInterpretation const& i_fixedPart,
-		std::vector<Tile> const& i_freeTiles
+		Vector<Tile> const& i_freeTiles
 	);
 };
 

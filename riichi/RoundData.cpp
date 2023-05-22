@@ -64,7 +64,7 @@ bool RoundData::RiichiIppatsuValid
 }
 
 //------------------------------------------------------------------------------
-std::vector<Tile> const& RoundData::Discards
+Vector<Tile> const& RoundData::Discards
 (
 	Seat i_player
 )	const
@@ -82,7 +82,7 @@ Hand const& RoundData::Hand
 }
 
 //------------------------------------------------------------------------------
-std::optional<Tile> const& RoundData::DrawnTile
+Option<Tile> const& RoundData::DrawnTile
 (
 	Seat i_player
 )	const
@@ -126,7 +126,7 @@ Player const& RoundData::GetPlayer
 RoundData::RoundData
 (
 	Seat i_roundWind,
-	std::vector<Player> const& i_players,
+	Vector<Player> const& i_players,
 	Rules const& i_rules,
 	ShuffleRNG& i_shuffleRNG
 )
@@ -134,7 +134,7 @@ RoundData::RoundData
 	, m_deadWallDrawsRemaining{ i_rules.DeadWallDrawsAvailable() }
 {
 	// Randomly determine initial seats
-	std::vector<size_t> playerIndices( i_players.size() );
+	Vector<size_t> playerIndices( i_players.size() );
 	std::ranges::iota( playerIndices, 0 );
 	std::ranges::shuffle( playerIndices, i_shuffleRNG );
 	m_players.reserve( i_players.size() );
@@ -237,14 +237,14 @@ Tile RoundData::DealHands
 }
 
 //------------------------------------------------------------------------------
-std::vector<Tile> RoundData::DrawTiles
+Vector<Tile> RoundData::DrawTiles
 (
 	size_t i_num
 )
 {
 	Ensure( WallTilesRemaining() >= i_num, "Tried to draw more tiles than in wall" );
 
-	std::vector<Tile> tiles;
+	Vector<Tile> tiles;
 	tiles.reserve( i_num );
 	for ( size_t i = 0; i < i_num; ++i )
 	{

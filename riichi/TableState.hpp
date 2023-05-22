@@ -1,10 +1,10 @@
 #pragma once
 
 #include "Declare.hpp"
+#include "NamedUnion.hpp"
 #include "PlayerCount.hpp"
 #include "Seat.hpp"
 #include "Tile.hpp"
-#include "Utils.hpp"
 
 namespace Riichi
 {
@@ -173,7 +173,7 @@ struct RobAKanChance
 }
 
 //------------------------------------------------------------------------------
-using TableState = Utils::NamedVariant<
+using TableState = NamedUnion<
 	TableStateType,
 
 	TableStates::Setup,

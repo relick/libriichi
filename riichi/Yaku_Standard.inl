@@ -5,7 +5,6 @@
 #include "Hand.hpp"
 #include "RoundData.hpp"
 #include "Tile.hpp"
-#include "Utils.hpp"
 
 #include <numeric>
 

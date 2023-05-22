@@ -1,9 +1,8 @@
 #pragma once
 
+#include "Containers.hpp"
 #include "Declare.hpp"
 #include "Tile.hpp"
-
-#include <optional>
 
 namespace Riichi
 {
@@ -19,7 +18,7 @@ class HanValue
 {
 	static constexpr Han c_yakumanValue = 13;
 
-	std::optional<Han> m_value;
+	Option<Han> m_value;
 
 public:
 	HanValue( Han i_value )

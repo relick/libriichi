@@ -1,5 +1,6 @@
 #include "Yaku_Standard.hpp"
 
+#include "Containers.hpp"
 #include "Hand.hpp"
 #include "RoundData.hpp"
 #include "Tile.hpp"
@@ -456,7 +457,7 @@ HanValue Ikkitsuukan::CalculateValue
 {
 	// This one isn't so bad. We'll make a matrix of suit x sequence and just search for all the groups we need
 
-	Utils::EnumIndexedArray<std::array<bool, 3>, Suit, c_suitCount> groupsPerSuit{};
+	Utils::EnumIndexedArray<Array<bool, 3>, Suit, c_suitCount> groupsPerSuit{};
 
 	auto fnEvalGroup = [ &groupsPerSuit ]( HandGroup const& i_group )
 	{
@@ -658,7 +659,7 @@ HanValue Chiitoitsu::CalculateValue
 
 	// TODO: Can we do this without filling a container?
 
-	std::unordered_set<Tile> uniqueTiles;
+	Set<Tile> uniqueTiles;
 	uniqueTiles.insert( i_nextTile );
 
 	for ( HandGroup const& group : i_interp.m_groups )
@@ -951,7 +952,7 @@ HanValue KokushiMusou::CalculateValue
 	// TODO: Can we do this without filling a container?
 
 	// Sufficient to check that all tiles are terminals/honors and that the distinct tile count >= 13
-	std::unordered_set<Tile> uniqueTiles;
+	Set<Tile> uniqueTiles;
 	uniqueTiles.reserve( 14 );
 
 	for ( HandGroup const& group : i_interp.m_groups )
@@ -1265,7 +1266,7 @@ HanValue ChuurenPoutou::CalculateValue
 
 	Suit const requiredSuit = i_nextTile.Get<TileType::Suit>().m_suit;
 
-	std::array<int, 9> requiredOfEachValue = {
+	Array<int, 9> requiredOfEachValue = {
 		3, 1, 1,
 		1, 1, 1,
 		1, 1, 3,

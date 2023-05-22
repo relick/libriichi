@@ -1,5 +1,7 @@
 #include "Hand.hpp"
 
+#include "Utils.hpp"
+
 #include <algorithm>
 #include <ranges>
 
@@ -9,7 +11,7 @@ namespace Riichi
 //------------------------------------------------------------------------------
 void Hand::AddFreeTiles
 (
-	std::vector<Tile> const& i_newTiles
+	Vector<Tile> const& i_newTiles
 )
 {
 	m_freeTiles.insert_range( m_freeTiles.end(), i_newTiles );
@@ -19,7 +21,7 @@ void Hand::AddFreeTiles
 //------------------------------------------------------------------------------
 std::ostream& operator<<( std::ostream& io_out, Hand const& i_hand )
 {
-	std::vector<Tile> sortedTiles = i_hand.m_freeTiles;
+	Vector<Tile> sortedTiles = i_hand.m_freeTiles;
 	std::ranges::sort( sortedTiles );
 
 	auto fnPrintSuit = [ &io_out ]( Suit suit )
@@ -32,7 +34,7 @@ std::ostream& operator<<( std::ostream& io_out, Hand const& i_hand )
 		}
 	};
 
-	std::optional<Suit> lastSuit;
+	Option<Suit> lastSuit;
 	for ( Tile const& tile : sortedTiles )
 	{
 		if ( tile.Type() == TileType::Suit )
@@ -77,7 +79,7 @@ std::ostream& operator<<( std::ostream& io_out, Hand const& i_hand )
 //------------------------------------------------------------------------------
 HandGroup::HandGroup
 (
-	std::vector<Tile> i_tiles,
+	Vector<Tile> i_tiles,
 	GroupType i_type,
 	bool i_open
 )
@@ -171,7 +173,7 @@ HandAssessment::HandAssessment
 )
 {
 	// Make a temporary list of all tiles in the hand that we can use for quickly assessing
-	std::vector<Tile> tilesInHand = i_hand.FreeTiles();
+	Vector<Tile> tilesInHand = i_hand.FreeTiles();
 
 	// At the same time, make any meld-specific assessments
 	for ( Meld const& meld : i_hand.Melds() )
@@ -206,7 +208,7 @@ HandAssessment::HandAssessment
 	for ( Meld const& meld : i_hand.Melds() )
 	{
 		fixedPart.m_groups.emplace_back(
-			std::ranges::to<std::vector>( std::views::elements<0>( meld.m_tiles ) ),
+			std::ranges::to<Vector<Tile>>( std::views::elements<0>( meld.m_tiles ) ),
 			meld.m_type,
 			meld.m_open
 		);
@@ -244,13 +246,13 @@ HandAssessment::HandAssessment
 }
 
 //------------------------------------------------------------------------------
-/*static*/ std::vector<HandInterpretation> HandAssessment::GenerateInterpretations
+/*static*/ Vector<HandInterpretation> HandAssessment::GenerateInterpretations
 (
 	HandInterpretation const& i_fixedPart,
-	std::vector<Tile> const& i_freeTiles
+	Vector<Tile> const& i_freeTiles
 )
 {
-	std::vector<HandInterpretation> interpretations;
+	Vector<HandInterpretation> interpretations;
 
 	auto fnGenerate = [ & ]()
 	{
