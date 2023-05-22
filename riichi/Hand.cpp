@@ -7,6 +7,16 @@ namespace Riichi
 {
 
 //------------------------------------------------------------------------------
+void Hand::AddFreeTiles
+(
+	std::vector<Tile> const& i_newTiles
+)
+{
+	m_freeTiles.insert_range( m_freeTiles.end(), i_newTiles );
+	std::ranges::sort( m_freeTiles ); // TODO: players may not always want their hand sorted
+}
+
+//------------------------------------------------------------------------------
 HandGroup::HandGroup
 (
 	std::vector<Tile> i_tiles,

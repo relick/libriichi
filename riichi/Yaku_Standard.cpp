@@ -165,7 +165,7 @@ HanValue HaiteiRaoyue::CalculateValue
 	YAKU_CALCULATEVALUE_PARAMS()
 )	const
 {
-	if ( i_nextTileType == TileDrawType::SelfDraw && i_round.WallSize() == 0u )
+	if ( i_nextTileType == TileDrawType::SelfDraw && i_round.WallTilesRemaining() == 0u )
 	{
 		return 1;
 	}
@@ -179,7 +179,7 @@ HanValue HouteiRaoyui::CalculateValue
 	YAKU_CALCULATEVALUE_PARAMS()
 )	const
 {
-	if ( i_nextTileType == TileDrawType::DiscardDraw && i_round.WallSize() == 0u )
+	if ( i_nextTileType == TileDrawType::DiscardDraw && i_round.WallTilesRemaining() == 0u )
 	{
 		return 1;
 	}

@@ -47,6 +47,7 @@ public:
 
 	std::vector<Tile> const& FreeTiles() const { return m_freeTiles; }
 	std::vector<Meld> const& Melds() const { return m_melds; }
+	void AddFreeTiles( std::vector<Tile> const& i_newTiles );
 };
 
 //------------------------------------------------------------------------------

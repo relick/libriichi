@@ -47,6 +47,8 @@ enum class DragonTileType : EnumValueType
 	Green,
 	Red,
 };
+inline constexpr size_t c_dragonTileTypeCount = 3;
+using DragonTileTypes = Utils::EnumRange<DragonTileType, c_dragonTileTypeCount>;
 
 //------------------------------------------------------------------------------
 enum class WindTileType : EnumValueType
@@ -56,6 +58,8 @@ enum class WindTileType : EnumValueType
 	West,
 	North,
 };
+inline constexpr size_t c_windTileTypeCount = 4;
+using WindTileTypes = Utils::EnumRange<WindTileType, c_windTileTypeCount>;
 
 //------------------------------------------------------------------------------
 using Tile = Utils::NamedVariant<

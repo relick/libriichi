@@ -52,37 +52,69 @@ void BetweenRounds::StartRound
 	}
 
 	RoundData& round = table.m_rounds.back();
-	//round.BreakWall( table.m_shuffleRNG );
-	// Break wall
-	// Deal hands
-	// Set to correct turn type
 
-	table.m_state = TableStates::GameOver{ table };
+	// TODO: we call these here, they could technically be part of RoundData construction
+	// They could also be exposed as their own states.
+	// In other words, they're fine here for now, but maybe this decision needs revisiting later
+	round.BreakWall( table.m_shuffleRNG );
+	round.DealHands();
+
+	Player const& turnPlayer = round.GetPlayer( round.CurrentTurn(), table );
+
+	switch ( turnPlayer.Type() )
+	{
+	case PlayerType::User:
+	{
+		table.m_state = TableStates::Turn_Player{ table };
+		break;
+	}
+	case PlayerType::AI:
+	{
+		table.m_state = TableStates::Turn_AI{ table };
+		break;
+	}
+	}
 }
 
 //------------------------------------------------------------------------------
 void Turn_AI::Discard
 (
 )	const
-{}
+{
+	// TODO
+	Table& table = m_table.get();
+	table.m_state = TableStates::GameOver{ table };
+}
 
 //------------------------------------------------------------------------------
 void Turn_Player::Discard
 (
 	Tile const& i_tile
 )	const
-{}
+{
+	// TODO
+	Table& table = m_table.get();
+	table.m_state = TableStates::GameOver{ table };
+}
 
 //------------------------------------------------------------------------------
 void BetweenTurns::Pass
 (
 )	const
-{}
+{
+	// TODO
+	Table& table = m_table.get();
+	table.m_state = TableStates::GameOver{ table };
+}
 
 //------------------------------------------------------------------------------
 void RobAKanChance::Pass
 (
 )	const
-{}
+{
+	// TODO
+	Table& table = m_table.get();
+	table.m_state = TableStates::GameOver{ table };
+}
 
 }

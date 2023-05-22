@@ -13,7 +13,7 @@ set(LIBRIICHI_SOURCE
  "riichi/TableState.cpp"
  "riichi/RoundData.cpp"
  "riichi/Yaku_Standard.cpp"
-)
+ "riichi/Rules.cpp")
 add_library(libriichi STATIC ${LIBRIICHI_SOURCE})
 
 # Demo

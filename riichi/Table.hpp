@@ -66,8 +66,9 @@ public:
 	// Simulation
 	bool Playing() const;
 	TableState const& GetState() { return m_state; }
-	RoundData const& GetRoundData( size_t i_roundIndex = size_t( -1 ) ) { return i_roundIndex >= m_rounds.size() ? m_rounds.back() : m_rounds[ i_roundIndex ]; }
+	RoundData const& GetRoundData( size_t i_roundIndex = SIZE_MAX ) { return i_roundIndex >= m_rounds.size() ? m_rounds.back() : m_rounds[ i_roundIndex ]; }
 	TableEvent const& GetEvent() const { return m_mostRecentEvent; }
+	Player const& GetPlayer( size_t i_playerIndex ) const { return m_players[ i_playerIndex ]; }
 };
 
 }

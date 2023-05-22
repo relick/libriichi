@@ -35,13 +35,40 @@ class RestrictedIntegral
 public:
 	using CoreType = T_Integral;
 	using RestrictedType = RestrictedIntegral<CoreType, t_Min, t_Default, t_Max>;
-	static constexpr auto Min = t_Min;
-	static constexpr auto Max = t_Max;
+	
+	struct BlessedValue { T_Integral m_val; };
+
+	static constexpr BlessedValue Min{ t_Min };
+	static constexpr BlessedValue Max{ t_Max };
+
+	struct RestrictedTypeRange
+	{
+		struct Iter
+		{
+			T_Integral m_current;
+
+			void operator++() { ++m_current; }
+			RestrictedType operator*() { return RestrictedType{ m_current }; }
+			bool operator!=( Iter const& b ) const { return m_current != b.m_current; }
+		};
+
+		T_Integral m_lower;
+		T_Integral m_upper;
+
+		RestrictedTypeRange( T_Integral i_lower, T_Integral i_upper, bool i_includeUpperBound )
+			: m_lower{ i_lower }
+			, m_upper{ T_Integral( i_upper + ( i_includeUpperBound ? 1 : 0 ) ) }
+		{}
+
+		Iter begin() const { return Iter{ m_lower }; }
+		Iter end() const { return Iter{ m_upper }; }
+	};
 
 public:
 	CoreType m_val{ t_Default };
 
-	constexpr RestrictedIntegral( CoreType i_val ) : m_val{ i_val } {}
+	explicit constexpr RestrictedIntegral( CoreType i_val ) : m_val{ i_val } {}
+	constexpr RestrictedIntegral( BlessedValue i_val ) : m_val{ i_val.m_val } {}
 
 public:
 	template<CoreType t_Value>
@@ -51,6 +78,19 @@ public:
 		static_assert( t_Value <= t_Max, "Restricted integer provided with too large a value" );
 		return RestrictedType( t_Value );
 	}
+
+	static constexpr RestrictedTypeRange ExclusiveRange( RestrictedType i_l, RestrictedType i_u )
+	{
+		Ensure( i_l.m_val <= i_u.m_val, "Lower bound must be <= upper bound in range" );
+		return RestrictedTypeRange( i_l.m_val, i_u.m_val, false );
+	}
+
+	static constexpr RestrictedTypeRange InclusiveRange( RestrictedType i_l, RestrictedType i_u )
+	{
+		Ensure( i_l.m_val <= i_u.m_val, "Lower bound must be <= upper bound in range" );
+		return RestrictedTypeRange( i_l.m_val, i_u.m_val, true );
+	}
+
 	constexpr RestrictedIntegral() {}
 	constexpr RestrictedIntegral( RestrictedType const& i_o ) : m_val{ i_o.m_val } {}
 
@@ -58,6 +98,13 @@ public:
 	constexpr CoreType Get() const { return m_val; }
 
 	constexpr RestrictedType& operator=( RestrictedType const& i_o ) { m_val = i_o.m_val; return *this; }
+
+	constexpr RestrictedType& operator++()
+	{
+		Ensure( m_val < t_Max, "Can not increment value - reached max" );
+		++m_val;
+		return *this;
+	}
 };
 
 //------------------------------------------------------------------------------
