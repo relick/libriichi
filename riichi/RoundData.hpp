@@ -20,6 +20,7 @@ class RoundData
 		std::optional<size_t> m_riichiDiscardTile;
 		std::vector<Tile> m_discards;
 		Hand m_hand;
+		std::optional<Tile> m_draw; // Currently drawn tile
 
 		explicit RoundPlayerData( size_t i_playerI ) : m_playerIndex( i_playerI ) {}
 	};
@@ -47,6 +48,8 @@ public:
 	bool CalledDoubleRiichi( Seat i_player ) const;
 	bool RiichiIppatsuValid( Seat i_player ) const;
 	std::vector<Tile> const& Discards( Seat i_player ) const;
+	Hand const& Hand( Seat i_player ) const;
+	std::optional<Tile> const& DrawnTile( Seat i_player ) const;
 	size_t WallTilesRemaining() const;
 	bool CallsMade() const;
 	Player const& GetPlayer( Seat i_player, Table const& i_table ) const;
@@ -68,12 +71,15 @@ public:
 		ShuffleRNG& i_shuffleRNG
 	);
 
-	size_t DeadWallSize( Rules const& i_rules );
-
 	void BreakWall( ShuffleRNG& i_shuffleRNG );
-	void DealHands();
+	Tile DealHands();
 
 	std::vector<Tile> DrawTiles( size_t i_num );
+	Tile DrawTile();
+
+	// Player turn actions
+	Tile DiscardDrawn();
+	Tile PassCalls(); // draws for next player
 };
 
 }

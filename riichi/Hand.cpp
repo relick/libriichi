@@ -17,6 +17,64 @@ void Hand::AddFreeTiles
 }
 
 //------------------------------------------------------------------------------
+std::ostream& operator<<( std::ostream& io_out, Hand const& i_hand )
+{
+	std::vector<Tile> sortedTiles = i_hand.m_freeTiles;
+	std::ranges::sort( sortedTiles );
+
+	auto fnPrintSuit = [ &io_out ]( Suit suit )
+	{
+		switch ( suit )
+		{
+		case Suit::Manzu: io_out << 'm'; break;
+		case Suit::Pinzu: io_out << 'p'; break;
+		case Suit::Souzu: io_out << 's'; break;
+		}
+	};
+
+	std::optional<Suit> lastSuit;
+	for ( Tile const& tile : sortedTiles )
+	{
+		if ( tile.Type() == TileType::Suit )
+		{
+			if ( lastSuit.has_value() && lastSuit.value() != tile.Get<TileType::Suit>().m_suit )
+			{
+				fnPrintSuit( tile.Get<TileType::Suit>().m_suit );
+			}
+			lastSuit = tile.Get<TileType::Suit>().m_suit;
+			io_out << static_cast< int >( tile.Get<TileType::Suit>().m_value.m_val );
+		}
+		else 
+		{
+			if ( lastSuit.has_value() )
+			{
+				fnPrintSuit( lastSuit.value() );
+				lastSuit.reset();
+			}
+			io_out << tile;
+		}
+	}
+	if ( lastSuit.has_value() )
+	{
+		fnPrintSuit( lastSuit.value() );
+	}
+
+	for ( Meld const& meld : i_hand.m_melds )
+	{
+		io_out << ' ';
+
+		for ( Meld::MeldTile const& tile : meld.m_tiles )
+		{
+			io_out << tile.first;
+		}
+	}
+
+	io_out << '\n';
+
+	return io_out;
+}
+
+//------------------------------------------------------------------------------
 HandGroup::HandGroup
 (
 	std::vector<Tile> i_tiles,

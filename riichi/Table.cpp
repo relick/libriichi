@@ -61,6 +61,17 @@ void Table::AddPlayer
 }
 
 //------------------------------------------------------------------------------
+void Table::Transition
+(
+	TableState&& i_nextState,
+	TableEvent&& i_nextEvent
+)
+{
+	m_state = std::move( i_nextState );
+	m_mostRecentEvent = std::move( i_nextEvent );
+}
+
+//------------------------------------------------------------------------------
 bool Table::Playing
 (
 )	const

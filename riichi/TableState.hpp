@@ -88,6 +88,7 @@ namespace TableStates
 struct Base
 {
 	Base( Table& i_table ) : m_table{ i_table } {}
+protected:
 	std::reference_wrapper<Table> m_table;
 };
 
@@ -122,25 +123,31 @@ struct GameOver
 struct Turn_AI
 	: Base
 {
-	using Base::Base;
+	Turn_AI( Table& i_table, Seat i_seat );
 
 	// TODO data
-	Seat Seat() const { return Seat::East; }
+	Seat GetSeat() const { return m_seat; }
 
 	void Discard() const;
+
+private:
+	Seat m_seat;
 };
 
 //------------------------------------------------------------------------------
 struct Turn_Player
 	: Base
 {
-	using Base::Base;
+	Turn_Player( Table& i_table, Seat i_seat );
 
 	// TODO data
-	Seat Seat() const { return Seat::East; }
+	Seat GetSeat() const { return m_seat; }
 
 	// TODO other options
 	void Discard( Tile const& i_tile ) const;
+
+private:
+	Seat m_seat;
 };
 
 //------------------------------------------------------------------------------

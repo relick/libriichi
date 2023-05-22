@@ -73,6 +73,24 @@ std::vector<Tile> const& RoundData::Discards
 }
 
 //------------------------------------------------------------------------------
+Hand const& RoundData::Hand
+(
+	Seat i_player
+)	const
+{
+	return m_players[ ( size_t )i_player ].m_hand;
+}
+
+//------------------------------------------------------------------------------
+std::optional<Tile> const& RoundData::DrawnTile
+(
+	Seat i_player
+)	const
+{
+	return m_players[ ( size_t )i_player ].m_draw;
+}
+
+//------------------------------------------------------------------------------
 size_t RoundData::WallTilesRemaining
 (
 )	const
@@ -195,7 +213,7 @@ void RoundData::BreakWall
 }
 
 //------------------------------------------------------------------------------
-void RoundData::DealHands
+Tile RoundData::DealHands
 (
 )
 {
@@ -208,11 +226,14 @@ void RoundData::DealHands
 		}
 	}
 
-	m_players.front().m_hand.AddFreeTiles( DrawTiles( 2 ) );
+	m_players.front().m_hand.AddFreeTiles( DrawTiles( 1 ) );
+	m_players.front().m_draw = DrawTile();
 	for ( size_t playerI = 1; playerI < m_players.size(); ++playerI )
 	{
 		m_players[ playerI ].m_hand.AddFreeTiles( DrawTiles( 1 ) );
 	}
+
+	return m_players.front().m_draw.value();
 }
 
 //------------------------------------------------------------------------------
@@ -231,6 +252,43 @@ std::vector<Tile> RoundData::DrawTiles
 		m_wall.pop_back();
 	}
 	return tiles;
+}
+
+//------------------------------------------------------------------------------
+Tile RoundData::DrawTile
+(
+)
+{
+	Ensure( WallTilesRemaining() >= 1, "Tried to draw more tiles than in wall" );
+
+	Tile drawn = std::move( m_wall.back() );
+	m_wall.pop_back();
+	return drawn;
+}
+
+//------------------------------------------------------------------------------
+Tile RoundData::DiscardDrawn
+(
+)
+{
+	RoundPlayerData& player = m_players[ ( size_t )m_currentTurn ];
+	Tile discarded = player.m_draw.value();
+	player.m_discards.emplace_back( discarded );
+	player.m_draw.reset();
+	return discarded;
+}
+
+//------------------------------------------------------------------------------
+Tile RoundData::PassCalls
+(
+)
+{
+	do
+	{
+		m_currentTurn = Next( m_currentTurn );
+	} while ( ( size_t )m_currentTurn >= m_players.size() );
+	m_players[ ( size_t )m_currentTurn ].m_draw = DrawTile();
+	return m_players[ ( size_t )m_currentTurn ].m_draw.value();
 }
 
 }

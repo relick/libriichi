@@ -35,10 +35,12 @@ int main()
 	} );
 
 
+	int loopCount = 0;
 	// TODO: Let's start with the manual loop + manual switch approach
 	// then see if we can tidy it up with something better later
 	do
 	{
+		std::cout << "--" << loopCount++ << "--" << std::endl;
 		// First, get current state, and process (providing any input necessary)
 		Riichi::TableState const& state = table.GetState();
 		switch ( state.Type() )
@@ -53,8 +55,15 @@ int main()
 		}
 		case BetweenRounds:
 		{
-			std::cout << "Starting next round" << std::endl;
+			std::cout << "Starting next round\n";
 			state.Get<BetweenRounds>().StartRound();
+
+			std::cout << "Initial Hands: \n";
+			for ( Riichi::Seat seat : Riichi::Seats{} )
+			{
+				std::cout << Riichi::ToString( seat ) << ": " << table.GetRoundData().Hand( seat );
+			}
+			std::cout << std::endl;
 			break;
 		}
 		case GameOver:
@@ -65,14 +74,14 @@ int main()
 		case Turn_AI:
 		{
 			Riichi::TableStates::Turn_AI const& turn = state.Get<Turn_AI>();
-			std::cout << "AI in seat " << ToString( turn.Seat() ) << " taking turn" << std::endl;
+			std::cout << "AI in seat " << ToString( turn.GetSeat() ) << " taking turn" << std::endl;
 			turn.Discard();
 			break;
 		}
 		case Turn_Player:
 		{
 			Riichi::TableStates::Turn_Player const& turn = state.Get<Turn_Player>();
-			std::cout << "Player in seat " << ToString( turn.Seat() ) << " taking turn" << std::endl;
+			std::cout << "Player in seat " << ToString( turn.GetSeat() ) << " taking turn" << std::endl;
 			turn.Discard( Riichi::DragonTileType::White );
 			break;
 		}
@@ -107,6 +116,28 @@ int main()
 			std::cerr << "Error: " << event.Get<Error>() << std::endl;
 			break;
 		}
+
+		case DealerDraw:
+		{
+			Riichi::TableEvents::Draw const& draw = event.Get<DealerDraw>();
+			std::cout << "Round started with dealer drawing tile " << draw.TileDrawn() << std::endl;
+			break;
+		}
+
+		case Draw:
+		{
+			Riichi::TableEvents::Draw const& draw = event.Get<Draw>();
+			std::cout << Riichi::ToString( table.GetRoundData().CurrentTurn() ) << " drew tile " << draw.TileDrawn() << std::endl;
+			break;
+		}
+
+		case Discard:
+		{
+			Riichi::TableEvents::Discard const& discard = event.Get<Discard>();
+			std::cout << Riichi::ToString( table.GetRoundData().CurrentTurn() ) << " discarded tile " << discard.TileDiscarded() << std::endl;
+			break;
+		}
+
 		default:
 		{
 			std::cout << "Event: " << ToString( event.Type() ) << std::endl;

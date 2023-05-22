@@ -19,7 +19,7 @@ void Setup::StartGame
 		return;
 	}
 
-	table.m_state = TableStates::BetweenRounds{ table };
+	table.Transition( TableStates::BetweenRounds{ table }, TableEvent::Tag<TableEventType::None>() );
 }
 
 //------------------------------------------------------------------------------
@@ -57,7 +57,7 @@ void BetweenRounds::StartRound
 	// They could also be exposed as their own states.
 	// In other words, they're fine here for now, but maybe this decision needs revisiting later
 	round.BreakWall( table.m_shuffleRNG );
-	round.DealHands();
+	Tile const& firstDrawnTile = round.DealHands();
 
 	Player const& turnPlayer = round.GetPlayer( round.CurrentTurn(), table );
 
@@ -65,26 +65,57 @@ void BetweenRounds::StartRound
 	{
 	case PlayerType::User:
 	{
-		table.m_state = TableStates::Turn_Player{ table };
+		table.Transition(
+			TableStates::Turn_Player{table, round.CurrentTurn()},
+			TableEvent{ TableEvent::Tag<TableEventType::DealerDraw>(), firstDrawnTile }
+		);
 		break;
 	}
 	case PlayerType::AI:
 	{
-		table.m_state = TableStates::Turn_AI{ table };
+		table.Transition(
+			TableStates::Turn_AI{table, round.CurrentTurn()},
+			TableEvent{ TableEvent::Tag<TableEventType::DealerDraw>(), firstDrawnTile }
+		);
 		break;
 	}
 	}
 }
 
 //------------------------------------------------------------------------------
+Turn_AI::Turn_AI
+(
+	Table& i_table,
+	Seat i_seat
+)
+	: Base{ i_table }
+	, m_seat{ i_seat }
+{}
+
+//------------------------------------------------------------------------------
 void Turn_AI::Discard
 (
 )	const
 {
-	// TODO
 	Table& table = m_table.get();
-	table.m_state = TableStates::GameOver{ table };
+
+	// TODO: Super good AI goes here
+	// For now, we just discard the drawn tile
+	RoundData& round = table.m_rounds.back();
+	Tile const discardedTile = round.DiscardDrawn();
+
+	table.Transition( TableStates::BetweenTurns{table}, TableEvents::Discard{discardedTile} );
 }
+
+//------------------------------------------------------------------------------
+Turn_Player::Turn_Player
+(
+	Table& i_table,
+	Seat i_seat
+)
+	: Base{ i_table }
+	, m_seat{ i_seat }
+{}
 
 //------------------------------------------------------------------------------
 void Turn_Player::Discard
@@ -94,7 +125,7 @@ void Turn_Player::Discard
 {
 	// TODO
 	Table& table = m_table.get();
-	table.m_state = TableStates::GameOver{ table };
+	table.Transition( TableStates::GameOver{table}, std::string( "nyi" ) );
 }
 
 //------------------------------------------------------------------------------
@@ -102,9 +133,39 @@ void BetweenTurns::Pass
 (
 )	const
 {
-	// TODO
 	Table& table = m_table.get();
-	table.m_state = TableStates::GameOver{ table };
+
+	RoundData& round = table.m_rounds.back();
+
+	if ( round.WallTilesRemaining() == 0u )
+	{
+		table.Transition( TableStates::GameOver{table}, TableEvents::WallDepleted{} );
+		return;
+	}
+
+	Tile const& drawnTile = round.PassCalls();
+
+	Player const& turnPlayer = round.GetPlayer( round.CurrentTurn(), table );
+
+	switch ( turnPlayer.Type() )
+	{
+	case PlayerType::User:
+	{
+		table.Transition(
+			TableStates::Turn_Player{table, round.CurrentTurn()},
+			TableEvent{ TableEvent::Tag<TableEventType::Draw>(), drawnTile }
+		);
+		break;
+	}
+	case PlayerType::AI:
+	{
+		table.Transition(
+			TableStates::Turn_AI{table, round.CurrentTurn()},
+			TableEvent{ TableEvent::Tag<TableEventType::Draw>(), drawnTile }
+		);
+		break;
+	}
+	}
 }
 
 //------------------------------------------------------------------------------
@@ -114,7 +175,7 @@ void RobAKanChance::Pass
 {
 	// TODO
 	Table& table = m_table.get();
-	table.m_state = TableStates::GameOver{ table };
+	table.Transition( TableStates::GameOver{table}, std::string( "nyi" ) );
 }
 
 }

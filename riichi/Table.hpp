@@ -69,6 +69,9 @@ public:
 	RoundData const& GetRoundData( size_t i_roundIndex = SIZE_MAX ) { return i_roundIndex >= m_rounds.size() ? m_rounds.back() : m_rounds[ i_roundIndex ]; }
 	TableEvent const& GetEvent() const { return m_mostRecentEvent; }
 	Player const& GetPlayer( size_t i_playerIndex ) const { return m_players[ i_playerIndex ]; }
+
+private:
+	void Transition( TableState&& i_nextState, TableEvent&& i_nextEvent );
 };
 
 }

@@ -1,8 +1,9 @@
-#pragma once
+﻿#pragma once
 
 #include "Utils.hpp"
 
 #include <array>
+#include <iostream>
 
 namespace Riichi
 {
@@ -69,6 +70,53 @@ using Tile = Utils::NamedVariant<
 	DragonTileType,
 	WindTileType
 >;
+
+//------------------------------------------------------------------------------
+inline std::ostream& operator<<( std::ostream& io_out, Tile const& i_tile )
+{
+	switch ( i_tile.Type() )
+	{
+	using enum TileType;
+	case Suit:
+	{
+		SuitTile const& tile = i_tile.Get<Suit>();
+		switch ( tile.m_suit )
+		{
+		using enum Suit;
+		case Manzu: io_out << static_cast<int>( tile.m_value.m_val ) << "m"; return io_out;
+		case Pinzu: io_out << static_cast<int>( tile.m_value.m_val ) << "p"; return io_out;
+		case Souzu: io_out << static_cast<int>( tile.m_value.m_val ) << "s"; return io_out;
+		}
+		break;
+	}
+	case Dragon:
+	{
+		DragonTileType const& tile = i_tile.Get<Dragon>();
+		switch ( tile )
+		{
+		using enum DragonTileType;
+		case White: io_out << "白"; return io_out;
+		case Green: io_out << "発"; return io_out;
+		case Red: io_out << "中"; return io_out;
+		}
+		break;
+	}
+	case Wind:
+	{
+		WindTileType const& tile = i_tile.Get<Wind>();
+		switch ( tile )
+		{
+		using enum WindTileType;
+		case East: io_out << "東"; return io_out;
+		case South: io_out << "南"; return io_out;
+		case West: io_out << "西"; return io_out;
+		case North: io_out << "北"; return io_out;
+		}
+		break;
+	}
+	}
+	return io_out;
+}
 
 //------------------------------------------------------------------------------
 enum class TileDrawType : EnumValueType
