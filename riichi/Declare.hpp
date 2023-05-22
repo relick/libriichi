@@ -62,6 +62,17 @@ class Table;
 // TableEvent
 //------------------------------------------------------------------------------
 enum class TableEventType : EnumValueType;
+namespace TableEvents
+{
+class Draw;
+enum class CallType : EnumValueType;
+class Call;
+class Discard;
+class HandKan;
+class Tsumo;
+class Ron;
+class WallDepleted;
+}
 
 //------------------------------------------------------------------------------
 // TableState

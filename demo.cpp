@@ -127,14 +127,14 @@ int main()
 		case Draw:
 		{
 			Riichi::TableEvents::Draw const& draw = event.Get<Draw>();
-			std::cout << Riichi::ToString( table.GetRoundData().CurrentTurn() ) << " drew tile " << draw.TileDrawn() << std::endl;
+			std::cout << Riichi::ToString( draw.Player() ) << " drew tile " << draw.TileDrawn() << std::endl;
 			break;
 		}
 
 		case Discard:
 		{
 			Riichi::TableEvents::Discard const& discard = event.Get<Discard>();
-			std::cout << Riichi::ToString( table.GetRoundData().CurrentTurn() ) << " discarded tile " << discard.TileDiscarded() << std::endl;
+			std::cout << Riichi::ToString( discard.Player() ) << " discarded tile " << discard.TileDiscarded() << std::endl;
 			break;
 		}
 

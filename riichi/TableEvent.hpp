@@ -3,6 +3,9 @@
 #include "Base.hpp"
 #include "Utils.hpp"
 
+#include <vector>
+#include <utility>
+
 namespace Riichi
 {
 
@@ -19,7 +22,7 @@ enum class TableEventType : EnumValueType
 	// Turn possibilities
 	Discard,
 	Riichi, // also a discard
-	Kan,
+	HandKan,
 
 	// Round end possibilities
 	Tsumo,
@@ -41,7 +44,7 @@ inline constexpr char const* ToString( TableEventType i_type )
 		"Call",
 		"Discard",
 		"Riichi",
-		"Kan",
+		"HandKan",
 		"Tsumo",
 		"Ron",
 		"WallDepleted",
@@ -59,24 +62,101 @@ namespace TableEvents
 class Draw
 {
 	Tile m_tileDrawn;
+	Seat m_player;
 public:
-	explicit Draw( Tile const& i_tileDrawn )
+	explicit Draw( Tile const& i_tileDrawn, Seat i_player )
 		: m_tileDrawn{ i_tileDrawn }
+		, m_player{ i_player }
 	{}
 
 	Tile const& TileDrawn() const { return m_tileDrawn; }
+	Seat Player() const { return m_player; }
+};
+
+//------------------------------------------------------------------------------
+enum class CallType : EnumValueType
+{
+	Pon,
+	Chi,
+	Kan,
+};
+
+//------------------------------------------------------------------------------
+class Call
+{
+	CallType m_callType;
+	Tile m_calledTile;
+	Seat m_takenFrom;
+public:
+	explicit Call( CallType i_callType, Tile const& i_calledTile, Seat i_takenFrom )
+		: m_callType{ i_callType }
+		, m_calledTile{ i_calledTile }
+		, m_takenFrom{ i_takenFrom }
+	{}
+
+	CallType GetCallType() const { return m_callType; }
+	Tile const& CalledTile() const { return m_calledTile; }
+	Seat TakenFrom() const { return m_takenFrom; }
 };
 
 //------------------------------------------------------------------------------
 class Discard
 {
 	Tile m_tileDiscarded;
+	Seat m_player;
 public:
-	explicit Discard( Tile const& i_tileDiscarded )
+	explicit Discard( Tile const& i_tileDiscarded, Seat i_player )
 		: m_tileDiscarded{ i_tileDiscarded }
+		, m_player{ i_player }
 	{}
 
 	Tile const& TileDiscarded() const { return m_tileDiscarded; }
+	Seat Player() const { return m_player; }
+};
+
+//------------------------------------------------------------------------------
+class HandKan
+{
+	Tile m_kanTile;
+	bool m_closed;
+public:
+	explicit HandKan( Tile const& i_kanTile, bool i_closed )
+		: m_kanTile{ i_kanTile }
+		, m_closed{ i_closed }
+	{}
+
+	Tile const& KanTile() const { return m_kanTile; }
+	bool Closed() const { return m_closed; }
+};
+
+//------------------------------------------------------------------------------
+class Tsumo
+{
+	Tile m_winningTile;
+	Seat m_winner;
+public:
+	explicit Tsumo( Tile const& i_winningTile, Seat i_winner )
+		: m_winningTile{ i_winningTile }
+		, m_winner{ i_winner }
+	{}
+
+	Tile const& WinningTile() const { return m_winningTile; }
+	Seat Winner() const { return m_winner; }
+};
+
+//------------------------------------------------------------------------------
+class Ron
+{
+	Tile m_winningTile;
+	std::vector<Seat> m_winners;
+public:
+	explicit Ron( Tile const& i_winningTile, std::vector<Seat> i_winners )
+		: m_winningTile{ i_winningTile }
+		, m_winners{ std::move( i_winners ) }
+	{}
+
+	Tile const& WinningTile() const { return m_winningTile; }
+	std::vector<Seat> const& Winners() const { return m_winners; }
 };
 
 //------------------------------------------------------------------------------
@@ -93,19 +173,19 @@ public:
 using TableEvent = Utils::NamedVariant<
 	TableEventType,
 
-	Utils::NullType,
+	Utils::NullType, // None
 
-	TableEvents::Draw, // DealerDraw is just a different type but identical data to a Draw
-	TableEvents::Draw,
-	Utils::NullType,
-	TableEvents::Discard,
-	Utils::NullType,
-	Utils::NullType,
-	Utils::NullType,
-	Utils::NullType,
-	TableEvents::WallDepleted,
+	TableEvents::Draw, // DealerDraw
+	TableEvents::Draw, // Draw
+	TableEvents::Call, // Call
+	TableEvents::Discard, // Discard
+	TableEvents::Discard, // Riichi
+	TableEvents::HandKan, // HandKan
+	TableEvents::Tsumo, // Tsumo
+	TableEvents::Ron, // Ron
+	TableEvents::WallDepleted, // WallDepleted
 
-	std::string
+	std::string // Error
 >;
 
 }

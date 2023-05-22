@@ -67,7 +67,7 @@ void BetweenRounds::StartRound
 	{
 		table.Transition(
 			TableStates::Turn_Player{table, round.CurrentTurn()},
-			TableEvent{ TableEvent::Tag<TableEventType::DealerDraw>(), firstDrawnTile }
+			TableEvent{ TableEvent::Tag<TableEventType::DealerDraw>(), firstDrawnTile, round.CurrentTurn() }
 		);
 		break;
 	}
@@ -75,7 +75,7 @@ void BetweenRounds::StartRound
 	{
 		table.Transition(
 			TableStates::Turn_AI{table, round.CurrentTurn()},
-			TableEvent{ TableEvent::Tag<TableEventType::DealerDraw>(), firstDrawnTile }
+			TableEvent{ TableEvent::Tag<TableEventType::DealerDraw>(), firstDrawnTile, round.CurrentTurn() }
 		);
 		break;
 	}
@@ -104,7 +104,10 @@ void Turn_AI::Discard
 	RoundData& round = table.m_rounds.back();
 	Tile const discardedTile = round.DiscardDrawn();
 
-	table.Transition( TableStates::BetweenTurns{table}, TableEvents::Discard{discardedTile} );
+	table.Transition(
+		TableStates::BetweenTurns{table},
+		TableEvent{ TableEvent::Tag<TableEventType::Discard>(), discardedTile, round.CurrentTurn() }
+	);
 }
 
 //------------------------------------------------------------------------------
@@ -153,7 +156,7 @@ void BetweenTurns::Pass
 	{
 		table.Transition(
 			TableStates::Turn_Player{table, round.CurrentTurn()},
-			TableEvent{ TableEvent::Tag<TableEventType::Draw>(), drawnTile }
+			TableEvent{ TableEvent::Tag<TableEventType::Draw>(), drawnTile, round.CurrentTurn() }
 		);
 		break;
 	}
@@ -161,7 +164,7 @@ void BetweenTurns::Pass
 	{
 		table.Transition(
 			TableStates::Turn_AI{table, round.CurrentTurn()},
-			TableEvent{ TableEvent::Tag<TableEventType::Draw>(), drawnTile }
+			TableEvent{ TableEvent::Tag<TableEventType::Draw>(), drawnTile, round.CurrentTurn() }
 		);
 		break;
 	}
