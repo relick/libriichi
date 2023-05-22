@@ -72,6 +72,7 @@ public:
 	Tile const& TileDrawn() const { return m_tileDrawn; }
 	Seat Player() const { return m_player; }
 };
+using DealerDraw = Draw;
 
 //------------------------------------------------------------------------------
 enum class CallType : EnumValueType
@@ -113,6 +114,7 @@ public:
 	Tile const& TileDiscarded() const { return m_tileDiscarded; }
 	Seat Player() const { return m_player; }
 };
+using Riichi = Discard;
 
 //------------------------------------------------------------------------------
 class HandKan
@@ -175,15 +177,15 @@ using TableEvent = Utils::NamedVariant<
 
 	Utils::NullType, // None
 
-	TableEvents::Draw, // DealerDraw
-	TableEvents::Draw, // Draw
-	TableEvents::Call, // Call
-	TableEvents::Discard, // Discard
-	TableEvents::Discard, // Riichi
-	TableEvents::HandKan, // HandKan
-	TableEvents::Tsumo, // Tsumo
-	TableEvents::Ron, // Ron
-	TableEvents::WallDepleted, // WallDepleted
+	TableEvents::DealerDraw,
+	TableEvents::Draw,
+	TableEvents::Call,
+	TableEvents::Discard,
+	TableEvents::Riichi,
+	TableEvents::HandKan,
+	TableEvents::Tsumo,
+	TableEvents::Ron,
+	TableEvents::WallDepleted,
 
 	std::string // Error
 >;
