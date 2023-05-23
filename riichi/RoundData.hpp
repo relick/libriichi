@@ -46,7 +46,7 @@ public:
 	bool CalledDoubleRiichi( Seat i_player ) const;
 	bool RiichiIppatsuValid( Seat i_player ) const;
 	Vector<Tile> const& Discards( Seat i_player ) const;
-	Hand const& Hand( Seat i_player ) const;
+	Hand const& GetHand( Seat i_player ) const;
 	Option<Tile> const& DrawnTile( Seat i_player ) const;
 	size_t WallTilesRemaining() const;
 	bool CallsMade() const;

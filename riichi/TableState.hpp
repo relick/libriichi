@@ -59,7 +59,7 @@ enum class TableStateType : EnumValueType
 
 	// Round active
 	Turn_AI,
-	Turn_Player,
+	Turn_User,
 	BetweenTurns,
 	RonAKanChance, // It's kinda amusing to me that this is a special state, but it makes sense
 };
@@ -73,7 +73,7 @@ inline constexpr char const* ToString( TableStateType i_type )
 		"BetweenRounds",
 		"GameOver",
 		"Turn_AI",
-		"Turn_Player",
+		"Turn_User",
 		"BetweenTurns",
 		"RonAKanChance",
 	};
@@ -116,62 +116,93 @@ struct GameOver
 {
 	using Base::Base;
 
-	// No options
+	// Nothing. Game over.
+};
+
+//------------------------------------------------------------------------------
+struct BaseTurn
+	: Base
+{
+	BaseTurn( Table& i_table, Seat i_seat );
+
+	Hand const& GetHand() const;
+	Seat GetSeat() const { return m_seat; }
+
+private:
+	Seat m_seat;
 };
 
 //------------------------------------------------------------------------------
 struct Turn_AI
-	: Base
+	: BaseTurn
 {
 	Turn_AI( Table& i_table, Seat i_seat );
 
-	Seat GetSeat() const { return m_seat; }
-
 	void MakeDecision() const;
-
-private:
-	Seat m_seat;
 };
 
 //------------------------------------------------------------------------------
-struct Turn_Player
-	: Base
+struct Turn_User
+	: BaseTurn
 {
-	Turn_Player( Table& i_table, Seat i_seat );
+	Turn_User( Table& i_table, Seat i_seat, bool i_canTsumo, bool i_canRiichi, bool i_canKan );
 
-	// TODO data
-	Seat GetSeat() const { return m_seat; }
+	bool CanTsumo() const { return m_canTsumo; }
+	bool CanRiichi() const { return m_canTsumo; }
+	bool CanKan() const { return m_canKan; }
 
-	// TODO other options
+	void Tsumo() const;
 	void Discard( Tile const& i_tile ) const;
+	void Riichi( Tile const& i_tile ) const;
+	void Kan( Tile const& i_tile ) const; // Will meld the 4 matching tiles if a closed kan
 
 private:
-	Seat m_seat;
+	bool m_canTsumo;
+	bool m_canRiichi;
+	bool m_canKan;
 };
 
 //------------------------------------------------------------------------------
 struct BetweenTurns
 	: Base
 {
-	using Base::Base;
+	BetweenTurns( Table& i_table, Option<Seat> i_canChi, SeatSet i_canPon, SeatSet i_canKan, SeatSet i_canRon );
 
-	// TODO other options
-	void Pass() const;
+	// TODO indication about AI intent (to allow AI to jump in before user, depending on game implementation)
+
+	Option<Seat> CanChi() const { return m_canChi; }
+	SeatSet const& CanPon() const { return m_canPon; }
+	SeatSet const& CanKan() const { return m_canKan; }
+	SeatSet const& CanRon() const { return m_canRon; }
+
+	// If any calls are made by AI, they will only happen in UserPass or UserRon
+	// TODO: disambiguate calls if they can form multiple melds
+	void UserPass() const;
+	void UserChi( Seat i_user ) const;
+	void UserPon( Seat i_user ) const;
+	void UserKan( Seat i_user ) const;
+	void UserRon( SeatSet const& i_users ) const;
+
+private:
+	Option<Seat> m_canChi;
+	SeatSet m_canPon;
+	SeatSet m_canKan;
+	SeatSet m_canRon;
 };
 
 //------------------------------------------------------------------------------
 struct RonAKanChance
 	: Base
 {
-	RonAKanChance( Table& i_table, SeatSet i_playersAbleToRon );
+	RonAKanChance( Table& i_table, SeatSet i_canRon );
 
-	SeatSet const& PlayersAbleToRon() const { return m_playersAbleToRon; }
+	SeatSet const& CanRon() const { return m_canRon; }
 	
 	void Pass() const;
 	void Ron( SeatSet const& i_players ) const;
 
 private:
-	SeatSet m_playersAbleToRon;
+	SeatSet m_canRon;
 };
 
 }
@@ -184,7 +215,7 @@ using TableState = NamedUnion<
 	TableStates::BetweenRounds,
 	TableStates::GameOver,
 	TableStates::Turn_AI,
-	TableStates::Turn_Player,
+	TableStates::Turn_User,
 	TableStates::BetweenTurns,
 	TableStates::RonAKanChance
 >;

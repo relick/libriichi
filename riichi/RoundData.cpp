@@ -73,7 +73,7 @@ Vector<Tile> const& RoundData::Discards
 }
 
 //------------------------------------------------------------------------------
-Hand const& RoundData::Hand
+Hand const& RoundData::GetHand
 (
 	Seat i_player
 )	const

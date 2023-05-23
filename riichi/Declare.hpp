@@ -85,7 +85,7 @@ struct Setup;
 struct BetweenRounds;
 struct GameOver;
 struct Turn_AI;
-struct Turn_Player;
+struct Turn_User;
 struct BetweenTurns;
 struct RonAKanChance;
 }

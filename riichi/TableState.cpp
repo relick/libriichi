@@ -1,6 +1,11 @@
 #include "TableState.hpp"
 #include "TableState.hpp"
 #include "TableState.hpp"
+#include "TableState.hpp"
+#include "TableState.hpp"
+#include "TableState.hpp"
+#include "TableState.hpp"
+#include "TableState.hpp"
 
 #include "Rules.hpp"
 #include "Table.hpp"
@@ -67,8 +72,9 @@ void BetweenRounds::StartRound
 	{
 	case PlayerType::User:
 	{
+		// TODO: calculate tsumo/riichi/kan
 		table.Transition(
-			TableStates::Turn_Player{table, round.CurrentTurn()},
+			TableStates::Turn_User{table, round.CurrentTurn(), false, false, false},
 			TableEvent{ TableEvent::Tag<TableEventType::DealerDraw>(), firstDrawnTile, round.CurrentTurn() }
 		);
 		break;
@@ -85,13 +91,31 @@ void BetweenRounds::StartRound
 }
 
 //------------------------------------------------------------------------------
-Turn_AI::Turn_AI
+BaseTurn::BaseTurn
 (
 	Table& i_table,
 	Seat i_seat
 )
 	: Base{ i_table }
 	, m_seat{ i_seat }
+{}
+
+//------------------------------------------------------------------------------
+Hand const& BaseTurn::GetHand
+(
+)	const
+{
+	Table& table = m_table.get();
+	return table.GetRoundData().GetHand( m_seat );
+}
+
+//------------------------------------------------------------------------------
+Turn_AI::Turn_AI
+(
+	Table& i_table,
+	Seat i_seat
+)
+	: BaseTurn{ i_table, i_seat }
 {}
 
 //------------------------------------------------------------------------------
@@ -106,24 +130,40 @@ void Turn_AI::MakeDecision
 	RoundData& round = table.m_rounds.back();
 	Tile const discardedTile = round.DiscardDrawn();
 
+	// TODO: calculate calls
 	table.Transition(
-		TableStates::BetweenTurns{table},
+		TableStates::BetweenTurns{table, std::nullopt, SeatSet{}, SeatSet{}, SeatSet{}},
 		TableEvent{ TableEvent::Tag<TableEventType::Discard>(), discardedTile, round.CurrentTurn() }
 	);
 }
 
 //------------------------------------------------------------------------------
-Turn_Player::Turn_Player
+Turn_User::Turn_User
 (
 	Table& i_table,
-	Seat i_seat
+	Seat i_seat,
+	bool i_canTsumo,
+	bool i_canRiichi,
+	bool i_canKan
 )
-	: Base{ i_table }
-	, m_seat{ i_seat }
+	: BaseTurn{ i_table, i_seat }
+	, m_canTsumo{ i_canTsumo }
+	, m_canRiichi{ i_canRiichi }
+	, m_canKan{ i_canKan }
 {}
 
 //------------------------------------------------------------------------------
-void Turn_Player::Discard
+void Turn_User::Tsumo
+(
+)	const
+{
+	// TODO
+	Table& table = m_table.get();
+	table.Transition( TableStates::GameOver{table}, std::string( "nyi" ) );
+}
+
+//------------------------------------------------------------------------------
+void Turn_User::Discard
 (
 	Tile const& i_tile
 )	const
@@ -134,13 +174,53 @@ void Turn_Player::Discard
 }
 
 //------------------------------------------------------------------------------
-void BetweenTurns::Pass
+void Turn_User::Riichi
+(
+	Tile const& i_tile
+)	const
+{
+	// TODO
+	Table& table = m_table.get();
+	table.Transition( TableStates::GameOver{table}, std::string( "nyi" ) );
+}
+
+//------------------------------------------------------------------------------
+void Turn_User::Kan
+(
+	Tile const& i_tile
+)	const
+{
+	// TODO
+	Table& table = m_table.get();
+	table.Transition( TableStates::GameOver{table}, std::string( "nyi" ) );
+}
+
+//------------------------------------------------------------------------------
+BetweenTurns::BetweenTurns
+(
+	Table& i_table,
+	Option<Seat> i_canChi,
+	SeatSet i_canPon,
+	SeatSet i_canKan,
+	SeatSet i_canRon
+)
+	: Base{ i_table }
+	, m_canChi{ std::move( i_canChi ) }
+	, m_canPon{ std::move( i_canPon ) }
+	, m_canKan{ std::move( i_canKan ) }
+	, m_canRon{ std::move( i_canRon ) }
+{}
+
+//------------------------------------------------------------------------------
+void BetweenTurns::UserPass
 (
 )	const
 {
 	Table& table = m_table.get();
 
 	RoundData& round = table.m_rounds.back();
+
+	// TODO: Process AI call/wins
 
 	if ( round.WallTilesRemaining() == 0u )
 	{
@@ -156,8 +236,9 @@ void BetweenTurns::Pass
 	{
 	case PlayerType::User:
 	{
+		// TODO: calculate tsumo/riichi/kan
 		table.Transition(
-			TableStates::Turn_Player{table, round.CurrentTurn()},
+			TableStates::Turn_User{table, round.CurrentTurn(), false, false, false},
 			TableEvent{ TableEvent::Tag<TableEventType::Draw>(), drawnTile, round.CurrentTurn() }
 		);
 		break;
@@ -174,13 +255,57 @@ void BetweenTurns::Pass
 }
 
 //------------------------------------------------------------------------------
+void BetweenTurns::UserChi
+(
+	Seat i_user
+)	const
+{
+	// TODO
+	Table& table = m_table.get();
+	table.Transition( TableStates::GameOver{table}, std::string( "nyi" ) );
+}
+
+//------------------------------------------------------------------------------
+void BetweenTurns::UserPon
+(
+	Seat i_user
+)	const
+{
+	// TODO
+	Table& table = m_table.get();
+	table.Transition( TableStates::GameOver{table}, std::string( "nyi" ) );
+}
+
+//------------------------------------------------------------------------------
+void BetweenTurns::UserKan
+(
+	Seat i_user
+)	const
+{
+	// TODO
+	Table& table = m_table.get();
+	table.Transition( TableStates::GameOver{table}, std::string( "nyi" ) );
+}
+
+//------------------------------------------------------------------------------
+void BetweenTurns::UserRon
+(
+	SeatSet const& i_users
+)	const
+{
+	// TODO
+	Table& table = m_table.get();
+	table.Transition( TableStates::GameOver{table}, std::string( "nyi" ) );
+}
+
+//------------------------------------------------------------------------------
 RonAKanChance::RonAKanChance
 (
 	Table& i_table,
-	SeatSet i_playersAbleToRon
+	SeatSet i_canRon
 )
 	: Base{ i_table }
-	, m_playersAbleToRon{ i_playersAbleToRon }
+	, m_canRon{ std::move( i_canRon ) }
 {}
 
 //------------------------------------------------------------------------------
@@ -199,7 +324,7 @@ void RonAKanChance::Ron
 	SeatSet const& i_players
 )	const
 {
-	Ensure( m_playersAbleToRon.ContainsAllOf( i_players ), "Players tried to ron a kan when not allowed." );
+	Ensure( m_canRon.ContainsAllOf( i_players ), "Players tried to ron a kan when not allowed." );
 
 	// TODO
 	Table& table = m_table.get();

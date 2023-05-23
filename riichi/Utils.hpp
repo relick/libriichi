@@ -158,7 +158,8 @@ public:
 	static Iter begin() { return Iter{ this, 0 }; }
 	static Iter end() { return Iter{ this, t_EnumCount }; }
 
-	EnumSet( std::initializer_list<T_Enum> i_vals )
+	explicit EnumSet() = default;
+	explicit EnumSet( std::initializer_list<T_Enum> i_vals )
 	{
 		for ( T_Enum val : i_vals )
 		{

@@ -61,7 +61,7 @@ int main()
 			std::cout << "Initial Hands: \n";
 			for ( Riichi::Seat seat : Riichi::Seats{} )
 			{
-				std::cout << Riichi::ToString( seat ) << ": " << table.GetRoundData().Hand( seat );
+				std::cout << Riichi::ToString( seat ) << ": " << table.GetRoundData().GetHand( seat );
 			}
 			std::cout << std::endl;
 			break;
@@ -78,9 +78,9 @@ int main()
 			turn.MakeDecision();
 			break;
 		}
-		case Turn_Player:
+		case Turn_User:
 		{
-			Riichi::TableStates::Turn_Player const& turn = state.Get<Turn_Player>();
+			Riichi::TableStates::Turn_User const& turn = state.Get<Turn_User>();
 			std::cout << "Player in seat " << ToString( turn.GetSeat() ) << " taking turn" << std::endl;
 			turn.Discard( Riichi::DragonTileType::White );
 			break;
@@ -88,7 +88,7 @@ int main()
 		case BetweenTurns:
 		{
 			std::cout << "Passing to next turn" << std::endl;
-			state.Get<BetweenTurns>().Pass();
+			state.Get<BetweenTurns>().UserPass();
 			break;
 		}
 		case RonAKanChance:

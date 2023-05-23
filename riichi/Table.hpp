@@ -34,7 +34,7 @@ class Table
 	friend TableStates::BetweenRounds;
 	friend TableStates::GameOver;
 	friend TableStates::Turn_AI;
-	friend TableStates::Turn_Player;
+	friend TableStates::Turn_User;
 	friend TableStates::BetweenTurns;
 	friend TableStates::RonAKanChance;
 
@@ -55,6 +55,13 @@ public:
 		unsigned int i_shuffleSeed, // rng seed for tile shuffling
 		unsigned int i_aiSeed // rng seed for AI behaviour
 	);
+
+	// TODO: disallow copies + moves because tablestates hold a direct reference to the table
+	// It would be really nice to fix this
+	Table( Table const& ) = delete;
+	Table( Table&& ) = delete;
+	Table& operator=( Table const& ) = delete;
+	Table& operator=( Table&& ) = delete;
 
 	// Setup
 	void AddPlayer( Player&& i_player );
