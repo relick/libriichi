@@ -15,7 +15,7 @@ void Hand::AddFreeTiles
 )
 {
 	m_freeTiles.insert_range( m_freeTiles.end(), i_newTiles );
-	std::ranges::sort( m_freeTiles ); // TODO: players may not always want their hand sorted
+	std::ranges::sort( m_freeTiles ); // TODO-QOL: players may not always want their hand sorted
 }
 
 //------------------------------------------------------------------------------

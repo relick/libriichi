@@ -60,7 +60,7 @@ void BetweenRounds::StartRound
 
 	RoundData& round = table.m_rounds.back();
 
-	// TODO: we call these here, they could technically be part of RoundData construction
+	// TODO-DEBT: we call these here, they could technically be part of RoundData construction
 	// They could also be exposed as their own states.
 	// In other words, they're fine here for now, but maybe this decision needs revisiting later
 	round.BreakWall( table.m_shuffleRNG );
@@ -72,7 +72,7 @@ void BetweenRounds::StartRound
 	{
 	case PlayerType::User:
 	{
-		// TODO: calculate tsumo/riichi/kan
+		// TODO-MVP: calculate tsumo/riichi/kan
 		table.Transition(
 			TableStates::Turn_User{table, round.CurrentTurn(), false, false, false},
 			TableEvent{ TableEvent::Tag<TableEventType::DealerDraw>(), firstDrawnTile, round.CurrentTurn() }
@@ -125,12 +125,12 @@ void Turn_AI::MakeDecision
 {
 	Table& table = m_table.get();
 
-	// TODO: Super good AI goes here
+	// TODO-AI: Super good AI goes here
 	// For now, we just discard the drawn tile
 	RoundData& round = table.m_rounds.back();
 	Tile const discardedTile = round.DiscardDrawn();
 
-	// TODO: calculate calls
+	// TODO-MVP: calculate calls
 	table.Transition(
 		TableStates::BetweenTurns{table, std::nullopt, SeatSet{}, SeatSet{}, SeatSet{}},
 		TableEvent{ TableEvent::Tag<TableEventType::Discard>(), discardedTile, round.CurrentTurn() }
@@ -157,7 +157,7 @@ void Turn_User::Tsumo
 (
 )	const
 {
-	// TODO
+	// TODO-MVP
 	Table& table = m_table.get();
 	table.Transition( TableStates::GameOver{table}, std::string( "nyi" ) );
 }
@@ -168,7 +168,7 @@ void Turn_User::Discard
 	Tile const& i_tile
 )	const
 {
-	// TODO
+	// TODO-MVP
 	Table& table = m_table.get();
 	table.Transition( TableStates::GameOver{table}, std::string( "nyi" ) );
 }
@@ -179,7 +179,7 @@ void Turn_User::Riichi
 	Tile const& i_tile
 )	const
 {
-	// TODO
+	// TODO-MVP
 	Table& table = m_table.get();
 	table.Transition( TableStates::GameOver{table}, std::string( "nyi" ) );
 }
@@ -190,7 +190,7 @@ void Turn_User::Kan
 	Tile const& i_tile
 )	const
 {
-	// TODO
+	// TODO-MVP
 	Table& table = m_table.get();
 	table.Transition( TableStates::GameOver{table}, std::string( "nyi" ) );
 }
@@ -220,7 +220,7 @@ void BetweenTurns::UserPass
 
 	RoundData& round = table.m_rounds.back();
 
-	// TODO: Process AI call/wins
+	// TODO-AI: Process AI call/wins
 
 	if ( round.WallTilesRemaining() == 0u )
 	{
@@ -236,7 +236,7 @@ void BetweenTurns::UserPass
 	{
 	case PlayerType::User:
 	{
-		// TODO: calculate tsumo/riichi/kan
+		// TODO-MVP: calculate tsumo/riichi/kan
 		table.Transition(
 			TableStates::Turn_User{table, round.CurrentTurn(), false, false, false},
 			TableEvent{ TableEvent::Tag<TableEventType::Draw>(), drawnTile, round.CurrentTurn() }
@@ -260,7 +260,7 @@ void BetweenTurns::UserChi
 	Seat i_user
 )	const
 {
-	// TODO
+	// TODO-MVP
 	Table& table = m_table.get();
 	table.Transition( TableStates::GameOver{table}, std::string( "nyi" ) );
 }
@@ -271,7 +271,7 @@ void BetweenTurns::UserPon
 	Seat i_user
 )	const
 {
-	// TODO
+	// TODO-MVP
 	Table& table = m_table.get();
 	table.Transition( TableStates::GameOver{table}, std::string( "nyi" ) );
 }
@@ -282,7 +282,7 @@ void BetweenTurns::UserKan
 	Seat i_user
 )	const
 {
-	// TODO
+	// TODO-MVP
 	Table& table = m_table.get();
 	table.Transition( TableStates::GameOver{table}, std::string( "nyi" ) );
 }
@@ -293,7 +293,7 @@ void BetweenTurns::UserRon
 	SeatSet const& i_users
 )	const
 {
-	// TODO
+	// TODO-MVP
 	Table& table = m_table.get();
 	table.Transition( TableStates::GameOver{table}, std::string( "nyi" ) );
 }
@@ -313,7 +313,7 @@ void RonAKanChance::Pass
 (
 )	const
 {
-	// TODO
+	// TODO-MVP
 	Table& table = m_table.get();
 	table.Transition( TableStates::GameOver{table}, std::string( "nyi" ) );
 }
@@ -326,7 +326,7 @@ void RonAKanChance::Ron
 {
 	Ensure( m_canRon.ContainsAllOf( i_players ), "Players tried to ron a kan when not allowed." );
 
-	// TODO
+	// TODO-MVP
 	Table& table = m_table.get();
 	table.Transition( TableStates::GameOver{table}, std::string( "nyi" ) );
 }

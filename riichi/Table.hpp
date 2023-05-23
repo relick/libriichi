@@ -16,7 +16,7 @@ namespace Riichi
 //------------------------------------------------------------------------------
 struct Standings
 {
-	// TODO: how do we relate these points with the players? Should we handle this differently?
+	// TODO-MVP: how do we relate these points with the players? Should we handle this differently?
 	Vector<Points> m_points;
 
 	explicit Standings( Rules const& i_rules );
@@ -56,7 +56,7 @@ public:
 		unsigned int i_aiSeed // rng seed for AI behaviour
 	);
 
-	// TODO: disallow copies + moves because tablestates hold a direct reference to the table
+	// TODO-DEBT: disallow copies + moves because tablestates hold a direct reference to the table
 	// It would be really nice to fix this
 	Table( Table const& ) = delete;
 	Table( Table&& ) = delete;

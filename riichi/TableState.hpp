@@ -12,7 +12,7 @@ namespace Riichi
 /*
 
 Rough notes on game flow:
-// TODO remove this
+// TODO-MVP remove this
 
 - Start
 + Draw (dealer)
@@ -168,7 +168,7 @@ struct BetweenTurns
 {
 	BetweenTurns( Table& i_table, Option<Seat> i_canChi, SeatSet i_canPon, SeatSet i_canKan, SeatSet i_canRon );
 
-	// TODO indication about AI intent (to allow AI to jump in before user, depending on game implementation)
+	// TODO-AI indication about AI intent (to allow AI to jump in before user, depending on game implementation)
 
 	Option<Seat> CanChi() const { return m_canChi; }
 	SeatSet const& CanPon() const { return m_canPon; }
@@ -176,7 +176,7 @@ struct BetweenTurns
 	SeatSet const& CanRon() const { return m_canRon; }
 
 	// If any calls are made by AI, they will only happen in UserPass or UserRon
-	// TODO: disambiguate calls if they can form multiple melds
+	// TODO-MVP: disambiguate calls if they can form multiple melds
 	void UserPass() const;
 	void UserChi( Seat i_user ) const;
 	void UserPon( Seat i_user ) const;

@@ -8,7 +8,7 @@ StandardYonma::StandardYonma
 )
 {
 	// Yonma uses all tiles
-	// TODO: red dora
+	// TODO-AI: red dora
 	for ( int tileTypeCount = 0; tileTypeCount < 4; ++tileTypeCount )
 	{
 		for ( Suit suit : Suits{} )

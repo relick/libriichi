@@ -59,7 +59,7 @@ bool RoundData::RiichiIppatsuValid
 	Seat i_player
 )	const
 {
-	// TODO
+	// TODO-MVP
 	return false;
 }
 
@@ -168,7 +168,7 @@ RoundData::RoundData
 		m_players.emplace_back( player.m_playerIndex );
 	}
 
-	// TODO: work out the situations when we should rotate player based on last round win
+	// TODO-MVP: work out the situations when we should rotate player based on last round win
 	// for now always rotate
 	std::ranges::rotate( m_players, m_players.begin() + 1 );
 	bool const rotated = true;

@@ -8,9 +8,6 @@
 namespace Riichi::StandardYaku
 {
 
-// Overall TODO: Lots of the yaku need to assess the 'final group' separately from the rest of the groups. This is to avoid creating a container and doing a bunch of copies where unnecessary
-// It would be nice to clean this up somehow. It would also be nice if all the yaku could be made to avoid allocating entirely when assessing!
-
 //------------------------------------------------------------------------------
 // Win by self-draw with closed hand
 //------------------------------------------------------------------------------
@@ -176,7 +173,7 @@ DECLARE_YAKU( Sankantsu );
 //------------------------------------------------------------------------------
 // Hand consists of 7 unique pairs
 // Must be closed, by nature of the hand structure
-// TODO: The main and interpretations algorithm will fail to recognise 7 pairs
+// TODO-MVP: The main hand interpretations algorithm will fail to recognise 7 pairs
 //------------------------------------------------------------------------------
 BEGIN_YAKU( Chiitoitsu )
 	static bool ValidTile( Tile const& i_tile );
@@ -222,7 +219,7 @@ DECLARE_YAKU( Chinitsu );
 //------------------------------------------------------------------------------
 // THIRTEEN ORPHANS
 // 19m19s19p1234567z + any terminal/honor, closed only
-// TODO: The main and interpretations algorithm will fail to recognise 13 orphans
+// TODO-MVP: The main hand interpretations algorithm will fail to recognise 13 orphans
 //------------------------------------------------------------------------------
 BEGIN_YAKU( KokushiMusou )
 	static bool RequiredTile( Tile const& i_tile );
@@ -292,7 +289,7 @@ DECLARE_YAKU( Tenhou );
 //------------------------------------------------------------------------------
 DECLARE_YAKU( Chihou );
 
-// TODO: Scoring options that aren't typical yaku
+// TODO-MVP: Scoring options that aren't typical yaku
 // Kazoe Yakuman
 // Nagashi Mangan
 

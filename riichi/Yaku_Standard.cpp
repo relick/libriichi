@@ -12,7 +12,7 @@
 namespace Riichi::StandardYaku
 {
 
-// Overall TODO: Lots of the yaku need to assess the 'final group' separately from the rest of the groups. This is to avoid creating a container and doing a bunch of copies where unnecessary
+// TODO-DEBT: Lots of the yaku need to assess the 'final group' separately from the rest of the groups. This is to avoid creating a container and doing a bunch of copies where unnecessary
 // It would be nice to clean this up somehow. It would also be nice if all the yaku could be made to avoid allocating entirely when assessing!
 
 //------------------------------------------------------------------------------
@@ -120,7 +120,7 @@ HanValue Iipeikou::CalculateValue
 		return NoYaku;
 	}
 
-	// TODO: I wonder if there's a more efficient way of assessing this than just comparing all groups
+	// TODO-OPT: I wonder if there's a more efficient way of assessing this than just comparing all groups
 
 	if ( SequenceWait( i_interp.m_waitType ) )
 	{
@@ -388,7 +388,7 @@ HanValue SanshokuDoujun::CalculateValue
 		return NoYaku;
 	}
 
-	// TODO: I wonder if there's a more efficient way of assessing this than just comparing all triples of groups
+	// TODO-OPT: I wonder if there's a more efficient way of assessing this than just comparing all triples of groups
 
 	if ( SequenceWait( i_interp.m_waitType ) )
 	{
@@ -567,7 +567,7 @@ HanValue SanshokuDoukou::CalculateValue
 		return NoYaku;
 	}
 
-	// TODO: I wonder if there's a more efficient way of assessing this than just comparing all triples of groups
+	// TODO-OPT: I wonder if there's a more efficient way of assessing this than just comparing all triples of groups
 
 	if ( i_interp.m_waitType == WaitType::Shanpon )
 	{
@@ -657,7 +657,7 @@ HanValue Chiitoitsu::CalculateValue
 		return NoYaku;
 	}
 
-	// TODO: Can we do this without filling a container?
+	// TODO-OPT: Can we do this without filling a container?
 
 	Set<Tile> uniqueTiles;
 	uniqueTiles.insert( i_nextTile );
@@ -852,7 +852,7 @@ HanValue Ryanpeikou::CalculateValue
 		return NoYaku;
 	}
 
-	// TODO: I wonder if there's a more efficient way of assessing this than just comparing all groups
+	// TODO-OPT: I wonder if there's a more efficient way of assessing this than just comparing all groups
 
 	if ( i_interp.m_waitType == WaitType::Tanki )
 	{
@@ -949,7 +949,7 @@ HanValue KokushiMusou::CalculateValue
 		return NoYaku;
 	}
 
-	// TODO: Can we do this without filling a container?
+	// TODO-OPT: Can we do this without filling a container?
 
 	// Sufficient to check that all tiles are terminals/honors and that the distinct tile count >= 13
 	Set<Tile> uniqueTiles;
