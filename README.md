@@ -3,6 +3,8 @@
 
 Aims:
 - Nice to use
+- The game of mahjong is so complicated and each part interconnected that it's really not possible to make a library that is flexible and extensible in the way that would allow for super powers and things like that. So I'm happy I made this but it's not really going to be able to be an 'independent' library by the time it's integrated with a full game.
+- Fun to play
 
 TODOs key (in order of priority):
 1. TODO-MVP: Critical to play a game of riichi mahjong.
