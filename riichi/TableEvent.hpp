@@ -151,15 +151,15 @@ public:
 class Ron
 {
 	Tile m_winningTile;
-	Vector<Seat> m_winners;
+	SeatSet m_winners;
 public:
-	explicit Ron( Tile const& i_winningTile, Vector<Seat> i_winners )
+	explicit Ron( Tile const& i_winningTile, SeatSet i_winners )
 		: m_winningTile{ i_winningTile }
 		, m_winners{ std::move( i_winners ) }
 	{}
 
 	Tile const& WinningTile() const { return m_winningTile; }
-	Vector<Seat> const& Winners() const { return m_winners; }
+	SeatSet const& Winners() const { return m_winners; }
 };
 
 //------------------------------------------------------------------------------

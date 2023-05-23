@@ -61,7 +61,7 @@ enum class TableStateType : EnumValueType
 	Turn_AI,
 	Turn_Player,
 	BetweenTurns,
-	RobAKanChance, // It's kinda amusing to me that this is a special state, but it makes sense
+	RonAKanChance, // It's kinda amusing to me that this is a special state, but it makes sense
 };
 
 //------------------------------------------------------------------------------
@@ -75,7 +75,7 @@ inline constexpr char const* ToString( TableStateType i_type )
 		"Turn_AI",
 		"Turn_Player",
 		"BetweenTurns",
-		"RobAKanChance",
+		"RonAKanChance",
 	};
 	return strs[ ( size_t )i_type ];
 }
@@ -125,10 +125,9 @@ struct Turn_AI
 {
 	Turn_AI( Table& i_table, Seat i_seat );
 
-	// TODO data
 	Seat GetSeat() const { return m_seat; }
 
-	void Discard() const;
+	void MakeDecision() const;
 
 private:
 	Seat m_seat;
@@ -161,13 +160,18 @@ struct BetweenTurns
 };
 
 //------------------------------------------------------------------------------
-struct RobAKanChance
+struct RonAKanChance
 	: Base
 {
-	using Base::Base;
+	RonAKanChance( Table& i_table, SeatSet i_playersAbleToRon );
 
-	// TODO other options
+	SeatSet const& PlayersAbleToRon() const { return m_playersAbleToRon; }
+	
 	void Pass() const;
+	void Ron( SeatSet const& i_players ) const;
+
+private:
+	SeatSet m_playersAbleToRon;
 };
 
 }
@@ -182,7 +186,7 @@ using TableState = NamedUnion<
 	TableStates::Turn_AI,
 	TableStates::Turn_Player,
 	TableStates::BetweenTurns,
-	TableStates::RobAKanChance
+	TableStates::RonAKanChance
 >;
 
 }

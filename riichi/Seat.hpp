@@ -17,6 +17,7 @@ enum class Seat : EnumValueType
 };
 inline constexpr size_t c_seatCount = 4;
 using Seats = Utils::EnumRange<Seat, c_seatCount>;
+using SeatSet = Utils::EnumSet<Seat, c_seatCount>;
 
 //------------------------------------------------------------------------------
 inline constexpr char const* ToString( Seat i_seat )

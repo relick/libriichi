@@ -1,4 +1,6 @@
 #include "TableState.hpp"
+#include "TableState.hpp"
+#include "TableState.hpp"
 
 #include "Rules.hpp"
 #include "Table.hpp"
@@ -93,7 +95,7 @@ Turn_AI::Turn_AI
 {}
 
 //------------------------------------------------------------------------------
-void Turn_AI::Discard
+void Turn_AI::MakeDecision
 (
 )	const
 {
@@ -172,10 +174,33 @@ void BetweenTurns::Pass
 }
 
 //------------------------------------------------------------------------------
-void RobAKanChance::Pass
+RonAKanChance::RonAKanChance
+(
+	Table& i_table,
+	SeatSet i_playersAbleToRon
+)
+	: Base{ i_table }
+	, m_playersAbleToRon{ i_playersAbleToRon }
+{}
+
+//------------------------------------------------------------------------------
+void RonAKanChance::Pass
 (
 )	const
 {
+	// TODO
+	Table& table = m_table.get();
+	table.Transition( TableStates::GameOver{table}, std::string( "nyi" ) );
+}
+
+//------------------------------------------------------------------------------
+void RonAKanChance::Ron
+(
+	SeatSet const& i_players
+)	const
+{
+	Ensure( m_playersAbleToRon.ContainsAllOf( i_players ), "Players tried to ron a kan when not allowed." );
+
 	// TODO
 	Table& table = m_table.get();
 	table.Transition( TableStates::GameOver{table}, std::string( "nyi" ) );

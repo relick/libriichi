@@ -75,7 +75,7 @@ int main()
 		{
 			Riichi::TableStates::Turn_AI const& turn = state.Get<Turn_AI>();
 			std::cout << "AI in seat " << ToString( turn.GetSeat() ) << " taking turn" << std::endl;
-			turn.Discard();
+			turn.MakeDecision();
 			break;
 		}
 		case Turn_Player:
@@ -91,10 +91,10 @@ int main()
 			state.Get<BetweenTurns>().Pass();
 			break;
 		}
-		case RobAKanChance:
+		case RonAKanChance:
 		{
 			std::cout << "Passing on rob-a-kan chance" << std::endl;
-			state.Get<RobAKanChance>().Pass();
+			state.Get<RonAKanChance>().Pass();
 			break;
 		}
 

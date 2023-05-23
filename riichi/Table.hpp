@@ -36,7 +36,7 @@ class Table
 	friend TableStates::Turn_AI;
 	friend TableStates::Turn_Player;
 	friend TableStates::BetweenTurns;
-	friend TableStates::RobAKanChance;
+	friend TableStates::RonAKanChance;
 
 private:
 	std::unique_ptr<Rules> m_rules;

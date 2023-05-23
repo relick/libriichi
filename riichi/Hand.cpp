@@ -46,7 +46,7 @@ std::ostream& operator<<( std::ostream& io_out, Hand const& i_hand )
 			lastSuit = tile.Get<TileType::Suit>().m_suit;
 			io_out << static_cast< int >( tile.Get<TileType::Suit>().m_value.m_val );
 		}
-		else 
+		else
 		{
 			if ( lastSuit.has_value() )
 			{

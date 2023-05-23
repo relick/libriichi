@@ -139,6 +139,50 @@ struct EnumIndexedArray
 };
 
 //------------------------------------------------------------------------------
+template<typename T_Enum, size_t t_EnumCount>
+class EnumSet
+{
+	Utils::EnumIndexedArray<bool, T_Enum, t_EnumCount> m_enumVals{};
+
+public:
+	struct Iter
+	{
+		EnumSet const* m_set{ nullptr };
+		size_t m_enumPos{ t_EnumCount };
+
+		void operator++() { do { ++m_enumPos; } while ( !m_set->Contains( ( T_Enum )m_enumPos ) ); }
+		T_Enum operator*() { return ( T_Enum )m_enumPos; }
+		bool operator!=( Iter const& b ) const { return m_enumPos != b.m_enumPos; }
+	};
+
+	static Iter begin() { return Iter{ this, 0 }; }
+	static Iter end() { return Iter{ this, t_EnumCount }; }
+
+	EnumSet( std::initializer_list<T_Enum> i_vals )
+	{
+		for ( T_Enum val : i_vals )
+		{
+			m_enumVals[ val ] = true;
+		}
+	}
+
+	void Insert( T_Enum i_val ) { m_enumVals[ i_val ] = true; }
+	void Erase( T_Enum i_val ) { m_enumVals[ i_val ] = false; }
+	bool Contains( T_Enum i_val ) const { return m_enumVals[ i_val ]; }
+	bool ContainsAllOf( EnumSet const& i_o ) const
+	{
+		for ( T_Enum val : EnumRange<T_Enum, t_EnumCount>{} )
+		{
+			if ( !Contains( val ) && i_o.Contains( val ) )
+			{
+				return false;
+			}
+		}
+		return true;
+	}
+};
+
+//------------------------------------------------------------------------------
 template<typename T_Container, typename T_Value>
 T_Container Append( T_Container i_c, T_Value i_v )
 {

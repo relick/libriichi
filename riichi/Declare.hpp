@@ -87,7 +87,7 @@ struct GameOver;
 struct Turn_AI;
 struct Turn_Player;
 struct BetweenTurns;
-struct RobAKanChance;
+struct RonAKanChance;
 }
 
 //------------------------------------------------------------------------------
