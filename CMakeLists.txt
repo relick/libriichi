@@ -9,11 +9,13 @@ set (CMAKE_TRY_COMPILE_TARGET_TYPE "STATIC_LIBRARY")
 # Library
 set(LIBRIICHI_SOURCE
  "riichi/Hand.cpp"
+ "riichi/RoundData.cpp"
+ "riichi/Rules.cpp"
  "riichi/Table.cpp"
  "riichi/TableState.cpp"
- "riichi/RoundData.cpp"
+ "riichi/Tile.cpp"
  "riichi/Yaku_Standard.cpp"
- "riichi/Rules.cpp")
+)
 add_library(libriichi STATIC ${LIBRIICHI_SOURCE})
 target_compile_options(libriichi PUBLIC "$<$<CXX_COMPILER_ID:MSVC>:/utf-8>")
 

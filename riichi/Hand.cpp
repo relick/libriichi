@@ -19,6 +19,55 @@ void Hand::AddFreeTiles
 }
 
 //------------------------------------------------------------------------------
+Vector<Pair<Tile, Tile>> Hand::ChiOptions
+(
+	Tile const& i_tile
+)	const
+{
+	if ( i_tile.Type() != TileType::Suit )
+	{
+		// Cannot chi if not suit tile
+		return {};
+	}
+
+	SuitTile const& suitTile = i_tile.Get<TileType::Suit>();
+
+	// TODO-MVP
+	
+	return {};
+}
+
+//------------------------------------------------------------------------------
+bool Hand::CanPon
+(
+	Tile const& i_tile
+)	const
+{
+	size_t const othersCount = std::ranges::count( m_freeTiles, i_tile );
+	return othersCount >= 2;
+}
+
+//------------------------------------------------------------------------------
+bool Hand::CanCallKan
+(
+	Tile const& i_tile
+)	const
+{
+	size_t const othersCount = std::ranges::count( m_freeTiles, i_tile );
+	return othersCount >= 3;
+}
+
+//------------------------------------------------------------------------------
+Vector<Hand::DrawKanResult> Hand::DrawKanOptions
+(
+	Tile const* i_drawnTile
+)	const
+{
+	// TODO-MVP
+	return {};
+}
+
+//------------------------------------------------------------------------------
 std::ostream& operator<<( std::ostream& io_out, Hand const& i_hand )
 {
 	Vector<Tile> sortedTiles = i_hand.m_freeTiles;

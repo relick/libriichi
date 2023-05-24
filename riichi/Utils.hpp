@@ -105,6 +105,15 @@ public:
 		++m_val;
 		return *this;
 	}
+
+	constexpr RestrictedType& operator--()
+	{
+		Ensure( m_val > t_Min, "Can not decrement value - reached min" );
+		--m_val;
+		return *this;
+	}
+
+	friend constexpr bool operator==( RestrictedType const&, RestrictedType const& ) = default;
 };
 
 //------------------------------------------------------------------------------

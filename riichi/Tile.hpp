@@ -38,6 +38,7 @@ struct SuitTile
 	SuitTileValue m_value;
 
 	friend bool operator==( SuitTile const&, SuitTile const& ) = default;
+	friend bool StrictEqualTo( SuitTile const&, SuitTile const& );
 	friend std::strong_ordering operator<=>( SuitTile const&, SuitTile const& ) = default;
 };
 
@@ -72,51 +73,18 @@ using Tile = NamedUnion<
 >;
 
 //------------------------------------------------------------------------------
-inline std::ostream& operator<<( std::ostream& io_out, Tile const& i_tile )
+bool StrictEqualTo( Tile const&, Tile const& );
+
+struct StrictEqualToTile
 {
-	switch ( i_tile.Type() )
+	bool operator()( Tile const& i_a, Tile const& i_b ) const
 	{
-	using enum TileType;
-	case Suit:
-	{
-		SuitTile const& tile = i_tile.Get<Suit>();
-		switch ( tile.m_suit )
-		{
-		using enum Suit;
-		case Manzu: io_out << static_cast<int>( tile.m_value.m_val ) << "m"; return io_out;
-		case Pinzu: io_out << static_cast<int>( tile.m_value.m_val ) << "p"; return io_out;
-		case Souzu: io_out << static_cast<int>( tile.m_value.m_val ) << "s"; return io_out;
-		}
-		break;
+		return StrictEqualTo( i_a, i_b );
 	}
-	case Dragon:
-	{
-		DragonTileType const& tile = i_tile.Get<Dragon>();
-		switch ( tile )
-		{
-		using enum DragonTileType;
-		case White: io_out << "白"; return io_out;
-		case Green: io_out << "発"; return io_out;
-		case Red: io_out << "中"; return io_out;
-		}
-		break;
-	}
-	case Wind:
-	{
-		WindTileType const& tile = i_tile.Get<Wind>();
-		switch ( tile )
-		{
-		using enum WindTileType;
-		case East: io_out << "東"; return io_out;
-		case South: io_out << "南"; return io_out;
-		case West: io_out << "西"; return io_out;
-		case North: io_out << "北"; return io_out;
-		}
-		break;
-	}
-	}
-	return io_out;
-}
+};
+
+//------------------------------------------------------------------------------
+std::ostream& operator<<( std::ostream& io_out, Tile const& i_tile );
 
 //------------------------------------------------------------------------------
 enum class TileDrawType : EnumValueType

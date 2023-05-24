@@ -23,8 +23,11 @@ using Option = std::optional<T>;
 template<typename K, typename V>
 using Map = std::unordered_map<K, V>;
 
-template<typename T>
-using Set = std::unordered_set<T>;
+template<typename T, typename S>
+using Pair = std::pair<T, S>;
+
+template<typename T, typename Pred = std::equal_to<T>>
+using Set = std::unordered_set<T, std::hash<T>, Pred>;
 
 template<typename... Ts>
 using Union = std::variant<Ts...>;

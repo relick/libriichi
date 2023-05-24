@@ -26,7 +26,7 @@ inline bool TripletCompatible( GroupType i_type ) { return i_type == GroupType::
 //------------------------------------------------------------------------------
 struct Meld
 {
-	using MeldTile = std::pair<Tile, Seat>;
+	using MeldTile = Pair<Tile, Seat>;
 
 	Vector<MeldTile> m_tiles;
 	GroupType m_type{ GroupType::Sequence };
@@ -46,6 +46,17 @@ public:
 	Vector<Tile> const& FreeTiles() const { return m_freeTiles; }
 	Vector<Meld> const& Melds() const { return m_melds; }
 	void AddFreeTiles( Vector<Tile> const& i_newTiles );
+
+	// These questions only consider the hand's tiles and not the actual validity of the call in the round
+	Vector<Pair<Tile, Tile>> ChiOptions( Tile const& i_tile ) const;
+	bool CanPon( Tile const& i_tile ) const;
+	bool CanCallKan( Tile const& i_tile ) const;
+	struct DrawKanResult
+	{
+		Tile kanTile;
+		bool closed;
+	};
+	Vector<DrawKanResult> DrawKanOptions( Tile const* i_drawnTile ) const;
 
 	friend std::ostream& operator<<( std::ostream& io_out, Hand const& i_hand );
 };
