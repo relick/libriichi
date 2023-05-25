@@ -32,9 +32,67 @@ Vector<Pair<Tile, Tile>> Hand::ChiOptions
 
 	SuitTile const& suitTile = i_tile.Get<TileType::Suit>();
 
-	// TODO-MVP
-	
-	return {};
+	// It's a little complicated searching for chi options
+	// We have to check for 3 shapes: DHH HDH HHD where D is the discarded tile and H are hand tiles
+	// We also want to multiply chi options based on strict tile comparison (so aka dora are treated as separate options)
+	// It works quite well then to reuse a pair of sets and search for the tiles we need in each shape, then fill out options from that as a cartesian product
+
+	Vector<Pair<Tile, Tile>> options;
+	Set<Tile, StrictEqualToTile> tiles1;
+	Set<Tile, StrictEqualToTile> tiles2;
+
+	auto fnSearchForTiles = [ & ]( Tile const& i_search1, Tile const& i_search2 )
+	{
+		for ( Tile const& tile : m_freeTiles )
+		{
+			if ( tile == i_search1 )
+			{
+				tiles1.insert( tile );
+			}
+			else if ( tile == i_search2 )
+			{
+				tiles2.insert( tile );
+			}
+		}
+
+		if ( !tiles1.empty() && !tiles2.empty() )
+		{
+			// Found shape, cartesian product the options
+			for ( Tile const& tile1 : tiles1 )
+			{
+				for ( Tile const& tile2 : tiles2 )
+				{
+					options.push_back( { tile1, tile2 } );
+				}
+			}
+		}
+
+		tiles1.clear();
+		tiles2.clear();
+	};
+
+	if ( suitTile.m_value <= SuitTileValue::Max - SuitTileValue::Set<2>() )
+	{
+		SuitTile const oneUp{ suitTile.m_suit, suitTile.m_value + SuitTileValue::Set<1>() };
+		SuitTile const twoUp{ suitTile.m_suit, suitTile.m_value + SuitTileValue::Set<2>() };
+		fnSearchForTiles( oneUp, twoUp );
+	}
+
+	if ( suitTile.m_value >= SuitTileValue::Min + SuitTileValue::Set<1>() && suitTile.m_value <= SuitTileValue::Max - SuitTileValue::Set<1>() )
+	{
+		SuitTile const oneDown{ suitTile.m_suit, suitTile.m_value - SuitTileValue::Set<1>() };
+		SuitTile const oneUp{ suitTile.m_suit, suitTile.m_value + SuitTileValue::Set<1>() };
+		fnSearchForTiles( oneDown, oneUp );
+	}
+
+	if ( suitTile.m_value >= SuitTileValue::Min + SuitTileValue::Set<2>() )
+	{
+		SuitTile const twoDown{ suitTile.m_suit, suitTile.m_value - SuitTileValue::Set<2>() };
+		SuitTile const oneDown{ suitTile.m_suit, suitTile.m_value - SuitTileValue::Set<1>() };
+		fnSearchForTiles( twoDown, oneDown );
+	}
+
+	return options;
 }
 
 //------------------------------------------------------------------------------
@@ -63,8 +121,47 @@ Vector<Hand::DrawKanResult> Hand::DrawKanOptions
 	Tile const* i_drawnTile
 )	const
 {
-	// TODO-MVP
-	return {};
+	Vector<DrawKanResult> results;
+
+	if ( i_drawnTile )
+	{
+		for ( Meld const& meld : m_melds )
+		{
+			if ( meld.m_type == GroupType::Triplet && meld.m_tiles.front().first == *i_drawnTile )
+			{
+				results.push_back( { *i_drawnTile, false } );
+				break;
+			}
+		}
+
+		if ( results.empty() )
+		{
+			size_t const othersCount = std::ranges::count( m_freeTiles, *i_drawnTile );
+			results.push_back( { *i_drawnTile, true } );
+		}
+	}
+
+	for ( Meld const& meld : m_melds )
+	{
+		if ( meld.m_type == GroupType::Triplet && std::ranges::contains( std::views::elements<0>( meld.m_tiles ), meld.m_tiles.front().first ) )
+		{
+			results.push_back( { meld.m_tiles.front().first, false } );
+			break;
+		}
+	}
+
+	// Could have more than one set of 4 in hand, so just search for them left to right
+	// n^2 but code is simple and n is small
+	for ( auto tileI = m_freeTiles.begin(); tileI != m_freeTiles.end(); ++tileI )
+	{
+		size_t const tilesOfType = std::count( tileI, m_freeTiles.end(), *tileI );
+		if ( tilesOfType >= 4 )
+		{
+			results.push_back( { *tileI, true } );
+		}
+	}
+
+	return results;
 }
 
 //------------------------------------------------------------------------------

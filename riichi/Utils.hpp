@@ -101,16 +101,42 @@ public:
 
 	constexpr RestrictedType& operator++()
 	{
-		Ensure( m_val < t_Max, "Can not increment value - reached max" );
+		Ensure( m_val < t_Max, "Can not increment value past max" );
 		++m_val;
 		return *this;
 	}
 
 	constexpr RestrictedType& operator--()
 	{
-		Ensure( m_val > t_Min, "Can not decrement value - reached min" );
+		Ensure( m_val > t_Min, "Can not decrement value past min" );
 		--m_val;
 		return *this;
+	}
+
+	friend constexpr RestrictedType operator+( RestrictedType const& i_a, RestrictedType const& i_b )
+	{
+		if ( i_b.m_val < 0 )
+		{
+			Ensure( i_a.m_val >= t_Min - i_b.m_val, "Can not add value past min" );
+		}
+		else
+		{
+			Ensure( i_a.m_val <= t_Max - i_b.m_val, "Can not add value past max" );
+		}
+		return RestrictedType{ ( T_Integral )( i_a.m_val + i_b.m_val ) };
+	}
+
+	friend constexpr RestrictedType operator-( RestrictedType const& i_a, RestrictedType const& i_b )
+	{
+		if ( i_b.m_val >= 0 )
+		{
+			Ensure( i_a.m_val >= t_Min + i_b.m_val, "Can not sub value past min" );
+		}
+		else
+		{
+			Ensure( i_a.m_val <= t_Max + i_b.m_val, "Can not sub value past max" );
+		}
+		return RestrictedType{ ( T_Integral )( i_a.m_val - i_b.m_val ) };
 	}
 
 	friend constexpr bool operator==( RestrictedType const&, RestrictedType const& ) = default;
