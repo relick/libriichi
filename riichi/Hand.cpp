@@ -19,6 +19,108 @@ void Hand::AddFreeTiles
 }
 
 //------------------------------------------------------------------------------
+void Hand::Discard
+(
+	Tile const& i_toDiscard,
+	Tile const& i_drawToAdd
+)
+{
+	Utils::EraseOne( m_freeTiles,
+		[ & ]( Tile const& i_tile )
+		{
+			return StrictEqualTo( i_tile, i_toDiscard );
+		}
+	);
+	m_freeTiles.push_back( i_drawToAdd );
+	std::ranges::sort( m_freeTiles ); // TODO-QOL: players may not always want their hand sorted
+}
+
+//------------------------------------------------------------------------------
+void Hand::MakeMeld
+(
+	Pair<Seat, Tile> const& i_meldTile,
+	Pair<Tile, Tile> const& i_otherTiles,
+	GroupType i_meldType
+)
+{
+	Ensure( i_meldType != GroupType::Quad, "Must call MakeKan instead of MakeMeld for quads" );
+
+	Utils::EraseOne(
+		m_freeTiles,
+		[ & ]( Tile const& i_tile )
+		{
+			return StrictEqualTo( i_tile, i_otherTiles.first );
+		}
+	);
+
+	Utils::EraseOne(
+		m_freeTiles,
+		[ & ]( Tile const& i_tile )
+		{
+			return StrictEqualTo( i_tile, i_otherTiles.second );
+		}
+	);
+
+	Meld newMeld;
+	newMeld.m_tiles.push_back( { i_meldTile.second, i_meldTile.first } );
+	newMeld.m_tiles.push_back( { i_otherTiles.first, std::nullopt } );
+	newMeld.m_tiles.push_back( { i_otherTiles.second, std::nullopt } );
+	newMeld.m_type = i_meldType;
+	newMeld.m_open = true;
+
+	m_melds.push_back( std::move( newMeld ) );
+}
+
+//------------------------------------------------------------------------------
+void Hand::MakeKan
+(
+	Tile const& i_meldTile,
+	Option<Seat> i_calledFrom
+)
+{
+	// First check existing triplet melds
+	for ( Meld& meld : m_melds )
+	{
+		if ( meld.m_type == GroupType::Triplet && meld.m_tiles.front().first == i_meldTile )
+		{
+			// Meld comes from our own hand
+			Ensure( !i_calledFrom.has_value(), "Cannot call kan on already open meld" );
+
+			meld.m_tiles.push_back( { i_meldTile, std::nullopt } );
+			meld.m_type = GroupType::Quad;
+			return;
+		}
+	}
+
+	// Then check hand
+
+	Meld newMeld;
+	if ( i_calledFrom.has_value() )
+	{
+		newMeld.m_tiles.push_back( { i_meldTile, i_calledFrom } );
+	}
+	std::erase_if(
+		m_freeTiles,
+		[ & ]( Tile const& i_tile )
+		{
+			if ( i_tile == i_meldTile )
+			{
+				newMeld.m_tiles.push_back( { i_tile, std::nullopt } );
+				return true;
+			}
+			return false;
+		}
+	);
+
+	Ensure( newMeld.m_tiles.size() == 4, "Did not find 4 tiles for kan" );
+
+	newMeld.m_type = GroupType::Quad;
+	newMeld.m_open = i_calledFrom.has_value();
+
+	m_melds.push_back( std::move( newMeld ) );
+}
+
+//------------------------------------------------------------------------------
 Vector<Pair<Tile, Tile>> Hand::ChiOptions
 (
 	Tile const& i_tile

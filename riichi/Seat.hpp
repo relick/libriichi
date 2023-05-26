@@ -39,9 +39,13 @@ inline bool operator==( Seat i_seat, WindTileType i_windTile )
 }
 
 //------------------------------------------------------------------------------
-inline Seat Next( Seat i_seat )
+inline Seat NextPlayer( Seat i_seat, size_t i_playerCount )
 {
-	return i_seat == Seat::North ? Seat::East : ( Seat )( ( EnumValueType )i_seat + 1 );
+	do
+	{
+		i_seat = i_seat == Seat::North ? Seat::East : ( Seat )( ( EnumValueType )i_seat + 1 );
+	} while ( ( size_t )i_seat >= i_playerCount );
+	return i_seat;
 }
 
 }

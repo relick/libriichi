@@ -72,9 +72,10 @@ void BetweenRounds::StartRound
 	{
 	case PlayerType::User:
 	{
-		// TODO-MVP: calculate tsumo/riichi/kan
+		// TODO-MVP: calculate tsumo/riichi
+		Vector<Hand::DrawKanResult> kanOptions = round.GetHand( round.CurrentTurn() ).DrawKanOptions( nullptr );
 		table.Transition(
-			TableStates::Turn_User{table, round.CurrentTurn(), false, false, false},
+			TableStates::Turn_User{table, round.CurrentTurn(), false, false, std::move( kanOptions )},
 			TableEvent{ TableEvent::Tag<TableEventType::DealerDraw>(), firstDrawnTile, round.CurrentTurn() }
 		);
 		break;
@@ -130,9 +131,31 @@ void Turn_AI::MakeDecision
 	RoundData& round = table.m_rounds.back();
 	Tile const discardedTile = round.DiscardDrawn();
 
-	// TODO-MVP: calculate calls
+	// TODO-DEBT: can this be pulled into a function instead of repeating it?
+
+	// TODO-RULES: call options (particularly chi) should be controllable by rules
+	Seat const nextPlayer = NextPlayer( round.CurrentTurn(), table.m_players.size() );
+	Pair<Seat, Vector<Pair<Tile, Tile>>> canChi{nextPlayer, round.GetHand( nextPlayer ).ChiOptions( discardedTile )};
+	SeatSet canPon;
+	SeatSet canKan;
+	SeatSet canRon;
+
+	for ( size_t seatI = 0; seatI < table.m_players.size(); ++seatI )
+	{
+		Seat const seat = ( Seat )seatI;
+		if ( round.GetHand( seat ).CanPon( discardedTile ) )
+		{
+			canPon.Insert( seat );
+		}
+		if ( round.GetHand( seat ).CanCallKan( discardedTile ) )
+		{
+			canKan.Insert( seat );
+		}
+		// TODO-MVP: ron
+	}
+
 	table.Transition(
-		TableStates::BetweenTurns{table, std::nullopt, SeatSet{}, SeatSet{}, SeatSet{}},
+		TableStates::BetweenTurns{table, std::move( canChi ), std::move( canPon ), std::move( canKan ), std::move( canRon )},
 		TableEvent{ TableEvent::Tag<TableEventType::Discard>(), discardedTile, round.CurrentTurn() }
 	);
 }
@@ -144,12 +167,12 @@ Turn_User::Turn_User
 	Seat i_seat,
 	bool i_canTsumo,
 	bool i_canRiichi,
-	bool i_canKan
+	Vector<Hand::DrawKanResult> i_kanOptions
 )
 	: BaseTurn{ i_table, i_seat }
 	, m_canTsumo{ i_canTsumo }
 	, m_canRiichi{ i_canRiichi }
-	, m_canKan{ i_canKan }
+	, m_kanOptions{ std::move( i_kanOptions ) }
 {}
 
 //------------------------------------------------------------------------------
@@ -199,7 +222,7 @@ void Turn_User::Kan
 BetweenTurns::BetweenTurns
 (
 	Table& i_table,
-	Option<Seat> i_canChi,
+	Pair<Seat, Vector<Pair<Tile, Tile>>> i_canChi,
 	SeatSet i_canPon,
 	SeatSet i_canKan,
 	SeatSet i_canRon
@@ -236,9 +259,10 @@ void BetweenTurns::UserPass
 	{
 	case PlayerType::User:
 	{
-		// TODO-MVP: calculate tsumo/riichi/kan
+		// TODO-MVP: calculate tsumo/riichi
+		Vector<Hand::DrawKanResult> kanOptions = round.GetHand( round.CurrentTurn() ).DrawKanOptions( nullptr );
 		table.Transition(
-			TableStates::Turn_User{table, round.CurrentTurn(), false, false, false},
+			TableStates::Turn_User{table, round.CurrentTurn(), false, false, std::move( kanOptions )},
 			TableEvent{ TableEvent::Tag<TableEventType::Draw>(), drawnTile, round.CurrentTurn() }
 		);
 		break;
@@ -257,12 +281,40 @@ void BetweenTurns::UserPass
 //------------------------------------------------------------------------------
 void BetweenTurns::UserChi
 (
-	Seat i_user
+	Seat i_user,
+	Pair<Tile, Tile> const& i_option
 )	const
 {
-	// TODO-MVP
 	Table& table = m_table.get();
-	table.Transition( TableStates::GameOver{table}, std::string( "nyi" ) );
+
+	RoundData& round = table.m_rounds.back();
+	Pair<Seat, Tile> const calledTile = round.Chi( i_user, i_option );
+
+	Player const& turnPlayer = round.GetPlayer( round.CurrentTurn(), table );
+
+	switch ( turnPlayer.Type() )
+	{
+	case PlayerType::User:
+	{
+		bool constexpr c_canTsumo = false;
+		bool constexpr c_canRiichi = false;
+		Vector<Hand::DrawKanResult> kanOptions = round.GetHand( round.CurrentTurn() ).DrawKanOptions( nullptr );
+
+		table.Transition(
+			TableStates::Turn_User{table, round.CurrentTurn(), c_canTsumo, c_canRiichi, std::move( kanOptions )},
+			TableEvent{ TableEvent::Tag<TableEventType::Call>(), TableEvents::CallType::Chi, calledTile.second, calledTile.first }
+		);
+		break;
+	}
+	case PlayerType::AI:
+	{
+		table.Transition(
+			TableStates::Turn_AI{table, round.CurrentTurn()},
+			TableEvent{ TableEvent::Tag<TableEventType::Call>(), TableEvents::CallType::Chi, calledTile.second, calledTile.first }
+		);
+		break;
+	}
+	}
 }
 
 //------------------------------------------------------------------------------
@@ -271,9 +323,36 @@ void BetweenTurns::UserPon
 	Seat i_user
 )	const
 {
-	// TODO-MVP
 	Table& table = m_table.get();
-	table.Transition( TableStates::GameOver{table}, std::string( "nyi" ) );
+
+	RoundData& round = table.m_rounds.back();
+	Pair<Seat, Tile> const calledTile = round.Pon( i_user );
+
+	Player const& turnPlayer = round.GetPlayer( round.CurrentTurn(), table );
+
+	switch ( turnPlayer.Type() )
+	{
+	case PlayerType::User:
+	{
+		bool constexpr c_canTsumo = false;
+		bool constexpr c_canRiichi = false;
+		Vector<Hand::DrawKanResult> kanOptions = round.GetHand( round.CurrentTurn() ).DrawKanOptions( nullptr );
+
+		table.Transition(
+			TableStates::Turn_User{table, round.CurrentTurn(), c_canTsumo, c_canRiichi, std::move( kanOptions )},
+			TableEvent{ TableEvent::Tag<TableEventType::Call>(), TableEvents::CallType::Pon, calledTile.second, calledTile.first }
+		);
+		break;
+	}
+	case PlayerType::AI:
+	{
+		table.Transition(
+			TableStates::Turn_AI{table, round.CurrentTurn()},
+			TableEvent{ TableEvent::Tag<TableEventType::Call>(), TableEvents::CallType::Pon, calledTile.second, calledTile.first }
+		);
+		break;
+	}
+	}
 }
 
 //------------------------------------------------------------------------------
@@ -282,9 +361,36 @@ void BetweenTurns::UserKan
 	Seat i_user
 )	const
 {
-	// TODO-MVP
 	Table& table = m_table.get();
-	table.Transition( TableStates::GameOver{table}, std::string( "nyi" ) );
+
+	RoundData& round = table.m_rounds.back();
+	Pair<Seat, Tile> const calledTile = round.DiscardKan( i_user );
+
+	Player const& turnPlayer = round.GetPlayer( round.CurrentTurn(), table );
+
+	switch ( turnPlayer.Type() )
+	{
+	case PlayerType::User:
+	{
+		bool constexpr c_canTsumo = false;
+		bool constexpr c_canRiichi = false;
+		Vector<Hand::DrawKanResult> kanOptions = round.GetHand( round.CurrentTurn() ).DrawKanOptions( nullptr );
+
+		table.Transition(
+			TableStates::Turn_User{table, round.CurrentTurn(), c_canTsumo, c_canRiichi, std::move( kanOptions )},
+			TableEvent{ TableEvent::Tag<TableEventType::Call>(), TableEvents::CallType::Kan, calledTile.second, calledTile.first }
+		);
+		break;
+	}
+	case PlayerType::AI:
+	{
+		table.Transition(
+			TableStates::Turn_AI{table, round.CurrentTurn()},
+			TableEvent{ TableEvent::Tag<TableEventType::Call>(), TableEvents::CallType::Kan, calledTile.second, calledTile.first }
+		);
+		break;
+	}
+	}
 }
 
 //------------------------------------------------------------------------------

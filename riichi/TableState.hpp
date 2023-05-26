@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Declare.hpp"
+#include "Hand.hpp"
 #include "NamedUnion.hpp"
 #include "PlayerCount.hpp"
 #include "Seat.hpp"
@@ -145,11 +146,11 @@ struct Turn_AI
 struct Turn_User
 	: BaseTurn
 {
-	Turn_User( Table& i_table, Seat i_seat, bool i_canTsumo, bool i_canRiichi, bool i_canKan );
+	Turn_User( Table& i_table, Seat i_seat, bool i_canTsumo, bool i_canRiichi, Vector<Hand::DrawKanResult> i_kanOptions );
 
 	bool CanTsumo() const { return m_canTsumo; }
 	bool CanRiichi() const { return m_canTsumo; }
-	bool CanKan() const { return m_canKan; }
+	bool CanKan() const { return !m_kanOptions.empty(); }
 
 	void Tsumo() const;
 	void Discard( Tile const& i_tile ) const;
@@ -159,32 +160,31 @@ struct Turn_User
 private:
 	bool m_canTsumo;
 	bool m_canRiichi;
-	bool m_canKan;
+	Vector<Hand::DrawKanResult> m_kanOptions;
 };
 
 //------------------------------------------------------------------------------
 struct BetweenTurns
 	: Base
 {
-	BetweenTurns( Table& i_table, Option<Seat> i_canChi, SeatSet i_canPon, SeatSet i_canKan, SeatSet i_canRon );
+	BetweenTurns( Table& i_table, Pair<Seat, Vector<Pair<Tile, Tile>>> i_canChi, SeatSet i_canPon, SeatSet i_canKan, SeatSet i_canRon );
 
 	// TODO-AI indication about AI intent (to allow AI to jump in before user, depending on game implementation)
 
-	Option<Seat> CanChi() const { return m_canChi; }
+	Pair<Seat, Vector<Pair<Tile, Tile>>> const& CanChi() const { return m_canChi; }
 	SeatSet const& CanPon() const { return m_canPon; }
 	SeatSet const& CanKan() const { return m_canKan; }
 	SeatSet const& CanRon() const { return m_canRon; }
 
 	// If any calls are made by AI, they will only happen in UserPass or UserRon
-	// TODO-MVP: disambiguate calls if they can form multiple melds
 	void UserPass() const;
-	void UserChi( Seat i_user ) const;
+	void UserChi( Seat i_user, Pair<Tile, Tile> const& i_option ) const;
 	void UserPon( Seat i_user ) const;
 	void UserKan( Seat i_user ) const;
 	void UserRon( SeatSet const& i_users ) const;
 
 private:
-	Option<Seat> m_canChi;
+	Pair<Seat, Vector<Pair<Tile, Tile>>> m_canChi;
 	SeatSet m_canPon;
 	SeatSet m_canKan;
 	SeatSet m_canRon;

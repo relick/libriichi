@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include "Containers.hpp"
 #include "Declare.hpp"
@@ -17,6 +17,7 @@ class RoundData
 		size_t m_playerIndex; // index to Table's player list
 		Option<size_t> m_riichiDiscardTile;
 		Vector<Tile> m_discards;
+		Vector<Tile> m_visibleDiscards; // Called tiles removed from this list
 		Hand m_hand;
 		Option<Tile> m_draw; // Currently drawn tile
 
@@ -46,6 +47,7 @@ public:
 	bool CalledDoubleRiichi( Seat i_player ) const;
 	bool RiichiIppatsuValid( Seat i_player ) const;
 	Vector<Tile> const& Discards( Seat i_player ) const;
+	Vector<Tile> const& VisibleDiscards( Seat i_player ) const;
 	Hand const& GetHand( Seat i_player ) const;
 	Option<Tile> const& DrawnTile( Seat i_player ) const;
 	size_t WallTilesRemaining() const;
@@ -76,8 +78,13 @@ public:
 	Tile DrawTile();
 
 	// Player turn actions
-	Tile DiscardDrawn();
-	Tile PassCalls(); // draws for next player
+	Tile DiscardDrawn(); // returns discarded tile
+	Tile DiscardHandTile( Tile const& i_discard ); // returns discarded tile
+	Tile PassCalls(); // draws for next player, returns draw
+	Tile HandKan( Tile const& i_tile ); // returns dead wall draw ☠
+	Pair<Seat, Tile> Chi( Seat i_caller, Pair<Tile, Tile> const& i_meldTiles ); // returns called tile and called from
+	Pair<Seat, Tile> Pon( Seat i_caller ); // returns called tile and called from
+	Pair<Seat, Tile> DiscardKan( Seat i_caller ); // returns called tile and called from
 };
 
 }

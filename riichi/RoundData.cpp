@@ -73,6 +73,15 @@ Vector<Tile> const& RoundData::Discards
 }
 
 //------------------------------------------------------------------------------
+Vector<Tile> const& RoundData::VisibleDiscards
+(
+	Seat i_player
+)	const
+{
+	return m_players[ ( size_t )i_player ].m_visibleDiscards;
+}
+
+//------------------------------------------------------------------------------
 Hand const& RoundData::GetHand
 (
 	Seat i_player
@@ -274,8 +283,23 @@ Tile RoundData::DiscardDrawn
 	RoundPlayerData& player = m_players[ ( size_t )m_currentTurn ];
 	Tile discarded = player.m_draw.value();
 	player.m_discards.emplace_back( discarded );
+	player.m_visibleDiscards.emplace_back( discarded );
 	player.m_draw.reset();
 	return discarded;
+}
+
+//------------------------------------------------------------------------------
+Tile RoundData::DiscardHandTile
+(
+	Tile const& i_discard
+)
+{
+	RoundPlayerData& player = m_players[ ( size_t )m_currentTurn ];
+	player.m_discards.emplace_back( i_discard );
+	player.m_visibleDiscards.emplace_back( i_discard );
+	player.m_hand.Discard( i_discard, player.m_draw.value() );
+	player.m_draw.reset();
+	return i_discard;
 }
 
 //------------------------------------------------------------------------------
@@ -283,12 +307,85 @@ Tile RoundData::PassCalls
 (
 )
 {
-	do
-	{
-		m_currentTurn = Next( m_currentTurn );
-	} while ( ( size_t )m_currentTurn >= m_players.size() );
+	m_currentTurn = NextPlayer( m_currentTurn, m_players.size() );
 	m_players[ ( size_t )m_currentTurn ].m_draw = DrawTile();
 	return m_players[ ( size_t )m_currentTurn ].m_draw.value();
+}
+
+//------------------------------------------------------------------------------
+Tile RoundData::HandKan
+(
+	Tile const& i_tile
+)
+{
+	RoundPlayerData& player = m_players[ ( size_t )m_currentTurn ];
+	player.m_hand.MakeKan( i_tile, std::nullopt );
+
+	Ensure( WallTilesRemaining() >= 1, "Tried to draw more tiles than in wall" );
+	Ensure( m_deadWallDrawsRemaining >= 1, "Tried to draw more tiles than in dead wall pool" );
+
+	Tile drawn = std::move( m_wall.front() );
+	m_wall.erase( m_wall.begin() );
+	return drawn;
+}
+
+//------------------------------------------------------------------------------
+Pair<Seat, Tile> RoundData::Chi
+(
+	Seat i_caller,
+	Pair<Tile, Tile> const& i_meldTiles
+)
+{
+	RoundPlayerData& current = m_players[ ( size_t )m_currentTurn ];
+	Pair<Seat, Tile> const ret{ m_currentTurn, current.m_discards.back() };
+
+	// Disappear it from the visible discards in front of the player
+	current.m_visibleDiscards.pop_back();
+
+	RoundPlayerData& caller = m_players[ ( size_t )i_caller ];
+	caller.m_hand.MakeMeld( ret, { i_meldTiles.first, i_meldTiles.second }, GroupType::Sequence );
+
+	return ret;
+}
+
+//------------------------------------------------------------------------------
+Pair<Seat, Tile> RoundData::Pon
+(
+	Seat i_caller
+)
+{
+	// TODO-RULES: Uhhhh I guess I forgot that you might want to pon and have different options too like a chi
+	RoundPlayerData& current = m_players[ ( size_t )m_currentTurn ];
+	Pair<Seat, Tile> const ret{ m_currentTurn, current.m_discards.back() };
+
+	// Disappear it from the visible discards in front of the player
+	current.m_visibleDiscards.pop_back();
+
+	RoundPlayerData& caller = m_players[ ( size_t )i_caller ];
+	auto tile1 = std::find( caller.m_hand.FreeTiles().begin(), caller.m_hand.FreeTiles().end(), ret.second);
+	auto tile2 = std::find( tile1 + 1, caller.m_hand.FreeTiles().end(), ret.second );
+
+	caller.m_hand.MakeMeld( ret, { *tile1, *tile2 }, GroupType::Triplet );
+
+	return ret;
+}
+
+//------------------------------------------------------------------------------
+Pair<Seat, Tile> RoundData::DiscardKan
+(
+	Seat i_caller
+)
+{
+	RoundPlayerData& current = m_players[ ( size_t )m_currentTurn ];
+	Pair<Seat, Tile> const ret{ m_currentTurn, current.m_discards.back() };
+
+	// Disappear it from the visible discards in front of the player
+	current.m_visibleDiscards.pop_back();
+
+	RoundPlayerData& caller = m_players[ ( size_t )i_caller ];
+	caller.m_hand.MakeKan( ret.second, ret.first );
+
+	return ret;
 }
 
 }
