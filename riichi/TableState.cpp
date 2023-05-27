@@ -69,7 +69,7 @@ void BetweenRounds::StartRound
 		Hand const& playerHand = round.GetHand( round.CurrentTurn() );
 
 		bool const allowedToRiichi = playerHand.Melds().empty() && !round.CalledRiichi( round.CurrentTurn() );
-		auto const [validWaits, canRiichi] = table.m_rules->WaitsWithYaku(
+		auto const [ validWaits, canRiichi ] = table.m_rules->WaitsWithYaku(
 			round,
 			round.CurrentTurn(),
 			playerHand,
@@ -174,7 +174,7 @@ void Turn_AI::MakeDecision
 		}
 
 		bool constexpr c_allowedToRiichi = false;
-		auto const [validWaits, canRiichi] = table.m_rules->WaitsWithYaku(
+		auto const [ validWaits, canRiichi ] = table.m_rules->WaitsWithYaku(
 			round,
 			seat,
 			round.GetHand( seat ),
@@ -306,7 +306,7 @@ void Turn_User::Discard
 		}
 
 		bool constexpr c_allowedToRiichi = false;
-		auto const [validWaits, canRiichi] = table.m_rules->WaitsWithYaku(
+		auto const [ validWaits, canRiichi ] = table.m_rules->WaitsWithYaku(
 			round,
 			seat,
 			round.GetHand( seat ),
@@ -361,7 +361,7 @@ void Turn_User::Riichi
 		}
 
 		bool constexpr c_allowedToRiichi = false;
-		auto const [validWaits, canRiichi] = table.m_rules->WaitsWithYaku(
+		auto const [ validWaits, canRiichi ] = table.m_rules->WaitsWithYaku(
 			round,
 			seat,
 			round.GetHand( seat ),
@@ -404,7 +404,7 @@ void Turn_User::Kan
 		{
 			Seat const seat = ( Seat )seatI;
 			bool constexpr c_allowedToRiichi = false;
-			auto const [validWaits, canRiichi] = table.m_rules->WaitsWithYaku(
+			auto const [ validWaits, canRiichi ] = table.m_rules->WaitsWithYaku(
 				round,
 				seat,
 				round.GetHand( seat ),
@@ -747,7 +747,7 @@ void RonAKanChance::Pass
 		Hand const& playerHand = round.GetHand( round.CurrentTurn() );
 
 		bool const allowedToRiichi = playerHand.Melds().empty() && !round.CalledRiichi( round.CurrentTurn() );
-		auto const [validWaits, canRiichi] = table.m_rules->WaitsWithYaku(
+		auto const [ validWaits, canRiichi ] = table.m_rules->WaitsWithYaku(
 			round,
 			round.CurrentTurn(),
 			playerHand,

@@ -152,6 +152,7 @@ struct Turn_User
 	bool CanTsumo() const { return m_canTsumo; }
 	bool CanRiichi() const { return m_canTsumo; }
 	bool CanKan() const { return !m_kanOptions.empty(); }
+	Vector<Hand::DrawKanResult> const& KanOptions() const { return m_kanOptions; }
 
 	void Tsumo() const;
 	void Discard( Option<Tile> const& i_handTileToDiscard ) const; // nullopt will discard drawn tile

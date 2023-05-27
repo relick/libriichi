@@ -157,7 +157,10 @@ int main()
 				if ( input.starts_with( "kan" ) && turn.CanKan() )
 				{
 					Riichi::Option<Riichi::Tile> const tile = fnParseTile( input.substr( 4 ) );
-					if ( tile.has_value() )
+					if ( tile.has_value() && std::ranges::any_of( turn.KanOptions(), [ & ]( auto const& i_option ) -> bool
+						{
+							return i_option.kanTile == tile.value();
+						} ) )
 					{
 						turn.Kan( tile.value() );
 						break;
@@ -173,8 +176,16 @@ int main()
 					Riichi::Option<Riichi::Tile> const tile = fnParseTile( input.substr( 7 ) );
 					if ( tile.has_value() )
 					{
-						turn.Riichi( tile == turn.GetDrawnTile() ? std::nullopt : tile );
-						break;
+						if ( tile == turn.GetDrawnTile() )
+						{
+							turn.Riichi( std::nullopt );
+							break;
+						}
+						else if ( std::ranges::contains( turn.GetHand().FreeTiles(), tile.value() ) )
+						{
+							turn.Riichi( tile );
+							break;
+						}
 					}
 				}
 				else
@@ -182,8 +193,16 @@ int main()
 					Riichi::Option<Riichi::Tile> const tile = fnParseTile( input );
 					if ( tile.has_value() )
 					{
-						turn.Discard( tile == turn.GetDrawnTile() ? std::nullopt : tile );
-						break;
+						if ( tile == turn.GetDrawnTile() )
+						{
+							turn.Discard( std::nullopt );
+							break;
+						}
+						else if ( std::ranges::contains( turn.GetHand().FreeTiles(), tile.value() ) )
+						{
+							turn.Discard( tile );
+							break;
+						}
 					}
 				}
 			}

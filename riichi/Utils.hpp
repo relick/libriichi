@@ -229,16 +229,18 @@ T_Container Append( T_Container i_c, T_Value i_v )
 
 //------------------------------------------------------------------------------
 template<typename T_Container, typename T_Pred>
-void EraseOne( T_Container& i_c, T_Pred i_fnPred )
+bool EraseOne( T_Container& i_c, T_Pred i_fnPred )
 {
 	for ( auto i = i_c.begin(); i != i_c.end(); ++i )
 	{
 		if ( i_fnPred( *i ) )
 		{
 			i_c.erase( i );
-			return;
+			return true;
 		}
 	}
+
+	return false;
 }
 
 //------------------------------------------------------------------------------

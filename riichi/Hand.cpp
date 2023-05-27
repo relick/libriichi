@@ -27,12 +27,13 @@ void Hand::Discard
 	Option<TileDraw> const& i_drawToAdd
 )
 {
-	Utils::EraseOne( m_freeTiles,
+	bool const success = Utils::EraseOne( m_freeTiles,
 		[ & ]( Tile const& i_tile )
 		{
 			return StrictEqualTo( i_tile, i_toDiscard );
 		}
 	);
+	Ensure( success, "Failed to discard tile - invalid?" );
 
 	if ( i_drawToAdd.has_value() )
 	{
