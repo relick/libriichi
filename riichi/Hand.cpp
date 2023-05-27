@@ -248,7 +248,10 @@ Vector<Hand::DrawKanResult> Hand::DrawKanOptions
 		if ( results.empty() )
 		{
 			size_t const othersCount = std::ranges::count( m_freeTiles, *i_drawnTile );
-			results.push_back( { *i_drawnTile, true } );
+			if ( othersCount >= 3 )
+			{
+				results.push_back( { *i_drawnTile, true } );
+			}
 		}
 	}
 
