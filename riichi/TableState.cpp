@@ -212,9 +212,7 @@ void Turn_User::Tsumo
 (
 )	const
 {
-	// TODO-MVP
 	Table& table = m_table.get();
-	table.Transition( TableStates::GameOver{table}, std::string( "nyi" ) );
 
 	Ensure( m_canTsumo, "This user cannot tsumo" );
 
@@ -224,7 +222,44 @@ void Turn_User::Tsumo
 	TileDraw const& tileDraw = round.DrawnTile( round.CurrentTurn() ).value();
 	Hand const hand = round.GetHand( round.CurrentTurn() );
 
-	//table.m_rules->CalculateBasicPoints();
+	HandScore const score = table.m_rules->CalculateBasicPoints(
+		round,
+		round.CurrentTurn(),
+		hand,
+		tileDraw
+	);
+
+	Tile const winningTile = round.Tsumo( score );
+
+	bool const isDealer = round.IsDealer( round.CurrentTurn() );
+	Pair<Points, Points> const winnings = table.m_rules->PointsFromEachPlayerTsumo( score.first, isDealer );
+
+	for ( size_t seatI = 0; seatI < table.m_players.size(); ++seatI )
+	{
+		Seat const seat = ( Seat )seatI;
+		if ( seat == round.CurrentTurn() )
+		{
+			table.m_standings.m_points[ ( size_t )seat ] += static_cast<Points>(
+				isDealer
+				? ( ( table.m_players.size() - 1 ) * winnings.second )
+				: ( winnings.first + ( table.m_players.size() - 2 ) * winnings.second )
+				);
+		}
+		else if ( round.IsDealer( seat ) )
+		{
+			table.m_standings.m_points[ ( size_t )seat ] -= winnings.first;
+		}
+		else
+		{
+			table.m_standings.m_points[ ( size_t )seat ] -= winnings.second;
+		}
+	}
+
+	// TODO-RULES: allow for negative points play
+	table.Transition(
+		TableStates::BetweenRounds( table ),
+		{ TableEvent::Tag<TableEventType::Tsumo>(), winningTile, round.CurrentTurn() }
+	);
 }
 
 //------------------------------------------------------------------------------

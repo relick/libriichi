@@ -96,7 +96,7 @@ Pair<Set<Tile>, bool> StandardYonma::WaitsWithYaku
 }
 
 //------------------------------------------------------------------------------
-Pair<Points, Vector<Pair<char const*, HanValue>>> StandardYonma::CalculateBasicPoints
+HandScore StandardYonma::CalculateBasicPoints
 (
 	RoundData const& i_round,
 	Seat const& i_playerSeat,

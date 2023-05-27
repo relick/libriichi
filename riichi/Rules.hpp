@@ -13,6 +13,9 @@ namespace Riichi
 {
 
 //------------------------------------------------------------------------------
+using HandScore = Pair<Points, Vector<Pair<char const*, HanValue>>>;
+
+//------------------------------------------------------------------------------
 struct Rules
 {
 	virtual ~Rules() = default;
@@ -35,7 +38,7 @@ struct Rules
 		bool i_considerForRiichi
 	) const = 0;
 
-	virtual Pair<Points, Vector<Pair<char const*, HanValue>>> CalculateBasicPoints
+	virtual HandScore CalculateBasicPoints
 	(
 		RoundData const& i_round,
 		Seat const& i_playerSeat,

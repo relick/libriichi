@@ -4,6 +4,7 @@
 #include "Declare.hpp"
 #include "Hand.hpp"
 #include "Random.hpp"
+#include "Rules.hpp"
 #include "Seat.hpp"
 
 namespace Riichi
@@ -21,6 +22,7 @@ class RoundData
 		bool m_tempFuriten{ false }; // Passing up on a ron sets this true until next turn, or until the end of the game if riichi'd
 		Hand m_hand;
 		Option<TileDraw> m_draw; // Currently drawn tile
+		Option<HandScore> m_winningScore;
 
 		explicit RoundPlayerData( size_t i_playerI ) : m_playerIndex( i_playerI ) {}
 
@@ -81,6 +83,7 @@ public:
 	// Player turn actions
 	Tile Discard( Option<Tile> const& i_handTileToDiscard ); // returns discarded tile
 	Tile Riichi( Option<Tile> const& i_handTileToDiscard ); // returns discarded tile
+	Tile Tsumo( HandScore const& i_score ); // returns winning tile
 	TileDraw PassCalls( SeatSet const& i_couldRon ); // draws for next player, returns draw
 	Hand::KanResult HandKan( Tile const& i_tile ); // returns if kan was upgraded pon
 	TileDraw HandKanRonPass(); // returns dead wall draw ☠

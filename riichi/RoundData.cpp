@@ -306,6 +306,20 @@ Tile RoundData::Riichi
 }
 
 //------------------------------------------------------------------------------
+Tile RoundData::Tsumo
+(
+	HandScore const& i_score
+)
+{
+	RoundPlayerData& player = m_players[ ( size_t )m_currentTurn ];
+	Ensure( player.m_draw.has_value(), "Cannot tsumo without draw tile" );
+
+	player.m_winningScore = i_score;
+
+	return player.m_draw.value().m_tile;
+}
+
+//------------------------------------------------------------------------------
 TileDraw RoundData::PassCalls
 (
 	SeatSet const& i_couldRon

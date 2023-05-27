@@ -27,7 +27,7 @@ public:
 		bool i_considerForRiichi
 	) const override;
 
-	Pair<Points, Vector<Pair<char const*, HanValue>>> CalculateBasicPoints
+	HandScore CalculateBasicPoints
 	(
 		RoundData const& i_round,
 		Seat const& i_playerSeat,
