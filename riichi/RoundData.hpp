@@ -79,8 +79,8 @@ public:
 	TileDraw DealHands();
 
 	// Player turn actions
-	Tile DiscardDrawn(); // returns discarded tile
-	Tile DiscardHandTile( Tile const& i_discard ); // returns discarded tile
+	Tile Discard( Option<Tile> const& i_handTileToDiscard ); // returns discarded tile
+	Tile Riichi( Option<Tile> const& i_handTileToDiscard ); // returns discarded tile
 	TileDraw PassCalls( SeatSet const& i_couldRon ); // draws for next player, returns draw
 	TileDraw HandKan( Tile const& i_tile ); // returns dead wall draw ☠
 	Pair<Seat, Tile> Chi( Seat i_caller, Pair<Tile, Tile> const& i_meldTiles ); // returns called tile and called from

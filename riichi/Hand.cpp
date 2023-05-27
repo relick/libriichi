@@ -24,7 +24,7 @@ void Hand::AddFreeTiles
 void Hand::Discard
 (
 	Tile const& i_toDiscard,
-	Tile const& i_drawToAdd
+	Option<TileDraw> const& i_drawToAdd
 )
 {
 	Utils::EraseOne( m_freeTiles,
@@ -33,8 +33,12 @@ void Hand::Discard
 			return StrictEqualTo( i_tile, i_toDiscard );
 		}
 	);
-	m_freeTiles.push_back( i_drawToAdd );
-	std::ranges::sort( m_freeTiles ); // TODO-QOL: players may not always want their hand sorted
+
+	if ( i_drawToAdd.has_value() )
+	{
+		m_freeTiles.push_back( i_drawToAdd.value().m_tile );
+		std::ranges::sort( m_freeTiles ); // TODO-QOL: players may not always want their hand sorted
+	}
 }
 
 //------------------------------------------------------------------------------

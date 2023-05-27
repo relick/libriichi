@@ -154,8 +154,8 @@ struct Turn_User
 	bool CanKan() const { return !m_kanOptions.empty(); }
 
 	void Tsumo() const;
-	void Discard( Tile const& i_tile, bool i_drawnTile ) const; // Ask for if it's the drawn tile or not as there might also be one in the hand
-	void Riichi( Tile const& i_tile ) const;
+	void Discard( Option<Tile> const& i_handTileToDiscard ) const; // nullopt will discard drawn tile
+	void Riichi( Option<Tile> const& i_handTileToDiscard ) const; // nullopt will discard drawn tile
 	void Kan( Tile const& i_tile ) const; // Will meld the 4 matching tiles if a closed kan
 
 private:

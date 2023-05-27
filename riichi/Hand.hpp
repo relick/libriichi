@@ -46,7 +46,7 @@ public:
 	Vector<Tile> const& FreeTiles() const { return m_freeTiles; }
 	Vector<Meld> const& Melds() const { return m_melds; }
 	void AddFreeTiles( Vector<Tile> const& i_newTiles );
-	void Discard( Tile const& i_toDiscard, Tile const& i_drawToAdd );
+	void Discard( Tile const& i_toDiscard, Option<TileDraw> const& i_drawToAdd );
 	void MakeMeld( Pair<Seat, Tile> const& i_meldTile, Pair<Tile, Tile> const& i_otherTiles, GroupType i_meldType );
 	void MakeKan( Tile const& i_meldTile, Option<Seat> i_calledFrom );
 

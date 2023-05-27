@@ -299,30 +299,40 @@ Tile RoundData::DrawTile
 }
 
 //------------------------------------------------------------------------------
-Tile RoundData::DiscardDrawn
+Tile RoundData::Discard
 (
+	Option<Tile> const& i_handTileToDiscard
 )
 {
 	RoundPlayerData& player = m_players[ ( size_t )m_currentTurn ];
-	Tile discarded = player.m_draw.value().m_tile;
+	Tile discarded = [ & ]()
+	{
+		if ( i_handTileToDiscard.has_value() )
+		{
+			return i_handTileToDiscard.value();
+		}
+		Ensure( player.m_draw.has_value(), "Tried to discard drawn tile but didn't have one" );
+		return player.m_draw.value().m_tile;
+	}();
 	player.m_discards.emplace_back( discarded );
 	player.m_visibleDiscards.emplace_back( discarded );
+	if ( i_handTileToDiscard.has_value() )
+	{
+		player.m_hand.Discard( discarded, player.m_draw );
+	}
 	player.m_draw.reset();
 	return discarded;
 }
 
 //------------------------------------------------------------------------------
-Tile RoundData::DiscardHandTile
+Tile RoundData::Riichi
 (
-	Tile const& i_discard
+	Option<Tile> const& i_handTileToDiscard
 )
 {
 	RoundPlayerData& player = m_players[ ( size_t )m_currentTurn ];
-	player.m_discards.emplace_back( i_discard );
-	player.m_visibleDiscards.emplace_back( i_discard );
-	player.m_hand.Discard( i_discard, player.m_draw.value().m_tile );
-	player.m_draw.reset();
-	return i_discard;
+	player.m_riichiDiscardTile = player.m_discards.size();
+	return Discard( i_handTileToDiscard );
 }
 
 //------------------------------------------------------------------------------

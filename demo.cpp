@@ -83,7 +83,14 @@ int main()
 		{
 			Riichi::TableStates::Turn_User const& turn = state.Get<Turn_User>();
 			std::cout << "Player in seat " << ToString( turn.GetSeat() ) << " taking turn" << std::endl;
-			turn.Discard( turn.GetDrawnTile().value_or( turn.GetHand().FreeTiles().back() ), turn.GetDrawnTile().has_value() );
+			if ( turn.GetDrawnTile().has_value() )
+			{
+				turn.Discard( std::nullopt );
+			}
+			else
+			{
+				turn.Discard( turn.GetHand().FreeTiles().back() );
+			}
 			break;
 		}
 		case BetweenTurns:
