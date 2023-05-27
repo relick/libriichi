@@ -39,6 +39,7 @@ public:
 
 	Pair<Points, Points> PointsFromEachPlayerTsumo( Points i_basicPoints, bool i_isDealer ) const override;
 	Points PointsFromPlayerRon( Points i_basicPoints, bool i_isDealer ) const override;
+	Pair<Points, Points> PointsEachPlayerInTenpaiDraw( size_t i_playersInTenpai ) const override;
 
 private:
 	static Points RoundTo100( Points i_finalPoints );

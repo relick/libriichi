@@ -49,6 +49,7 @@ struct Rules
 
 	virtual Pair<Points, Points> PointsFromEachPlayerTsumo( Points i_basicPoints, bool i_isDealer ) const = 0;
 	virtual Points PointsFromPlayerRon( Points i_basicPoints, bool i_isDealer ) const = 0;
+	virtual Pair<Points, Points> PointsEachPlayerInTenpaiDraw( size_t i_playersInTenpai ) const = 0;
 
 	template<typename T_Visitor>
 	void VisitInterpreters( T_Visitor&& i_visitor ) const;

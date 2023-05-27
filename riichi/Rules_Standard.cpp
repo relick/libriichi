@@ -347,6 +347,26 @@ Points StandardYonma::PointsFromPlayerRon
 }
 
 //------------------------------------------------------------------------------
+Pair<Points, Points> StandardYonma::PointsEachPlayerInTenpaiDraw
+(
+	size_t i_playersInTenpai
+)	const
+{
+	if ( i_playersInTenpai == 0 )
+	{
+		return { 0, 0 };
+	}
+
+	size_t const playerCount = GetPlayerCount().Get();
+	size_t const playersNotInTenpai = playerCount - i_playersInTenpai;
+	size_t const pointsAvailable = playersNotInTenpai * 1000;
+	Points const pointsGainedPerTenpaiPlayer = static_cast< Points >( pointsAvailable / i_playersInTenpai );
+	Points const pointsPaidPerNonTenpaiPlayer = static_cast< Points >( pointsAvailable / playersNotInTenpai );
+
+	return { pointsGainedPerTenpaiPlayer, pointsPaidPerNonTenpaiPlayer };
+}
+
+//------------------------------------------------------------------------------
 /*static*/ Points StandardYonma::RoundTo100
 (
 	Points i_finalPoints

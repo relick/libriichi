@@ -456,7 +456,33 @@ void BetweenTurns::UserPass
 
 	if ( round.WallTilesRemaining() == 0u )
 	{
-		// TODO-MVP: set tenpai etc.
+		// TODO-MVP: nagashi mangan
+
+		size_t totalInTenpai = 0;
+		for ( size_t seatI = 0; seatI < table.m_players.size(); ++seatI )
+		{
+			Seat const seat = ( Seat )seatI;
+			if ( !HandAssessment( round.GetHand( seat ), *table.m_rules ).Waits().empty() )
+			{
+				round.AddFinishedInTenpai( seat );
+				++totalInTenpai;
+			}
+		}
+
+		auto const [ pointsForEachPlayer, pointsFromEachPlayer ] = table.m_rules->PointsEachPlayerInTenpaiDraw( totalInTenpai );
+		for ( size_t seatI = 0; seatI < table.m_players.size(); ++seatI )
+		{
+			Seat const seat = ( Seat )seatI;
+			if ( round.FinishedInTenpai( seat ) )
+			{
+				table.m_standings.m_points[ ( size_t )seat ] += pointsForEachPlayer;
+			}
+			else
+			{
+				table.m_standings.m_points[ ( size_t )seat ] -= pointsForEachPlayer;
+			}
+		}
+
 		// TODO-RULES: allow for negative points play
 		if ( std::ranges::any_of( table.m_standings.m_points, []( Points i_points ) { return i_points < 0; } )
 			|| round.NoMoreRounds( *table.m_rules ) )
