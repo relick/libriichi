@@ -109,6 +109,20 @@ Hand const& BaseTurn::GetHand
 }
 
 //------------------------------------------------------------------------------
+Option<Tile> BaseTurn::GetDrawnTile
+(
+)	const
+{
+	Table& table = m_table.get();
+	Option<TileDraw> const& drawnTile = table.GetRoundData().DrawnTile( m_seat );
+	if ( drawnTile.has_value() )
+	{
+		return drawnTile.value().m_tile;
+	}
+	return std::nullopt;
+}
+
+//------------------------------------------------------------------------------
 Turn_AI::Turn_AI
 (
 	Table& i_table,
@@ -192,12 +206,57 @@ void Turn_User::Tsumo
 //------------------------------------------------------------------------------
 void Turn_User::Discard
 (
-	Tile const& i_tile
+	Tile const& i_tile,
+	bool i_drawnTile
 )	const
 {
-	// TODO-MVP
 	Table& table = m_table.get();
-	table.Transition( TableStates::GameOver{table}, std::string( "nyi" ) );
+
+	RoundData& round = table.m_rounds.back();
+	Tile const discardedTile = [ & ]() -> Tile
+	{
+		if ( i_drawnTile )
+		{
+			// Technically don't need to care what i_tile is, but may as well!
+			Ensure( i_tile == round.DrawnTile( round.CurrentTurn() ).value().m_tile, "Tried to discard drawn tile but provided tile wasn't the drawn tile" );
+			return round.DiscardDrawn();
+		}
+		return round.DiscardHandTile( i_tile );
+	}();
+
+	// TODO-DEBT: can this be pulled into a function instead of repeating it?
+
+	// TODO-RULES: call options (particularly chi) should be controllable by rules
+	Seat const nextPlayer = NextPlayer( round.CurrentTurn(), table.m_players.size() );
+	Pair<Seat, Vector<Pair<Tile, Tile>>> canChi{nextPlayer, round.GetHand( nextPlayer ).ChiOptions( discardedTile )};
+	SeatSet canPon;
+	SeatSet canKan;
+	SeatSet canRon;
+
+	for ( size_t seatI = 0; seatI < table.m_players.size(); ++seatI )
+	{
+		Seat const seat = ( Seat )seatI;
+		if ( round.GetHand( seat ).CanPon( discardedTile ) )
+		{
+			canPon.Insert( seat );
+		}
+		if ( round.GetHand( seat ).CanCallKan( discardedTile ) )
+		{
+			canKan.Insert( seat );
+		}
+
+		Hand const& seatHand = round.GetHand( seat );
+		HandAssessment const assessment( seatHand, *table.m_rules );
+		if ( assessment.Waits().contains( discardedTile ) && !round.Furiten( seat, assessment.Waits() ) )
+		{
+			canRon.Insert( seat );
+		}
+	}
+
+	table.Transition(
+		TableStates::BetweenTurns{table, std::move( canChi ), std::move( canPon ), std::move( canKan ), std::move( canRon )},
+		TableEvent{ TableEvent::Tag<TableEventType::Discard>(), discardedTile, round.CurrentTurn() }
+	);
 }
 
 //------------------------------------------------------------------------------
