@@ -81,7 +81,7 @@ void BetweenRounds::StartRound
 
 		Vector<Hand::DrawKanResult> kanOptions = round.GetHand( round.CurrentTurn() ).DrawKanOptions( nullptr );
 		table.Transition(
-			TableStates::Turn_User{table, round.CurrentTurn(), canRiichi, canTsumo, std::move( kanOptions )},
+			TableStates::Turn_User{table, round.CurrentTurn(), canTsumo, canRiichi, std::move( kanOptions )},
 			TableEvent{ TableEvent::Tag<TableEventType::DealerDraw>(), firstDrawnTile, round.CurrentTurn() }
 		);
 		break;
@@ -523,7 +523,7 @@ void BetweenTurns::UserPass
 
 		Vector<Hand::DrawKanResult> kanOptions = round.GetHand( round.CurrentTurn() ).DrawKanOptions( nullptr );
 		table.Transition(
-			TableStates::Turn_User{table, round.CurrentTurn(), canRiichi, canTsumo, std::move( kanOptions )},
+			TableStates::Turn_User{table, round.CurrentTurn(), canTsumo, canRiichi, std::move( kanOptions )},
 			TableEvent{ TableEvent::Tag<TableEventType::Draw>(), drawnTile, round.CurrentTurn() }
 		);
 		break;
@@ -759,7 +759,7 @@ void RonAKanChance::Pass
 
 		Vector<Hand::DrawKanResult> kanOptions = round.GetHand( round.CurrentTurn() ).DrawKanOptions( nullptr );
 		table.Transition(
-			TableStates::Turn_User{table, round.CurrentTurn(), canRiichi, canTsumo, std::move( kanOptions )},
+			TableStates::Turn_User{table, round.CurrentTurn(), canTsumo, canRiichi, std::move( kanOptions )},
 			TableEvent{ TableEvent::Tag<TableEventType::Draw>(), deadWallDraw, round.CurrentTurn() }
 		);
 		break;
