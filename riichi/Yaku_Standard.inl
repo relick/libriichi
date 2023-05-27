@@ -29,7 +29,7 @@ HanValue DragonYakuhai<t_YakuhaiName, t_DragonType>::CalculateValue
 		}
 	}
 
-	if ( i_interp.m_waitType == WaitType::Shanpon && ValidTile( i_nextTile ) )
+	if ( i_interp.m_waitType == WaitType::Shanpon && ValidTile( i_lastTile.m_tile ) )
 	{
 		return 1;
 	}

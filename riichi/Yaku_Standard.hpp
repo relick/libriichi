@@ -78,8 +78,7 @@ struct DragonYakuhai
 		Hand const& i_hand,
 		HandAssessment const& i_assessment,
 		HandInterpretation const& i_interp,
-		Tile const& i_nextTile,
-		TileDrawType i_nextTileType
+		TileDraw const& i_lastTile
 	) const final;
 
 private:

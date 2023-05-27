@@ -45,7 +45,7 @@ struct Yaku
 	virtual char const* Name() const = 0;
 	virtual char const* IntepreterName() const = 0;
 
-	// NB do not need to check whether i_nextTile is in the interp's waits - it will be
+	// NB do not need to check whether i_lastTile is in the interp's waits - it will be
 	virtual HanValue CalculateValue
 	(
 		RoundData const& i_round,
@@ -53,8 +53,7 @@ struct Yaku
 		Hand const& i_hand,
 		HandAssessment const& i_assessment,
 		HandInterpretation const& i_interp,
-		Tile const& i_nextTile,
-		TileDrawType i_nextTileType
+		TileDraw const& i_lastTile
 	) const = 0;
 };
 
@@ -91,8 +90,7 @@ Seat const& i_playerSeat,					\
 Hand const& i_hand,							\
 HandAssessment const& i_assessment,			\
 HandInterpretation const& i_interp,			\
-Tile const& i_nextTile,						\
-TileDrawType i_nextTileType
+TileDraw const& i_lastTile
 
 #define BEGIN_YAKU( NAME, INTERPRETER )		\
 struct NAME									\

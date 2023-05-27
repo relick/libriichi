@@ -201,6 +201,16 @@ void Turn_User::Tsumo
 	// TODO-MVP
 	Table& table = m_table.get();
 	table.Transition( TableStates::GameOver{table}, std::string( "nyi" ) );
+
+	Ensure( m_canTsumo, "This user cannot tsumo" );
+
+	RoundData& round = table.m_rounds.back();
+
+	Ensure( round.DrawnTile( round.CurrentTurn() ).has_value(), "Cannot tsumo without drawn tile" );
+	TileDraw const& tileDraw = round.DrawnTile( round.CurrentTurn() ).value();
+	Hand const hand = round.GetHand( round.CurrentTurn() );
+
+	//table.m_rules->CalculateValue();
 }
 
 //------------------------------------------------------------------------------
@@ -257,6 +267,8 @@ void Turn_User::Riichi
 {
 	Table& table = m_table.get();
 
+	Ensure( m_canRiichi, "This user cannot riichi" );
+
 	RoundData& round = table.m_rounds.back();
 	Tile const discardedTile = round.Riichi( i_handTileToDiscard );
 
@@ -302,6 +314,11 @@ void Turn_User::Kan
 )	const
 {
 	Table& table = m_table.get();
+
+	Ensure( std::ranges::any_of( m_kanOptions, [ & ]( Hand::DrawKanResult const& i_option ) -> bool
+		{
+			return i_option.kanTile == i_tile;
+		}), "This user cannot kan with provided tile");
 
 	RoundData& round = table.m_rounds.back();
 	Hand::KanResult const kanResult = round.HandKan( i_tile );

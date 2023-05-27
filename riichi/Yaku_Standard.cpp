@@ -21,7 +21,7 @@ HanValue MenzenchinTsumohou::CalculateValue
 	YAKU_CALCULATEVALUE_PARAMS()
 )	const
 {
-	if ( !i_assessment.m_open && i_nextTileType != TileDrawType::DiscardDraw )
+	if ( !i_assessment.m_open && i_lastTile.m_type != TileDrawType::DiscardDraw )
 	{
 		return 1;
 	}
@@ -125,7 +125,7 @@ HanValue Iipeikou::CalculateValue
 	if ( SequenceWait( i_interp.m_waitType ) )
 	{
 		// Need to consider the final group, as it completed a sequence
-		HandGroup const finalGroup( i_interp, i_nextTile );
+		HandGroup const finalGroup( i_interp, i_lastTile.m_tile );
 
 		for ( HandGroup const& group : i_interp.m_groups )
 		{
@@ -166,7 +166,7 @@ HanValue HaiteiRaoyue::CalculateValue
 	YAKU_CALCULATEVALUE_PARAMS()
 )	const
 {
-	if ( i_nextTileType == TileDrawType::SelfDraw && i_round.WallTilesRemaining() == 0u )
+	if ( i_lastTile.m_type == TileDrawType::SelfDraw && i_round.WallTilesRemaining() == 0u )
 	{
 		return 1;
 	}
@@ -180,7 +180,7 @@ HanValue HouteiRaoyui::CalculateValue
 	YAKU_CALCULATEVALUE_PARAMS()
 )	const
 {
-	if ( i_nextTileType == TileDrawType::DiscardDraw && i_round.WallTilesRemaining() == 0u )
+	if ( i_lastTile.m_type == TileDrawType::DiscardDraw && i_round.WallTilesRemaining() == 0u )
 	{
 		return 1;
 	}
@@ -194,7 +194,7 @@ HanValue RinshanKaihou::CalculateValue
 	YAKU_CALCULATEVALUE_PARAMS()
 )	const
 {
-	if ( i_nextTileType == TileDrawType::DeadWallDraw )
+	if ( i_lastTile.m_type == TileDrawType::DeadWallDraw )
 	{
 		return 1;
 	}
@@ -209,7 +209,7 @@ HanValue Chankan::CalculateValue
 {
 	// TODO-RULES: In almost all cases, players are not allowed to call ron on an ankan (closed kan). The notable exception involves a kokushi tenpai hand, where the last tile needed for the yakuman is called for an ankan. However, the kokushi exception varies on the rules. In some rules, it is disallowed outright. 
 	// TODO-RULES: If a player is tenpai for suukantsu and a fifth kan is invoked, chankan may not be applied if that fifth kan is an added kan. 
-	if ( i_nextTileType == TileDrawType::KanTheft )
+	if ( i_lastTile.m_type == TileDrawType::KanTheft )
 	{
 		return 1;
 	}
@@ -232,7 +232,7 @@ HanValue Tanyao<t_KuitanEnabled>::CalculateValue
 		}
 	}
 
-	if ( InvalidTile( i_nextTile ) || std::ranges::any_of( i_interp.m_ungrouped, InvalidTile ) )
+	if ( InvalidTile( i_lastTile.m_tile ) || std::ranges::any_of( i_interp.m_ungrouped, InvalidTile ) )
 	{
 		return NoYaku;
 	}
@@ -285,7 +285,7 @@ HanValue Bakaze::CalculateValue
 		}
 	}
 
-	if ( i_interp.m_waitType == WaitType::Shanpon && ValidTile( i_nextTile, i_round.Wind() ) )
+	if ( i_interp.m_waitType == WaitType::Shanpon && ValidTile( i_lastTile.m_tile, i_round.Wind() ) )
 	{
 		return 1;
 	}
@@ -315,7 +315,7 @@ HanValue Jikaze::CalculateValue
 		}
 	}
 
-	if ( i_interp.m_waitType == WaitType::Shanpon && ValidTile( i_nextTile, i_playerSeat ) )
+	if ( i_interp.m_waitType == WaitType::Shanpon && ValidTile( i_lastTile.m_tile, i_playerSeat ) )
 	{
 		return 1;
 	}
@@ -356,7 +356,7 @@ HanValue Chantaiyao::CalculateValue
 	}
 
 	// Check final group too
-	if ( !RequiredTile( i_nextTile )
+	if ( !RequiredTile( i_lastTile.m_tile )
 		&& !std::ranges::any_of( i_interp.m_ungrouped, RequiredTile ) )
 	{
 		return NoYaku;
@@ -395,7 +395,7 @@ HanValue SanshokuDoujun::CalculateValue
 	if ( SequenceWait( i_interp.m_waitType ) )
 	{
 		// Need to consider the final group, as it completed a sequence
-		HandGroup const finalGroup( i_interp, i_nextTile );
+		HandGroup const finalGroup( i_interp, i_lastTile.m_tile );
 
 		for ( size_t groupI = 0; groupI < i_interp.m_groups.size(); ++groupI )
 		{
@@ -483,7 +483,7 @@ HanValue Ikkitsuukan::CalculateValue
 	if ( SequenceWait( i_interp.m_waitType ) )
 	{
 		// Need to consider the final group, as it completed a sequence
-		HandGroup const finalGroup( i_interp, i_nextTile );
+		HandGroup const finalGroup( i_interp, i_lastTile.m_tile );
 
 		fnEvalGroup( finalGroup );
 	}
@@ -542,7 +542,7 @@ HanValue Sanankou::CalculateValue
 	}
 
 	// Check if we're completing a closed triplet too
-	if ( i_nextTileType != TileDrawType::DiscardDraw && i_interp.m_waitType == WaitType::Shanpon )
+	if ( i_lastTile.m_type != TileDrawType::DiscardDraw && i_interp.m_waitType == WaitType::Shanpon )
 	{
 		++concealedTripleCount;
 	}
@@ -574,7 +574,7 @@ HanValue SanshokuDoukou::CalculateValue
 	if ( i_interp.m_waitType == WaitType::Shanpon )
 	{
 		// Need to consider the final group, as it completed a triplet
-		HandGroup const finalGroup( i_interp, i_nextTile );
+		HandGroup const finalGroup( i_interp, i_lastTile.m_tile );
 
 		for ( size_t groupI = 0; groupI < i_interp.m_groups.size(); ++groupI )
 		{
@@ -662,7 +662,7 @@ HanValue Chiitoitsu::CalculateValue
 	// TODO-OPT: Can we do this without filling a container?
 
 	Set<Tile> uniqueTiles;
-	uniqueTiles.insert( i_nextTile );
+	uniqueTiles.insert( i_lastTile.m_tile );
 
 	for ( HandGroup const& group : i_interp.m_groups )
 	{
@@ -706,7 +706,7 @@ HanValue Honroutou::CalculateValue
 	}
 
 	// Check final group too
-	if ( !ValidTile( i_nextTile )
+	if ( !ValidTile( i_lastTile.m_tile )
 		|| !std::ranges::all_of( i_interp.m_ungrouped, ValidTile ) )
 	{
 		return NoYaku;
@@ -757,11 +757,11 @@ HanValue Shousangen::CalculateValue
 		}
 	}
 
-	if ( i_interp.m_waitType == WaitType::Tanki && i_nextTile.Type() != TileType::Dragon )
+	if ( i_interp.m_waitType == WaitType::Tanki && i_lastTile.m_tile.Type() != TileType::Dragon )
 	{
 		return NoYaku;
 	}
-	else if ( i_interp.m_waitType == WaitType::Shanpon && i_nextTile.Type() == TileType::Dragon )
+	else if ( i_interp.m_waitType == WaitType::Shanpon && i_lastTile.m_tile.Type() == TileType::Dragon )
 	{
 		++dragonTripletCount;
 	}
@@ -785,7 +785,7 @@ HanValue Honitsu::CalculateValue
 	for ( Suit suit : Suits{} )
 	{
 		if ( i_assessment.m_containsSuit[ suit ]
-			|| ( i_nextTile.Type() == TileType::Suit && i_nextTile.Get<TileType::Suit>().m_suit == suit ) )
+			|| ( i_lastTile.m_tile.Type() == TileType::Suit && i_lastTile.m_tile.Get<TileType::Suit>().m_suit == suit ) )
 		{
 			++suitTypeCount;
 		}
@@ -806,7 +806,7 @@ HanValue JunchanTaiyao::CalculateValue
 )	const
 {
 	// Only suit groups possible in a junchan hand
-	if ( i_assessment.m_containsHonours || i_nextTile.Type() != TileType::Suit )
+	if ( i_assessment.m_containsHonours || i_lastTile.m_tile.Type() != TileType::Suit )
 	{
 		return NoYaku;
 	}
@@ -820,7 +820,7 @@ HanValue JunchanTaiyao::CalculateValue
 	}
 
 	// Check final group too
-	if ( !RequiredTile( i_nextTile )
+	if ( !RequiredTile( i_lastTile.m_tile )
 		&& !std::ranges::any_of( i_interp.m_ungrouped, RequiredTile ) )
 	{
 		return NoYaku;
@@ -880,7 +880,7 @@ HanValue Ryanpeikou::CalculateValue
 	else
 	{
 		// Need to consider the final group, as it completed a sequence
-		HandGroup const finalGroup( i_interp, i_nextTile );
+		HandGroup const finalGroup( i_interp, i_lastTile.m_tile );
 
 		for ( size_t groupI = 0; groupI < i_interp.m_groups.size(); ++groupI )
 		{
@@ -918,7 +918,7 @@ HanValue Chinitsu::CalculateValue
 	YAKU_CALCULATEVALUE_PARAMS()
 )	const
 {
-	if ( i_assessment.m_containsHonours || i_nextTile.Type() != TileType::Suit )
+	if ( i_assessment.m_containsHonours || i_lastTile.m_tile.Type() != TileType::Suit )
 	{
 		return NoYaku;
 	}
@@ -926,7 +926,7 @@ HanValue Chinitsu::CalculateValue
 	int suitTypeCount = 0;
 	for ( Suit suit : Suits{} )
 	{
-		if ( i_assessment.m_containsSuit[ suit ] || i_nextTile.Get<TileType::Suit>().m_suit == suit )
+		if ( i_assessment.m_containsSuit[ suit ] || i_lastTile.m_tile.Get<TileType::Suit>().m_suit == suit )
 		{
 			++suitTypeCount;
 		}
@@ -979,11 +979,11 @@ HanValue KokushiMusou::CalculateValue
 	}
 
 	// And finally the big tile itself
-	if ( !RequiredTile( i_nextTile ) )
+	if ( !RequiredTile( i_lastTile.m_tile ) )
 	{
 		return NoYaku;
 	}
-	uniqueTiles.insert( i_nextTile );
+	uniqueTiles.insert( i_lastTile.m_tile );
 
 	if ( uniqueTiles.size() >= 13 )
 	{
@@ -1019,7 +1019,7 @@ HanValue Suuankou::CalculateValue
 	}
 
 	// Check if we're completing a closed triplet too
-	if ( i_nextTileType != TileDrawType::DiscardDraw && i_interp.m_waitType == WaitType::Shanpon )
+	if ( i_lastTile.m_type != TileDrawType::DiscardDraw && i_interp.m_waitType == WaitType::Shanpon )
 	{
 		++concealedTripleCount;
 	}
@@ -1056,7 +1056,7 @@ HanValue Daisangen::CalculateValue
 		}
 	}
 
-	if ( i_interp.m_waitType == WaitType::Shanpon && i_nextTile.Type() == TileType::Dragon )
+	if ( i_interp.m_waitType == WaitType::Shanpon && i_lastTile.m_tile.Type() == TileType::Dragon )
 	{
 		++dragonTripletCount;
 	}
@@ -1100,11 +1100,11 @@ HanValue Shousuushii::CalculateValue
 		}
 	}
 
-	if ( i_interp.m_waitType == WaitType::Tanki && i_nextTile.Type() != TileType::Wind )
+	if ( i_interp.m_waitType == WaitType::Tanki && i_lastTile.m_tile.Type() != TileType::Wind )
 	{
 		return NoYaku;
 	}
-	else if ( i_interp.m_waitType == WaitType::Shanpon && i_nextTile.Type() == TileType::Wind )
+	else if ( i_interp.m_waitType == WaitType::Shanpon && i_lastTile.m_tile.Type() == TileType::Wind )
 	{
 		++windTripletCount;
 	}
@@ -1142,7 +1142,7 @@ HanValue Daisuushii::CalculateValue
 		}
 	}
 
-	if ( i_interp.m_waitType == WaitType::Shanpon && i_nextTile.Type() == TileType::Wind )
+	if ( i_interp.m_waitType == WaitType::Shanpon && i_lastTile.m_tile.Type() == TileType::Wind )
 	{
 		++windTripletCount;
 	}
@@ -1161,7 +1161,7 @@ HanValue Tsuuiisou::CalculateValue
 	YAKU_CALCULATEVALUE_PARAMS()
 )	const
 {
-	if ( i_assessment.m_containsTileType[ TileType::Suit ] || i_nextTile.Type() == TileType::Suit )
+	if ( i_assessment.m_containsTileType[ TileType::Suit ] || i_lastTile.m_tile.Type() == TileType::Suit )
 	{
 		return NoYaku;
 	}
@@ -1175,7 +1175,7 @@ HanValue Chinroutou::CalculateValue
 	YAKU_CALCULATEVALUE_PARAMS()
 )	const
 {
-	if ( i_assessment.m_containsHonours || !i_assessment.m_containsTerminals || i_nextTile.Type() != TileType::Suit )
+	if ( i_assessment.m_containsHonours || !i_assessment.m_containsTerminals || i_lastTile.m_tile.Type() != TileType::Suit )
 	{
 		return NoYaku;
 	}
@@ -1188,7 +1188,7 @@ HanValue Chinroutou::CalculateValue
 		}
 	}
 
-	if ( !RequiredTile( i_nextTile )
+	if ( !RequiredTile( i_lastTile.m_tile )
 		|| !std::ranges::all_of( i_interp.m_ungrouped, RequiredTile ) )
 	{
 		return NoYaku;
@@ -1214,8 +1214,8 @@ HanValue Ryuuiisou::CalculateValue
 		|| i_assessment.m_containsSuit[ Suit::Manzu ]
 		|| i_assessment.m_containsSuit[ Suit::Pinzu ]
 		|| !i_assessment.m_containsSuit[ Suit::Souzu ]
-		|| i_nextTile.Type() == TileType::Wind
-		|| ( i_nextTile.Type() == TileType::Suit && i_nextTile.Get<TileType::Suit>().m_suit != Suit::Souzu ) )
+		|| i_lastTile.m_tile.Type() == TileType::Wind
+		|| ( i_lastTile.m_tile.Type() == TileType::Suit && i_lastTile.m_tile.Get<TileType::Suit>().m_suit != Suit::Souzu ) )
 	{
 		return NoYaku;
 	}
@@ -1228,7 +1228,7 @@ HanValue Ryuuiisou::CalculateValue
 		}
 	}
 
-	if ( !RequiredTile( i_nextTile )
+	if ( !RequiredTile( i_lastTile.m_tile )
 		|| !std::ranges::all_of( i_interp.m_ungrouped, RequiredTile ) )
 	{
 		return NoYaku;
@@ -1261,12 +1261,12 @@ HanValue ChuurenPoutou::CalculateValue
 	YAKU_CALCULATEVALUE_PARAMS()
 )	const
 {
-	if ( i_assessment.m_open || i_assessment.m_containsHonours || i_nextTile.Type() != TileType::Suit )
+	if ( i_assessment.m_open || i_assessment.m_containsHonours || i_lastTile.m_tile.Type() != TileType::Suit )
 	{
 		return NoYaku;
 	}
 
-	Suit const requiredSuit = i_nextTile.Get<TileType::Suit>().m_suit;
+	Suit const requiredSuit = i_lastTile.m_tile.Get<TileType::Suit>().m_suit;
 
 	Array<int, 9> requiredOfEachValue = {
 		3, 1, 1,
@@ -1304,7 +1304,7 @@ HanValue ChuurenPoutou::CalculateValue
 	}
 
 	// And finally the big tile itself
-	fnEvalTile( i_nextTile );
+	fnEvalTile( i_lastTile.m_tile );
 
 	// If every value is 0 or less (technically, there should be exactly one value with -1, the others all 0)
 	// then we have the yakuman
@@ -1361,7 +1361,7 @@ HanValue Chihou::CalculateValue
 	YAKU_CALCULATEVALUE_PARAMS()
 )	const
 {
-	if ( i_nextTileType == TileDrawType::SelfDraw
+	if ( i_lastTile.m_type == TileDrawType::SelfDraw
 		&& !i_round.CallsMade()
 		&& !i_round.IsDealer( i_playerSeat )
 		&& i_round.Discards( i_playerSeat ).empty()
