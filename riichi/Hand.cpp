@@ -475,6 +475,7 @@ HandAssessment::HandAssessment
 	i_rules.VisitInterpreters(
 		[ this, &fixedPart, &sortedFreeTiles ]( HandInterpreter const& i_interpreter )
 		{
+			fixedPart.m_interpreter = i_interpreter.Name();
 			i_interpreter.AddInterpretations( m_interpretations, fixedPart, sortedFreeTiles );
 		}
 	);

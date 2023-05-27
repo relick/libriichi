@@ -287,8 +287,9 @@ DECLARE_YAKU( Tenhou, Standard );
 DECLARE_YAKU( Chihou, Standard );
 
 // TODO-MVP: Scoring options that aren't typical yaku
-// Kazoe Yakuman
 // Nagashi Mangan
+
+// Kazoe Yakuman left up to game system to use or not
 
 }
 

@@ -119,6 +119,7 @@ public:
 //------------------------------------------------------------------------------
 struct HandInterpretation
 {
+	char const* m_interpreter;
 	Vector<HandGroup> m_groups;
 	Vector<Tile> m_ungrouped;
 	Set<Tile> m_waits;

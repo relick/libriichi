@@ -43,7 +43,8 @@ struct Yaku
 	virtual ~Yaku() = default;
 
 	virtual char const* Name() const = 0;
-	virtual char const* IntepreterName() const = 0;
+	virtual char const* InterpreterName() const = 0;
+	bool UsesInterpreter( char const* i_interp ) const { /*TODO-OPT*/return std::strcmp(InterpreterName(), i_interp) == 0; }
 
 	// NB do not need to check whether i_lastTile is in the interp's waits - it will be
 	virtual HanValue CalculateValue
@@ -75,7 +76,7 @@ struct NamedYaku
 	: public Yaku
 {
 	char const* Name() const final { return t_YakuName.m_str; }
-	char const* IntepreterName() const final { return t_InterpreterName.m_str; }
+	char const* InterpreterName() const final { return t_InterpreterName.m_str; }
 };
 
 //------------------------------------------------------------------------------
