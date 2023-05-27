@@ -164,9 +164,8 @@ void Turn_AI::MakeDecision
 			canKan.Insert( seat );
 		}
 
-		Hand const& seatHand = round.GetHand( seat );
-		HandAssessment const assessment( seatHand, *table.m_rules );
-		if ( assessment.Waits().contains( discardedTile ) && !round.Furiten( seat, assessment.Waits() ) )
+		Set<Tile> const waits = table.m_rules->WaitsWithYaku( round, seat, round.GetHand( seat ), { discardedTile, TileDrawType::DiscardDraw } );
+		if ( !waits.empty() && !round.Furiten( seat, waits ) )
 		{
 			canRon.Insert( seat );
 		}
@@ -210,7 +209,7 @@ void Turn_User::Tsumo
 	TileDraw const& tileDraw = round.DrawnTile( round.CurrentTurn() ).value();
 	Hand const hand = round.GetHand( round.CurrentTurn() );
 
-	//table.m_rules->CalculateValue();
+	//table.m_rules->CalculateBasicPoints();
 }
 
 //------------------------------------------------------------------------------
@@ -245,9 +244,8 @@ void Turn_User::Discard
 			canKan.Insert( seat );
 		}
 
-		Hand const& seatHand = round.GetHand( seat );
-		HandAssessment const assessment( seatHand, *table.m_rules );
-		if ( assessment.Waits().contains( discardedTile ) && !round.Furiten( seat, assessment.Waits() ) )
+		Set<Tile> const waits = table.m_rules->WaitsWithYaku( round, seat, round.GetHand( seat ), { discardedTile, TileDrawType::DiscardDraw } );
+		if ( !waits.empty() && !round.Furiten( seat, waits ) )
 		{
 			canRon.Insert( seat );
 		}
@@ -293,9 +291,8 @@ void Turn_User::Riichi
 			canKan.Insert( seat );
 		}
 
-		Hand const& seatHand = round.GetHand( seat );
-		HandAssessment const assessment( seatHand, *table.m_rules );
-		if ( assessment.Waits().contains( discardedTile ) && !round.Furiten( seat, assessment.Waits() ) )
+		Set<Tile> const waits = table.m_rules->WaitsWithYaku( round, seat, round.GetHand( seat ), { discardedTile, TileDrawType::DiscardDraw } );
+		if ( !waits.empty() && !round.Furiten( seat, waits ) )
 		{
 			canRon.Insert( seat );
 		}
@@ -330,9 +327,8 @@ void Turn_User::Kan
 		for ( size_t seatI = 0; seatI < table.m_players.size(); ++seatI )
 		{
 			Seat const seat = ( Seat )seatI;
-			Hand const& seatHand = round.GetHand( seat );
-			HandAssessment const assessment( seatHand, *table.m_rules );
-			if ( assessment.Waits().contains( i_tile ) && !round.Furiten( seat, assessment.Waits() ) )
+			Set<Tile> const waits = table.m_rules->WaitsWithYaku( round, seat, round.GetHand( seat ), { i_tile, TileDrawType::KanTheft } );
+			if ( !waits.empty() && !round.Furiten( seat, waits ) )
 			{
 				canRon.Insert( seat );
 				anyCanRon = true;

@@ -54,7 +54,7 @@ Set<Tile> StandardYonma::WaitsWithYaku
 	Set<Tile> waits;
 	for ( HandInterpretation const& interp : assessment.Interpretations() )
 	{
-		if ( interp.m_waitType == WaitType::None )
+		if ( interp.m_waitType == WaitType::None || !interp.m_waits.contains( i_lastTile.m_tile ) )
 		{
 			continue;
 		}
