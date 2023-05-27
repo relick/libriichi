@@ -154,7 +154,7 @@ int main()
 			{
 				std::string input;
 				std::cin >> input;
-				if ( input.starts_with( "kan" ) && turn.CanKan() )
+				if ( input.starts_with( "kan" ) && input.size() > 4 && turn.CanKan() )
 				{
 					Riichi::Option<Riichi::Tile> const tile = fnParseTile( input.substr( 4 ) );
 					if ( tile.has_value() && std::ranges::any_of( turn.KanOptions(), [ & ]( auto const& i_option ) -> bool
@@ -171,7 +171,7 @@ int main()
 					turn.Tsumo();
 					break;
 				}
-				else if ( input.starts_with( "riichi" ) && turn.CanRiichi() )
+				else if ( input.starts_with( "riichi" ) && input.size() > 7 && turn.CanRiichi() )
 				{
 					Riichi::Option<Riichi::Tile> const tile = fnParseTile( input.substr( 7 ) );
 					if ( tile.has_value() )
