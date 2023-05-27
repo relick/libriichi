@@ -132,6 +132,15 @@ bool RoundData::IsWinner
 }
 
 //------------------------------------------------------------------------------
+Option<HandScore> const& RoundData::WinnerScore
+(
+	Seat i_player
+)	const
+{
+	return m_players[ ( size_t )i_player ].m_winningScore;
+}
+
+//------------------------------------------------------------------------------
 bool RoundData::FinishedInTenpai
 (
 	Seat i_player

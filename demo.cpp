@@ -362,6 +362,61 @@ int main()
 			break;
 		}
 
+		case Tsumo:
+		{
+			Riichi::TableEvents::Tsumo const& tsumo = event.Get<Tsumo>();
+			auto const& score = table.GetRoundData().WinnerScore( tsumo.Winner() ).value();
+			std::cout << Riichi::ToString( tsumo.Winner() ) << " won with tsumo! Score:\n";
+			Riichi::Han total = 0;
+			for ( auto const& yaku : score.second )
+			{
+				std::cout << yaku.first << ": ";
+				if ( yaku.second.IsYakuman() )
+				{
+					std::cout << "yakuman";
+				}
+				else
+				{
+					total += yaku.second.Get();
+					std::cout << yaku.second.Get();
+				}
+				std::cout << "\n";
+			}
+			std::cout << "Total: " << total << " (" << score.first << ")\n\n";
+
+			std::cout << "Standings before next round:\n" << table.Standings() << std::endl;
+			break;
+		}
+
+		case Ron:
+		{
+			Riichi::TableEvents::Ron const& ron = event.Get<Ron>();
+			for ( auto const& winner : ron.Winners() )
+			{
+				auto const& score = table.GetRoundData().WinnerScore( winner ).value();
+				std::cout << Riichi::ToString( winner ) << " won with ron! Score:\n";
+				Riichi::Han total = 0;
+				for ( auto const& yaku : score.second )
+				{
+					std::cout << yaku.first << ": ";
+					if ( yaku.second.IsYakuman() )
+					{
+						std::cout << "yakuman";
+					}
+					else
+					{
+						total += yaku.second.Get();
+						std::cout << yaku.second.Get();
+					}
+					std::cout << "\n";
+				}
+				std::cout << "Total: " << total << " (" << score.first << ")\n\n";
+			}
+
+			std::cout << "Standings before next round:\n" << table.Standings() << std::endl;
+			break;
+		}
+
 		default:
 		{
 			std::cout << "Event: " << ToString( event.Type() ) << std::endl;

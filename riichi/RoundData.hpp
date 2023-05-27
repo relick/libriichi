@@ -58,6 +58,7 @@ public:
 	Hand const& GetHand( Seat i_player ) const;
 	Option<TileDraw> const& DrawnTile( Seat i_player ) const;
 	bool IsWinner( Seat i_player ) const;
+	Option<HandScore> const& WinnerScore( Seat i_player ) const;
 	bool FinishedInTenpai( Seat i_player ) const;
 	size_t WallTilesRemaining() const;
 	bool CallsMade() const;
