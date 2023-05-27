@@ -12,6 +12,58 @@ namespace Riichi::StandardYaku
 {
 
 //------------------------------------------------------------------------------
+template<bool t_KuitanEnabled>
+HanValue Tanyao<t_KuitanEnabled>::CalculateValue
+(
+	YAKU_CALCULATEVALUE_PARAMS()
+)	const
+{
+	// Kuitan rule required for open tanyao hands
+	if constexpr ( !t_KuitanEnabled )
+	{
+		if ( i_assessment.m_open )
+		{
+			return NoYaku;
+		}
+	}
+
+	if ( InvalidTile( i_lastTile.m_tile ) || std::ranges::any_of( i_interp.m_ungrouped, InvalidTile ) )
+	{
+		return NoYaku;
+	}
+
+	for ( HandGroup const& group : i_interp.m_groups )
+	{
+		for ( Tile const& tile : group.Tiles() )
+		{
+			if ( InvalidTile( tile ) )
+			{
+				return NoYaku;
+			}
+		}
+	}
+
+	return 1;
+}
+
+template<bool t_KuitanEnabled>
+/*static*/ bool Tanyao<t_KuitanEnabled>::InvalidTile( Tile const& i_tile )
+{
+	if ( i_tile.Type() != TileType::Suit )
+	{
+		return true;
+	}
+
+	SuitTile const& suitTile = i_tile.Get<TileType::Suit>();
+	if ( suitTile.m_value == 1 || suitTile.m_value == 9 )
+	{
+		return true;
+	}
+
+	return false;
+}
+
+//------------------------------------------------------------------------------
 template<NameString t_YakuhaiName, DragonTileType t_DragonType>
 HanValue DragonYakuhai<t_YakuhaiName, t_DragonType>::CalculateValue
 (

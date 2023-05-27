@@ -13,6 +13,52 @@ StandardYonma::StandardYonma
 {
 	m_interpreters.emplace_back( std::make_unique<StandardInterpreter>() );
 
+	{
+		using namespace StandardYaku;
+		m_yaku.emplace_back( std::make_unique<MenzenchinTsumohou>() );
+		m_yaku.emplace_back( std::make_unique<Riichi>() );
+		m_yaku.emplace_back( std::make_unique<Ippatsu>() );
+		m_yaku.emplace_back( std::make_unique<Pinfu>() );
+		m_yaku.emplace_back( std::make_unique<Iipeikou>() );
+		m_yaku.emplace_back( std::make_unique<HaiteiRaoyue>() );
+		m_yaku.emplace_back( std::make_unique<HouteiRaoyui>() );
+		m_yaku.emplace_back( std::make_unique<RinshanKaihou>() );
+		m_yaku.emplace_back( std::make_unique<Chankan>() );
+		m_yaku.emplace_back( std::make_unique<Tanyao<>>() );
+		m_yaku.emplace_back( std::make_unique<Yakuhai_Haku>() );
+		m_yaku.emplace_back( std::make_unique<Yakuhai_Hatsu>() );
+		m_yaku.emplace_back( std::make_unique<Yakuhai_Chun>() );
+		m_yaku.emplace_back( std::make_unique<Bakaze>() );
+		m_yaku.emplace_back( std::make_unique<Jikaze>() );
+		m_yaku.emplace_back( std::make_unique<DoubleRiichi>() );
+		m_yaku.emplace_back( std::make_unique<Chantaiyao>() );
+		m_yaku.emplace_back( std::make_unique<SanshokuDoujun>() );
+		m_yaku.emplace_back( std::make_unique<Ikkitsuukan>() );
+		m_yaku.emplace_back( std::make_unique<Toitoi>() );
+		m_yaku.emplace_back( std::make_unique<Sanankou>() );
+		m_yaku.emplace_back( std::make_unique<SanshokuDoukou>() );
+		m_yaku.emplace_back( std::make_unique<Sankantsu>() );
+		m_yaku.emplace_back( std::make_unique<Chiitoitsu>() );
+		m_yaku.emplace_back( std::make_unique<Honroutou>() );
+		m_yaku.emplace_back( std::make_unique<Shousangen>() );
+		m_yaku.emplace_back( std::make_unique<Honitsu>() );
+		m_yaku.emplace_back( std::make_unique<JunchanTaiyao>() );
+		m_yaku.emplace_back( std::make_unique<Ryanpeikou>() );
+		m_yaku.emplace_back( std::make_unique<Chinitsu>() );
+		m_yaku.emplace_back( std::make_unique<KokushiMusou>() );
+		m_yaku.emplace_back( std::make_unique<Suuankou>() );
+		m_yaku.emplace_back( std::make_unique<Daisangen>() );
+		m_yaku.emplace_back( std::make_unique<Shousuushii>() );
+		m_yaku.emplace_back( std::make_unique<Daisuushii>() );
+		m_yaku.emplace_back( std::make_unique<Tsuuiisou>() );
+		m_yaku.emplace_back( std::make_unique<Chinroutou>() );
+		m_yaku.emplace_back( std::make_unique<Ryuuiisou>() );
+		m_yaku.emplace_back( std::make_unique<ChuurenPoutou>() );
+		m_yaku.emplace_back( std::make_unique<Suukantsu>() );
+		m_yaku.emplace_back( std::make_unique<Tenhou>() );
+		m_yaku.emplace_back( std::make_unique<Chihou>() );
+	}
+
 	// Yonma uses all tiles
 	// TODO-RULES: red dora
 	for ( int tileTypeCount = 0; tileTypeCount < 4; ++tileTypeCount )
