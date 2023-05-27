@@ -415,6 +415,43 @@ SuitTileValue HandGroup::CommonSuitTileValue
 }
 
 //------------------------------------------------------------------------------
+uint32_t HandInterpretation::Rank
+(
+)	const
+{
+	// Bits 0-3 for four triplets
+	// Bits 4-7 for four sequences
+	// Bit 8 for a pair
+	uint32_t rank = 0;
+	int tripleCount = 0;
+	int sequenceCount = 4;
+	for ( HandGroup const& group : m_groups )
+	{
+		switch ( group.Type() )
+		{
+		case GroupType::Pair:
+		{
+			rank |= 1 << 8;
+			break;
+		}
+		case GroupType::Triplet:
+		case GroupType::Quad:
+		{
+			rank |= 1 << tripleCount++;
+			break;
+		}
+		case GroupType::Sequence:
+		{
+			rank |= 1 << sequenceCount++;
+			break;
+		}
+		}
+	}
+
+	return rank;
+}
+
+//------------------------------------------------------------------------------
 HandAssessment::HandAssessment
 (
 	Hand const& i_hand
@@ -493,6 +530,252 @@ HandAssessment::HandAssessment
 	m_interpretations = GenerateInterpretations( fixedPart, i_hand.FreeTiles() );
 }
 
+
+static void CalculateWait
+(
+	HandInterpretation& io_soFar
+)
+{
+	// Go by order of simplicity
+
+	// Check for tanki first
+	if ( io_soFar.m_ungrouped.size() == 1 )
+	{
+		io_soFar.m_waitType = WaitType::Tanki;
+		io_soFar.m_waits.insert( io_soFar.m_ungrouped.front() );
+		return;
+	}
+
+	Ensure( io_soFar.m_ungrouped.size() == 2, "Wasn't a tanki wait but didn't have 2 tiles remaining" );
+
+	// Check for shanpon second
+	if ( io_soFar.m_ungrouped.front() == io_soFar.m_ungrouped.back() )
+	{
+		io_soFar.m_waitType = WaitType::Shanpon;
+		io_soFar.m_waits.insert( io_soFar.m_ungrouped.front() );
+		return;
+	}
+
+	// If not shanpon then work out the type of sequence wait, if there is one
+	if ( io_soFar.m_ungrouped.front().Type() != TileType::Suit || io_soFar.m_ungrouped.back().Type() != TileType::Suit )
+	{
+		// no wait :(
+		return;
+	}
+
+	SuitTile const& tile1 = io_soFar.m_ungrouped.front().Get<TileType::Suit>();
+	SuitTile const& tile2 = io_soFar.m_ungrouped.back().Get<TileType::Suit>();
+
+	if ( tile1.m_suit != tile2.m_suit )
+	{
+		// no wait :(
+		return;
+	}
+
+	// Tiles are sorted so this should always be a valid thing to ask - tile2 is either 1 or 2 above tile1
+	if ( tile2.m_value == tile1.m_value + SuitTileValue::Set<1>() )
+	{
+		if ( tile1.m_value == SuitTileValue::Min )
+		{
+			// Bottom edge
+			io_soFar.m_waitType = WaitType::Penchan;
+			io_soFar.m_waits.insert( SuitTile{ tile2.m_suit, tile2.m_value + SuitTileValue::Set<1>() } );
+			return;
+		}
+		else if ( tile2.m_value == SuitTileValue::Max )
+		{
+			// Top edge
+			io_soFar.m_waitType = WaitType::Penchan;
+			io_soFar.m_waits.insert( SuitTile{ tile1.m_suit, tile1.m_value - SuitTileValue::Set<1>() } );
+			return;
+		}
+
+		// Open
+		io_soFar.m_waitType = WaitType::Ryanmen;
+		io_soFar.m_waits.insert( SuitTile{ tile1.m_suit, tile1.m_value - SuitTileValue::Set<1>() } );
+		io_soFar.m_waits.insert( SuitTile{ tile2.m_suit, tile2.m_value + SuitTileValue::Set<1>() } );
+		return;
+	}
+	else if ( tile2.m_value == tile1.m_value + SuitTileValue::Set<2>() )
+	{
+		// Middle wait
+		io_soFar.m_waitType = WaitType::Kanchan;
+		io_soFar.m_waits.insert( SuitTile{ tile1.m_suit, tile1.m_value + SuitTileValue::Set<1>() } );
+	}
+
+	// Nothing :(
+}
+
+static void Gen
+(
+	Vector<HandInterpretation>& io_interps,
+	HandInterpretation i_soFar,
+	Vector<Tile> i_sortedRemaining,
+	size_t i_nextTileI
+)
+{
+	/*
+		Vector<HandGroup> m_groups;
+		Vector<Tile> m_ungrouped;
+		Set<Tile> m_waits;
+		WaitType m_waitType;
+	*/
+
+	// Make groups from current tile, when we've run out, work out the wait from the remaining tiles
+	if ( i_sortedRemaining.size() < 3 )
+	{
+		i_soFar.m_ungrouped = i_sortedRemaining;
+		if ( i_soFar.m_groups.size() >= 4 )
+		{
+			CalculateWait( i_soFar );
+		}
+
+		uint32_t const newRank = i_soFar.Rank();
+		for ( auto interpI = io_interps.begin(); interpI != io_interps.end(); /*++interpI*/ )
+		{
+			uint32_t const existingRank = interpI->Rank();
+			if ( existingRank != newRank )
+			{
+				if ( ( newRank & existingRank ) == newRank )
+				{
+					// Degen
+					return;
+				}
+				else if ( ( newRank & existingRank ) == existingRank )
+				{
+					// New interp supersedes it
+					interpI = io_interps.erase( interpI );
+					continue;
+				}
+			}
+			++interpI;
+		}
+		io_interps.push_back( i_soFar );
+		return;
+	}
+
+	bool const needPair = !std::ranges::any_of( i_soFar.m_groups, []( HandGroup const& group ) { return group.Type() == GroupType::Pair; } );
+
+	bool madeGroups = false;
+	// TODO-MVP: don't bother with optimisations for now, just repeat
+	for ( size_t tileI = i_nextTileI; tileI < i_sortedRemaining.size() - 1; ++tileI )
+	{
+		Tile const& tile = i_sortedRemaining[ tileI ];
+		Tile const& nextTile = i_sortedRemaining[ tileI + 1 ];
+
+		// Try to make pair
+		if ( needPair && nextTile == tile )
+		{
+			HandInterpretation withPair = i_soFar;
+			withPair.m_groups.push_back( HandGroup( { tile, nextTile }, GroupType::Pair, false ) );
+			Vector<Tile> remTiles = i_sortedRemaining;
+			remTiles.erase( remTiles.begin() + tileI, remTiles.begin() + tileI + 2 );
+			Gen( io_interps, withPair, remTiles, tileI );
+			madeGroups = true;
+		}
+
+		if ( tileI >= i_sortedRemaining.size() - 2 )
+		{
+			// Ran out of tiles to check
+			break;
+		}
+
+		// Try to make triplet
+		Tile const& nextNextTile = i_sortedRemaining[ tileI + 2 ];
+		if ( nextTile == tile && nextNextTile == tile )
+		{
+			HandInterpretation withTriplet = i_soFar;
+			withTriplet.m_groups.push_back( HandGroup( { tile, nextTile, nextNextTile }, GroupType::Triplet, false ) );
+			Vector<Tile> remTiles = i_sortedRemaining;
+			remTiles.erase( remTiles.begin() + tileI, remTiles.begin() + tileI + 3 );
+			Gen( io_interps, withTriplet, remTiles, tileI );
+			madeGroups = true;
+		}
+
+		// Try to make sequence
+		if ( tile.Type() == TileType::Suit )
+		{
+			SuitTile const& suitTile = tile.Get<TileType::Suit>();
+			if ( suitTile.m_value >= SuitTileValue::Max - SuitTileValue::Set<1>() )
+			{
+				// Can't find two tiles of higher value as this one is already too high
+				continue;
+			}
+			bool gotSequence = false;
+			for ( size_t tile2I = tileI + 1; tile2I < i_sortedRemaining.size(); ++tile2I )
+			{
+				Tile const& tile2 = i_sortedRemaining[ tile2I ];
+				if ( tile2.Type() == TileType::Suit )
+				{
+					SuitTile const& suitTile2 = tile2.Get<TileType::Suit>();
+					if ( suitTile.m_suit == suitTile2.m_suit && suitTile2.m_value == suitTile.m_value + SuitTileValue::Set<1>() )
+					{
+						// Found second tile, try for third
+						for ( size_t tile3I = tile2I + 1; tile3I < i_sortedRemaining.size(); ++tile3I )
+						{
+							Tile const& tile3 = i_sortedRemaining[ tile3I ];
+							if ( tile3.Type() == TileType::Suit )
+							{
+								SuitTile const& suitTile3 = tile3.Get<TileType::Suit>();
+								if ( suitTile.m_suit == suitTile3.m_suit && suitTile3.m_value == suitTile2.m_value + SuitTileValue::Set<1>() )
+								{
+									// Found three tiles
+									HandInterpretation withSeq = i_soFar;
+									withSeq.m_groups.push_back( HandGroup( { tile, tile2, tile3 }, GroupType::Sequence, false ) );
+									Vector<Tile> remTiles = i_sortedRemaining;
+									remTiles.erase( remTiles.begin() + tile3I );
+									remTiles.erase( remTiles.begin() + tile2I );
+									remTiles.erase( remTiles.begin() + tileI );
+									Gen( io_interps, withSeq, remTiles, tileI );
+									madeGroups = true;
+									gotSequence = true;
+
+									// TODO-DEBT: Look at this nesting:
+								}
+							}
+							if ( gotSequence )
+							{
+								break;
+							}
+						}
+					}
+				}
+				if ( gotSequence )
+				{
+					break;
+				}
+			}
+		}
+	}
+
+	// Failed to make any more groups with this hand so it's an interp on its own
+	if ( !madeGroups )
+	{
+		i_soFar.m_ungrouped = i_sortedRemaining;
+		uint32_t const newRank = i_soFar.Rank();
+		for ( auto interpI = io_interps.begin(); interpI != io_interps.end(); /*++interpI*/ )
+		{
+			uint32_t const existingRank = interpI->Rank();
+			if ( existingRank != newRank )
+			{
+				if ( ( newRank & existingRank ) == newRank )
+				{
+					// Degen
+					return;
+				}
+				else if ( ( newRank & existingRank ) == existingRank )
+				{
+					// New interp supersedes it
+					interpI = io_interps.erase( interpI );
+					continue;
+				}
+			}
+			++interpI;
+		}
+		io_interps.push_back( i_soFar );
+	}
+}
+
 //------------------------------------------------------------------------------
 /*static*/ Vector<HandInterpretation> HandAssessment::GenerateInterpretations
 (
@@ -502,18 +785,15 @@ HandAssessment::HandAssessment
 {
 	Vector<HandInterpretation> interpretations;
 
-	auto fnGenerate = [ & ]()
+	Vector<Tile> sortedFreeTiles = i_freeTiles;
+	std::ranges::sort( sortedFreeTiles );
+	Gen( interpretations, i_fixedPart, sortedFreeTiles, 0 );
+
+	// TODO-AI: Likely want this to be optional, so that AI can assess paths that don't lead to immediate victory
+	/*if ( std::ranges::any_of(interpretations, [](HandInterpretation const& i_interp) { return !i_interp.m_waits.empty(); }) )
 	{
-
-	};
-
-	auto fnEliminate = [ & ]()
-	{
-
-	};
-
-	fnGenerate();
-	fnEliminate();
+		std::erase_if( interpretations, []( HandInterpretation const& i_interp ) { return i_interp.m_waits.empty(); } );
+	}*/
 
 	return interpretations;
 }

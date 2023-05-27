@@ -113,6 +113,8 @@ struct HandInterpretation
 	Vector<Tile> m_ungrouped;
 	Set<Tile> m_waits;
 	WaitType m_waitType;
+
+	uint32_t Rank() const; // A special bitmask that allows you to determine if an interpretation is 'degenerate' compared to another
 };
 
 //------------------------------------------------------------------------------
@@ -125,6 +127,8 @@ struct HandAssessment
 	bool m_containsTerminals{ false }; // 1 or 9 of suit tiles
 	bool m_containsHonours{ false }; // wind or dragon
 	bool m_open{ false };
+
+	Vector<HandInterpretation> const& Interpretations() const { return m_interpretations; }
 
 	explicit HandAssessment( Hand const& i_hand );
 
