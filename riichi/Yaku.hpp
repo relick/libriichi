@@ -56,6 +56,10 @@ struct Yaku
 		HandInterpretation const& i_interp,
 		TileDraw const& i_lastTile
 	) const = 0;
+
+	// Would this yaku be valid if we riichi'd? This will determine if riichi can be done or not
+	// A little bit of a bodge but saves having to do hand assessments more than once
+	virtual bool AddsYakuToRiichi() const { return false; }
 };
 
 //------------------------------------------------------------------------------

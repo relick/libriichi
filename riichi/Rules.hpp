@@ -25,12 +25,14 @@ struct Rules
 	virtual size_t DeadWallDrawsAvailable() const = 0;
 	size_t DeadWallSize() const { return ( 1 + DeadWallDrawsAvailable() ) * 2 + DeadWallDrawsAvailable(); }
 
-	virtual Set<Tile> WaitsWithYaku
+	// Returns valid waits for a win, and a bool for whether a riichi is allowed
+	virtual Pair<Set<Tile>, bool> WaitsWithYaku
 	(
 		RoundData const& i_round,
 		Seat const& i_playerSeat,
 		Hand const& i_hand,
-		TileDraw const& i_lastTile
+		TileDraw const& i_lastTile,
+		bool i_considerForRiichi
 	) const = 0;
 
 	virtual Pair<Points, Vector<Pair<char const*, HanValue>>> CalculateBasicPoints

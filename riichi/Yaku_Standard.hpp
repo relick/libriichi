@@ -16,7 +16,9 @@ DECLARE_YAKU( MenzenchinTsumohou, Standard );
 //------------------------------------------------------------------------------
 // Win after calling riichi
 //------------------------------------------------------------------------------
-DECLARE_YAKU( Riichi, Standard );
+BEGIN_YAKU( Riichi, Standard )
+	bool AddsYakuToRiichi() const override { return true; }
+END_YAKU();
 
 //------------------------------------------------------------------------------
 // Win after calling riichi before your next discard and before any calls
@@ -123,7 +125,9 @@ END_YAKU();
 //------------------------------------------------------------------------------
 // Win after calling riichi on the very first discard
 //------------------------------------------------------------------------------
-DECLARE_YAKU( DoubleRiichi, Standard );
+BEGIN_YAKU( DoubleRiichi, Standard )
+	bool AddsYakuToRiichi() const override { return true; }
+END_YAKU();
 
 //------------------------------------------------------------------------------
 // All groups must contain a terminal or honour

@@ -40,12 +40,13 @@ StandardYonma::StandardYonma
 }
 
 //------------------------------------------------------------------------------
-Set<Tile> StandardYonma::WaitsWithYaku
+Pair<Set<Tile>, bool> StandardYonma::WaitsWithYaku
 (
 	RoundData const& i_round,
 	Seat const& i_playerSeat,
 	Hand const& i_hand,
-	TileDraw const& i_lastTile
+	TileDraw const& i_lastTile,
+	bool i_considerForRiichi
 ) const
 {
 	// Let's  a s s e s s
@@ -78,7 +79,20 @@ Set<Tile> StandardYonma::WaitsWithYaku
 		}
 	}
 
-	return waits;
+	bool allowedToRiichi = false;
+	if ( i_considerForRiichi )
+	{
+		for ( auto const& yaku : m_yaku )
+		{
+			if ( yaku->AddsYakuToRiichi() )
+			{
+				allowedToRiichi = true;
+				break;
+			}
+		}
+	}
+
+	return { waits, allowedToRiichi };
 }
 
 //------------------------------------------------------------------------------

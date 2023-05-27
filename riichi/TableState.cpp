@@ -67,9 +67,17 @@ void BetweenRounds::StartRound
 	case PlayerType::User:
 	{
 		Hand const& playerHand = round.GetHand( round.CurrentTurn() );
-		HandAssessment const assessment( playerHand, *table.m_rules );
-		bool const canRiichi = !assessment.Waits().empty() && playerHand.Melds().empty();
-		bool const canTsumo = assessment.Waits().contains( firstDrawnTile.m_tile );
+
+		bool const allowedToRiichi = playerHand.Melds().empty() && !round.CalledRiichi( round.CurrentTurn() );
+		auto const [validWaits, canRiichi] = table.m_rules->WaitsWithYaku(
+			round,
+			round.CurrentTurn(),
+			playerHand,
+			firstDrawnTile,
+			allowedToRiichi
+		);
+
+		bool const canTsumo = validWaits.contains( firstDrawnTile.m_tile );
 
 		Vector<Hand::DrawKanResult> kanOptions = round.GetHand( round.CurrentTurn() ).DrawKanOptions( nullptr );
 		table.Transition(
@@ -164,8 +172,15 @@ void Turn_AI::MakeDecision
 			canKan.Insert( seat );
 		}
 
-		Set<Tile> const waits = table.m_rules->WaitsWithYaku( round, seat, round.GetHand( seat ), { discardedTile, TileDrawType::DiscardDraw } );
-		if ( !waits.empty() && !round.Furiten( seat, waits ) )
+		bool constexpr c_allowedToRiichi = false;
+		auto const [validWaits, canRiichi] = table.m_rules->WaitsWithYaku(
+			round,
+			seat,
+			round.GetHand( seat ),
+			{ discardedTile, TileDrawType::DiscardDraw },
+			c_allowedToRiichi
+		);
+		if ( !validWaits.empty() && !round.Furiten( seat, validWaits ) )
 		{
 			canRon.Insert( seat );
 		}
@@ -244,8 +259,15 @@ void Turn_User::Discard
 			canKan.Insert( seat );
 		}
 
-		Set<Tile> const waits = table.m_rules->WaitsWithYaku( round, seat, round.GetHand( seat ), { discardedTile, TileDrawType::DiscardDraw } );
-		if ( !waits.empty() && !round.Furiten( seat, waits ) )
+		bool constexpr c_allowedToRiichi = false;
+		auto const [validWaits, canRiichi] = table.m_rules->WaitsWithYaku(
+			round,
+			seat,
+			round.GetHand( seat ),
+			{ discardedTile, TileDrawType::DiscardDraw },
+			c_allowedToRiichi
+		);
+		if ( !validWaits.empty() && !round.Furiten( seat, validWaits ) )
 		{
 			canRon.Insert( seat );
 		}
@@ -291,8 +313,15 @@ void Turn_User::Riichi
 			canKan.Insert( seat );
 		}
 
-		Set<Tile> const waits = table.m_rules->WaitsWithYaku( round, seat, round.GetHand( seat ), { discardedTile, TileDrawType::DiscardDraw } );
-		if ( !waits.empty() && !round.Furiten( seat, waits ) )
+		bool constexpr c_allowedToRiichi = false;
+		auto const [validWaits, canRiichi] = table.m_rules->WaitsWithYaku(
+			round,
+			seat,
+			round.GetHand( seat ),
+			{ discardedTile, TileDrawType::DiscardDraw },
+			c_allowedToRiichi
+		);
+		if ( !validWaits.empty() && !round.Furiten( seat, validWaits ) )
 		{
 			canRon.Insert( seat );
 		}
@@ -327,8 +356,15 @@ void Turn_User::Kan
 		for ( size_t seatI = 0; seatI < table.m_players.size(); ++seatI )
 		{
 			Seat const seat = ( Seat )seatI;
-			Set<Tile> const waits = table.m_rules->WaitsWithYaku( round, seat, round.GetHand( seat ), { i_tile, TileDrawType::KanTheft } );
-			if ( !waits.empty() && !round.Furiten( seat, waits ) )
+			bool constexpr c_allowedToRiichi = false;
+			auto const [validWaits, canRiichi] = table.m_rules->WaitsWithYaku(
+				round,
+				seat,
+				round.GetHand( seat ),
+				{ i_tile, TileDrawType::KanTheft },
+				c_allowedToRiichi
+			);
+			if ( !validWaits.empty() && !round.Furiten( seat, validWaits ) )
 			{
 				canRon.Insert( seat );
 				anyCanRon = true;
@@ -384,9 +420,17 @@ void BetweenTurns::UserPass
 	case PlayerType::User:
 	{
 		Hand const& playerHand = round.GetHand( round.CurrentTurn() );
-		HandAssessment const assessment( playerHand, *table.m_rules );
-		bool const canRiichi = !assessment.Waits().empty() && playerHand.Melds().empty();
-		bool const canTsumo = assessment.Waits().contains( drawnTile.m_tile );
+
+		bool const allowedToRiichi = playerHand.Melds().empty() && !round.CalledRiichi( round.CurrentTurn() );
+		auto const [ validWaits, canRiichi ] = table.m_rules->WaitsWithYaku(
+			round,
+			round.CurrentTurn(),
+			playerHand,
+			drawnTile,
+			allowedToRiichi
+		);
+
+		bool const canTsumo = validWaits.contains( drawnTile.m_tile );
 
 		Vector<Hand::DrawKanResult> kanOptions = round.GetHand( round.CurrentTurn() ).DrawKanOptions( nullptr );
 		table.Transition(
@@ -562,9 +606,17 @@ void RonAKanChance::Pass
 	case PlayerType::User:
 	{
 		Hand const& playerHand = round.GetHand( round.CurrentTurn() );
-		HandAssessment const assessment( playerHand, *table.m_rules );
-		bool const canRiichi = !assessment.Waits().empty() && playerHand.Melds().empty();
-		bool const canTsumo = assessment.Waits().contains( deadWallDraw.m_tile );
+
+		bool const allowedToRiichi = playerHand.Melds().empty() && !round.CalledRiichi( round.CurrentTurn() );
+		auto const [validWaits, canRiichi] = table.m_rules->WaitsWithYaku(
+			round,
+			round.CurrentTurn(),
+			playerHand,
+			deadWallDraw,
+			allowedToRiichi
+		);
+
+		bool const canTsumo = validWaits.contains( deadWallDraw.m_tile );
 
 		Vector<Hand::DrawKanResult> kanOptions = round.GetHand( round.CurrentTurn() ).DrawKanOptions( nullptr );
 		table.Transition(

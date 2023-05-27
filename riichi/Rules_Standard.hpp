@@ -18,12 +18,13 @@ public:
 	Vector<Tile> const& Tileset() const override { return m_tileSet; }
 	size_t DeadWallDrawsAvailable() const override { return 4u; }
 
-	Set<Tile> WaitsWithYaku
+	Pair<Set<Tile>, bool> WaitsWithYaku
 	(
 		RoundData const& i_round,
 		Seat const& i_playerSeat,
 		Hand const& i_hand,
-		TileDraw const& i_lastTile
+		TileDraw const& i_lastTile,
+		bool i_considerForRiichi
 	) const override;
 
 	Pair<Points, Vector<Pair<char const*, HanValue>>> CalculateBasicPoints
