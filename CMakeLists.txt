@@ -9,12 +9,14 @@ set (CMAKE_TRY_COMPILE_TARGET_TYPE "STATIC_LIBRARY")
 # Library
 set(LIBRIICHI_SOURCE
  "riichi/Hand.cpp"
+ "riichi/HandInterpreter.cpp"
  "riichi/RoundData.cpp"
- "riichi/Rules.cpp"
  "riichi/Table.cpp"
  "riichi/TableState.cpp"
  "riichi/Tile.cpp"
+ "riichi/HandInterpreter_Standard.cpp"
  "riichi/Yaku_Standard.cpp"
+ "riichi/Rules_Standard.cpp"
 )
 add_library(libriichi STATIC ${LIBRIICHI_SOURCE})
 target_compile_options(libriichi PUBLIC "$<$<CXX_COMPILER_ID:MSVC>:/utf-8>")
@@ -22,4 +24,7 @@ target_compile_options(libriichi PUBLIC "$<$<CXX_COMPILER_ID:MSVC>:/utf-8>")
 # Demo
 add_executable (libriichi_demo "demo.cpp")
 target_link_libraries (libriichi_demo PRIVATE libriichi)
-target_compile_options(libriichi_demo PRIVATE "$<$<CXX_COMPILER_ID:MSVC>:/utf-8>")
+
+# Hand tests
+add_executable (libriichi_hand_tests "hand_tests.cpp")
+target_link_libraries (libriichi_hand_tests PRIVATE libriichi)

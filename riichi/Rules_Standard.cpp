@@ -1,4 +1,7 @@
-#include "Rules.hpp"
+#include "Rules_Standard.hpp"
+
+#include "HandInterpreter_Standard.hpp"
+#include "Yaku_Standard.hpp"
 
 namespace Riichi
 {
@@ -7,6 +10,8 @@ StandardYonma::StandardYonma
 (
 )
 {
+	m_interpreters.emplace_back( std::make_unique<StandardInterpreter>() );
+
 	// Yonma uses all tiles
 	// TODO-AI: red dora
 	for ( int tileTypeCount = 0; tileTypeCount < 4; ++tileTypeCount )

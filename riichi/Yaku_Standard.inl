@@ -12,7 +12,7 @@ namespace Riichi::StandardYaku
 {
 
 //------------------------------------------------------------------------------
-template<YakuNameString t_YakuhaiName, DragonTileType t_DragonType>
+template<NameString t_YakuhaiName, DragonTileType t_DragonType>
 HanValue DragonYakuhai<t_YakuhaiName, t_DragonType>::CalculateValue
 (
 	YAKU_CALCULATEVALUE_PARAMS()
@@ -37,7 +37,7 @@ HanValue DragonYakuhai<t_YakuhaiName, t_DragonType>::CalculateValue
 	return NoYaku;
 }
 
-template<YakuNameString t_YakuhaiName, DragonTileType t_DragonType>
+template<NameString t_YakuhaiName, DragonTileType t_DragonType>
 /*static*/ bool DragonYakuhai<t_YakuhaiName, t_DragonType>::ValidTile( Tile const& i_tile )
 {
 	return i_tile.Type() == TileType::Dragon && i_tile.Get<TileType::Dragon>() == t_DragonType;

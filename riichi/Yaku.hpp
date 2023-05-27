@@ -43,6 +43,7 @@ struct Yaku
 	virtual ~Yaku() = default;
 
 	virtual char const* Name() const = 0;
+	virtual char const* IntepreterName() const = 0;
 
 	// NB do not need to check whether i_nextTile is in the interp's waits - it will be
 	virtual HanValue CalculateValue
@@ -59,9 +60,9 @@ struct Yaku
 
 //------------------------------------------------------------------------------
 template<size_t N>
-struct YakuNameString
+struct NameString
 {
-	constexpr YakuNameString( const char( &i_str )[ N ] )
+	constexpr NameString( const char( &i_str )[ N ] )
 	{
 		std::copy_n( i_str, N, m_str );
 	}
@@ -70,11 +71,12 @@ struct YakuNameString
 };
 
 //------------------------------------------------------------------------------
-template<YakuNameString t_YakuName>
+template<NameString t_YakuName, NameString t_InterpreterName>
 struct NamedYaku
 	: public Yaku
 {
 	char const* Name() const final { return t_YakuName.m_str; }
+	char const* IntepreterName() const final { return t_InterpreterName.m_str; }
 };
 
 //------------------------------------------------------------------------------
@@ -92,9 +94,9 @@ HandInterpretation const& i_interp,			\
 Tile const& i_nextTile,						\
 TileDrawType i_nextTileType
 
-#define BEGIN_YAKU( NAME )					\
+#define BEGIN_YAKU( NAME, INTERPRETER )		\
 struct NAME									\
-	: public NamedYaku< #NAME >				\
+	: public NamedYaku< #NAME, #INTERPRETER >\
 {											\
 	HanValue CalculateValue					\
 	(										\
@@ -105,6 +107,6 @@ private:
 #define END_YAKU()							\
 }
 
-#define DECLARE_YAKU( NAME ) BEGIN_YAKU( NAME ) END_YAKU()
+#define DECLARE_YAKU( NAME, INTERPRETER ) BEGIN_YAKU( NAME, INTERPRETER ) END_YAKU()
 
 }

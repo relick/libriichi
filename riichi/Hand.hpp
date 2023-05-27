@@ -61,12 +61,17 @@ public:
 	};
 	Vector<DrawKanResult> DrawKanOptions( Tile const* i_drawnTile ) const;
 
+	template<typename T_Visitor>
+	void VisitTiles( T_Visitor&& i_visitor ) const;
+
 	friend std::ostream& operator<<( std::ostream& io_out, Hand const& i_hand );
 };
 
 //------------------------------------------------------------------------------
 enum class WaitType : EnumValueType
 {
+	None,
+
 	Tanki, // Pair
 	Kanchan, // Middle/closed
 	Penchan, // Edge
@@ -112,9 +117,7 @@ struct HandInterpretation
 	Vector<HandGroup> m_groups;
 	Vector<Tile> m_ungrouped;
 	Set<Tile> m_waits;
-	WaitType m_waitType;
-
-	uint32_t Rank() const; // A special bitmask that allows you to determine if an interpretation is 'degenerate' compared to another
+	WaitType m_waitType{ WaitType::None };
 };
 
 //------------------------------------------------------------------------------
@@ -128,17 +131,14 @@ struct HandAssessment
 	bool m_containsHonours{ false }; // wind or dragon
 	bool m_open{ false };
 
-	Vector<HandInterpretation> const& Interpretations() const { return m_interpretations; }
+	explicit HandAssessment( Hand const& i_hand, Rules const& i_rules );
 
-	explicit HandAssessment( Hand const& i_hand );
+	Vector<HandInterpretation> const& Interpretations() const { return m_interpretations; }
 
 private:
 	Vector<HandInterpretation> m_interpretations;
-	static Vector<HandInterpretation> GenerateInterpretations
-	(
-		HandInterpretation const& i_fixedPart,
-		Vector<Tile> const& i_freeTiles
-	);
 };
 
 }
+
+#include "Hand.inl"

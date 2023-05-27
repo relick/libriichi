@@ -2,8 +2,12 @@
 
 #include "Containers.hpp"
 #include "Declare.hpp"
+#include "HandInterpreter.hpp"
 #include "PlayerCount.hpp"
 #include "Tile.hpp"
+#include "Yaku.hpp"
+
+#include <memory>
 
 namespace Riichi
 {
@@ -19,20 +23,19 @@ struct Rules
 	// Not sure there's a reason to vary this, but it's a nice place to put it
 	// Dead wall size derived from this, and kan call maximum is treated as equal
 	virtual size_t DeadWallDrawsAvailable() const = 0;
-	size_t DeadWallSize() const { return  ( 1 + DeadWallDrawsAvailable() ) * 2 + DeadWallDrawsAvailable(); }
-};
+	size_t DeadWallSize() const { return ( 1 + DeadWallDrawsAvailable() ) * 2 + DeadWallDrawsAvailable(); }
 
-//------------------------------------------------------------------------------
-class StandardYonma : public Rules
-{
-	Vector<Tile> m_tileSet;
-public:
-	StandardYonma();
+	template<typename T_Visitor>
+	void VisitInterpreters( T_Visitor&& i_visitor ) const;
 
-	PlayerCount GetPlayerCount() const override { return 4_Players; }
-	Points InitialPoints() const override { return 25'000; }
-	virtual Vector<Tile> const& Tileset() const { return m_tileSet; }
-	size_t DeadWallDrawsAvailable() const { return 4u; }
+	template<typename T_Visitor>
+	void VisitYaku( T_Visitor&& i_visitor ) const;
+
+protected:
+	Vector<std::unique_ptr<HandInterpreter>> m_interpreters;
+	Vector<std::unique_ptr<Yaku>> m_yaku;
 };
 
 }
+
+#include "Rules.inl"
