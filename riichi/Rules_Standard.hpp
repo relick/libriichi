@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Rules.hpp"
+#include "Seat.hpp"
 
 namespace Riichi
 {
@@ -17,6 +18,7 @@ public:
 	Points InitialPoints() const override { return 25'000; }
 	Vector<Tile> const& Tileset() const override { return m_tileSet; }
 	size_t DeadWallDrawsAvailable() const override { return 4u; }
+	Seat LastRound() const override { return Seat::South; } // TODO-RULES: this would be nice on a template? I guess
 
 	Pair<Set<Tile>, bool> WaitsWithYaku
 	(

@@ -168,7 +168,7 @@ private:
 struct BetweenTurns
 	: Base
 {
-	BetweenTurns( Table& i_table, Pair<Seat, Vector<Pair<Tile, Tile>>> i_canChi, SeatSet i_canPon, SeatSet i_canKan, SeatSet i_canRon );
+	BetweenTurns( Table& i_table, TileDraw i_discardedTile, Pair<Seat, Vector<Pair<Tile, Tile>>> i_canChi, SeatSet i_canPon, SeatSet i_canKan, SeatSet i_canRon );
 
 	// TODO-AI indication about AI intent (to allow AI to jump in before user, depending on game implementation)
 
@@ -185,6 +185,7 @@ struct BetweenTurns
 	void UserRon( SeatSet const& i_users ) const;
 
 private:
+	TileDraw m_discardedTile;
 	Pair<Seat, Vector<Pair<Tile, Tile>>> m_canChi;
 	SeatSet m_canPon;
 	SeatSet m_canKan;
@@ -195,7 +196,7 @@ private:
 struct RonAKanChance
 	: Base
 {
-	RonAKanChance( Table& i_table, SeatSet i_canRon );
+	RonAKanChance( Table& i_table, TileDraw i_kanTile, SeatSet i_canRon );
 
 	SeatSet const& CanRon() const { return m_canRon; }
 	
@@ -203,6 +204,7 @@ struct RonAKanChance
 	void Ron( SeatSet const& i_players ) const;
 
 private:
+	TileDraw m_kanTile;
 	SeatSet m_canRon;
 };
 

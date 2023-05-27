@@ -27,6 +27,7 @@ struct Rules
 	// Dead wall size derived from this, and kan call maximum is treated as equal
 	virtual size_t DeadWallDrawsAvailable() const = 0;
 	size_t DeadWallSize() const { return ( 1 + DeadWallDrawsAvailable() ) * 2 + DeadWallDrawsAvailable(); }
+	virtual Seat LastRound() const = 0;
 
 	// Returns valid waits for a win, and a bool for whether a riichi is allowed
 	virtual Pair<Set<Tile>, bool> WaitsWithYaku

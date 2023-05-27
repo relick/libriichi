@@ -123,6 +123,24 @@ Option<TileDraw> const& RoundData::DrawnTile
 }
 
 //------------------------------------------------------------------------------
+bool RoundData::IsWinner
+(
+	Seat i_player
+)	const
+{
+	return m_players[ ( size_t )i_player ].m_winningScore.has_value();
+}
+
+//------------------------------------------------------------------------------
+bool RoundData::FinishedInTenpai
+(
+	Seat i_player
+)	const
+{
+	return m_players[ ( size_t )i_player ].m_finishedInTenpai;
+}
+
+//------------------------------------------------------------------------------
 size_t RoundData::WallTilesRemaining
 (
 )	const
@@ -152,6 +170,44 @@ Player const& RoundData::GetPlayer
 )	const
 {
 	return i_table.GetPlayer( m_players[ ( size_t )i_player ].m_playerIndex );
+}
+
+//------------------------------------------------------------------------------
+bool RoundData::NoMoreRounds
+(
+	Rules const& i_rules
+)	const
+{
+	bool const roundWindWillIncrement = NextRoundRotateSeat( i_rules )
+		&& m_players[ ( size_t )NextPlayer( m_currentTurn, m_players.size() ) ].m_playerIndex == m_initialPlayerIndex;
+	return roundWindWillIncrement && i_rules.LastRound() == m_roundWind;
+}
+
+//------------------------------------------------------------------------------
+bool RoundData::NextRoundRotateSeat
+(
+	Rules const& i_rules
+)	const
+{
+	// TODO-RULES: This is a bit hardcoded and in principle could be controlled by rules
+	// We rotate if dealer did not win, or there was a draw and dealer was not in tenpai whilst others in tenpai
+	return !IsWinner( Seat::East ) || ( !AnyWinners() && !FinishedInTenpai( Seat::East ) && AnyFinishedInTenpai() );
+}
+
+//------------------------------------------------------------------------------
+bool RoundData::AnyWinners
+(
+)	const
+{
+	return std::ranges::any_of( m_players, []( RoundPlayerData const& i_player ) { return i_player.m_winningScore.has_value(); } );
+}
+
+//------------------------------------------------------------------------------
+bool RoundData::AnyFinishedInTenpai
+(
+)	const
+{
+	return std::ranges::any_of( m_players, []( RoundPlayerData const& i_player ) { return i_player.m_finishedInTenpai; } );
 }
 
 //------------------------------------------------------------------------------
@@ -193,6 +249,8 @@ RoundData::RoundData
 	, m_deadWallDrawsRemaining{ i_rules.DeadWallDrawsAvailable() }
 	, m_roundWind{ i_lastRound.m_roundWind }
 {
+	Ensure( !i_lastRound.NoMoreRounds( i_rules ), "Tried to start a new round after last round declared game was over!" );
+
 	// Copy players but then clear their data
 	m_players.reserve( i_lastRound.m_players.size() );
 	for ( RoundPlayerData const& player : i_lastRound.m_players )
@@ -200,10 +258,19 @@ RoundData::RoundData
 		m_players.emplace_back( player.m_playerIndex );
 	}
 
-	// TODO-MVP: work out the situations when we should rotate player based on last round win
-	// for now always rotate
-	std::ranges::rotate( m_players, m_players.begin() + 1 );
-	bool const rotated = true;
+	// TODO-RULES: honba
+	if ( i_lastRound.IsWinner( Seat::East ) || !i_lastRound.AnyWinners() )
+	{
+		// Dealer won, or there was a draw
+		// TODO-MVP: honba
+	}
+
+	bool rotated = false;
+	if ( i_lastRound.NextRoundRotateSeat( i_rules ) )
+	{
+		std::ranges::rotate( m_players, m_players.begin() + 1 );
+		rotated = true;
+	}
 
 	// Increment round wind if we've done a full circuit
 	if ( rotated && m_players[ ( size_t )Seat::East ].m_playerIndex == m_initialPlayerIndex )
@@ -303,20 +370,6 @@ Tile RoundData::Riichi
 	RoundPlayerData& player = m_players[ ( size_t )m_currentTurn ];
 	player.m_riichiDiscardTile = player.m_discards.size();
 	return Discard( i_handTileToDiscard );
-}
-
-//------------------------------------------------------------------------------
-Tile RoundData::Tsumo
-(
-	HandScore const& i_score
-)
-{
-	RoundPlayerData& player = m_players[ ( size_t )m_currentTurn ];
-	Ensure( player.m_draw.has_value(), "Cannot tsumo without draw tile" );
-
-	player.m_winningScore = i_score;
-
-	return player.m_draw.value().m_tile;
 }
 
 //------------------------------------------------------------------------------
@@ -426,6 +479,36 @@ Pair<Seat, Tile> RoundData::DiscardKan
 	caller.UpdateForTurn();
 
 	return ret;
+}
+
+//------------------------------------------------------------------------------
+Tile RoundData::AddWinner
+(
+	Seat i_player,
+	HandScore const& i_score
+)
+{
+	RoundPlayerData& player = m_players[ ( size_t )i_player ];
+	player.m_winningScore = i_score;
+
+	if ( player.m_draw.has_value() )
+	{
+		// Was tsumo
+		return player.m_draw.value().m_tile;
+	}
+
+	// Was ron
+	return m_players[ ( size_t )m_currentTurn ].m_discards.back();
+}
+
+//------------------------------------------------------------------------------
+void RoundData::AddFinishedInTenpai
+(
+	Seat i_player
+)
+{
+	RoundPlayerData& player = m_players[ ( size_t )i_player ];
+	player.m_finishedInTenpai = true;
 }
 
 //------------------------------------------------------------------------------

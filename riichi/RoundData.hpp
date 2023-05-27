@@ -23,6 +23,7 @@ class RoundData
 		Hand m_hand;
 		Option<TileDraw> m_draw; // Currently drawn tile
 		Option<HandScore> m_winningScore;
+		bool m_finishedInTenpai{ false };
 
 		explicit RoundPlayerData( size_t i_playerI ) : m_playerIndex( i_playerI ) {}
 
@@ -56,9 +57,15 @@ public:
 	Vector<Tile> const& VisibleDiscards( Seat i_player ) const;
 	Hand const& GetHand( Seat i_player ) const;
 	Option<TileDraw> const& DrawnTile( Seat i_player ) const;
+	bool IsWinner( Seat i_player ) const;
+	bool FinishedInTenpai( Seat i_player ) const;
 	size_t WallTilesRemaining() const;
 	bool CallsMade() const;
 	Player const& GetPlayer( Seat i_player, Table const& i_table ) const;
+	bool NoMoreRounds( Rules const& i_rules ) const;
+	bool NextRoundRotateSeat( Rules const& i_rules ) const;
+	bool AnyWinners() const;
+	bool AnyFinishedInTenpai() const;
 
 public:
 	// non-const interface, only accessible by table states
@@ -83,13 +90,15 @@ public:
 	// Player turn actions
 	Tile Discard( Option<Tile> const& i_handTileToDiscard ); // returns discarded tile
 	Tile Riichi( Option<Tile> const& i_handTileToDiscard ); // returns discarded tile
-	Tile Tsumo( HandScore const& i_score ); // returns winning tile
 	TileDraw PassCalls( SeatSet const& i_couldRon ); // draws for next player, returns draw
 	Hand::KanResult HandKan( Tile const& i_tile ); // returns if kan was upgraded pon
 	TileDraw HandKanRonPass(); // returns dead wall draw ☠
 	Pair<Seat, Tile> Chi( Seat i_caller, Pair<Tile, Tile> const& i_meldTiles ); // returns called tile and called from
 	Pair<Seat, Tile> Pon( Seat i_caller ); // returns called tile and called from
 	Pair<Seat, Tile> DiscardKan( Seat i_caller ); // returns called tile and called from
+
+	Tile AddWinner( Seat i_player, HandScore const& i_score ); // returns winning tile
+	void AddFinishedInTenpai( Seat i_player );
 
 private:
 	Vector<Tile> DealTiles( size_t i_num );

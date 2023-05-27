@@ -160,6 +160,7 @@ void Turn_AI::MakeDecision
 	SeatSet canKan;
 	SeatSet canRon;
 
+	TileDraw const discardedTileAsDraw{ discardedTile, TileDrawType::DiscardDraw };
 	for ( size_t seatI = 0; seatI < table.m_players.size(); ++seatI )
 	{
 		Seat const seat = ( Seat )seatI;
@@ -177,7 +178,7 @@ void Turn_AI::MakeDecision
 			round,
 			seat,
 			round.GetHand( seat ),
-			{ discardedTile, TileDrawType::DiscardDraw },
+			discardedTileAsDraw,
 			c_allowedToRiichi
 		);
 		if ( !validWaits.empty() && !round.Furiten( seat, validWaits ) )
@@ -187,7 +188,7 @@ void Turn_AI::MakeDecision
 	}
 
 	table.Transition(
-		TableStates::BetweenTurns{table, std::move( canChi ), std::move( canPon ), std::move( canKan ), std::move( canRon )},
+		TableStates::BetweenTurns{table, discardedTileAsDraw, std::move( canChi ), std::move( canPon ), std::move( canKan ), std::move( canRon )},
 		TableEvent{ TableEvent::Tag<TableEventType::Discard>(), discardedTile, round.CurrentTurn() }
 	);
 }
@@ -229,7 +230,7 @@ void Turn_User::Tsumo
 		tileDraw
 	);
 
-	Tile const winningTile = round.Tsumo( score );
+	Tile const winningTile = round.AddWinner( round.CurrentTurn(), score );
 
 	bool const isDealer = round.IsDealer( round.CurrentTurn() );
 	Pair<Points, Points> const winnings = table.m_rules->PointsFromEachPlayerTsumo( score.first, isDealer );
@@ -256,9 +257,18 @@ void Turn_User::Tsumo
 	}
 
 	// TODO-RULES: allow for negative points play
+	if ( std::ranges::any_of( table.m_standings.m_points, []( Points i_points ) { return i_points < 0; } )
+		|| round.NoMoreRounds( *table.m_rules ) )
+	{
+		table.Transition(
+			TableStates::GameOver( table ),
+			TableEvents::Tsumo{ winningTile, round.CurrentTurn() }
+		);
+	}
+
 	table.Transition(
 		TableStates::BetweenRounds( table ),
-		{ TableEvent::Tag<TableEventType::Tsumo>(), winningTile, round.CurrentTurn() }
+		TableEvents::Tsumo{ winningTile, round.CurrentTurn() }
 	);
 }
 
@@ -282,6 +292,7 @@ void Turn_User::Discard
 	SeatSet canKan;
 	SeatSet canRon;
 
+	TileDraw const discardedTileAsDraw{ discardedTile, TileDrawType::DiscardDraw };
 	for ( size_t seatI = 0; seatI < table.m_players.size(); ++seatI )
 	{
 		Seat const seat = ( Seat )seatI;
@@ -299,7 +310,7 @@ void Turn_User::Discard
 			round,
 			seat,
 			round.GetHand( seat ),
-			{ discardedTile, TileDrawType::DiscardDraw },
+			discardedTileAsDraw,
 			c_allowedToRiichi
 		);
 		if ( !validWaits.empty() && !round.Furiten( seat, validWaits ) )
@@ -309,7 +320,7 @@ void Turn_User::Discard
 	}
 
 	table.Transition(
-		TableStates::BetweenTurns{table, std::move( canChi ), std::move( canPon ), std::move( canKan ), std::move( canRon )},
+		TableStates::BetweenTurns{table, discardedTileAsDraw, std::move( canChi ), std::move( canPon ), std::move( canKan ), std::move( canRon )},
 		TableEvent{ TableEvent::Tag<TableEventType::Discard>(), discardedTile, round.CurrentTurn() }
 	);
 }
@@ -336,6 +347,7 @@ void Turn_User::Riichi
 	SeatSet canKan;
 	SeatSet canRon;
 
+	TileDraw const discardedTileAsDraw{ discardedTile, TileDrawType::DiscardDraw };
 	for ( size_t seatI = 0; seatI < table.m_players.size(); ++seatI )
 	{
 		Seat const seat = ( Seat )seatI;
@@ -353,7 +365,7 @@ void Turn_User::Riichi
 			round,
 			seat,
 			round.GetHand( seat ),
-			{ discardedTile, TileDrawType::DiscardDraw },
+			discardedTileAsDraw,
 			c_allowedToRiichi
 		);
 		if ( !validWaits.empty() && !round.Furiten( seat, validWaits ) )
@@ -363,7 +375,7 @@ void Turn_User::Riichi
 	}
 
 	table.Transition(
-		TableStates::BetweenTurns{table, std::move( canChi ), std::move( canPon ), std::move( canKan ), std::move( canRon )},
+		TableStates::BetweenTurns{table, discardedTileAsDraw, std::move( canChi ), std::move( canPon ), std::move( canKan ), std::move( canRon )},
 		TableEvent{ TableEvent::Tag<TableEventType::Riichi>(), discardedTile, round.CurrentTurn() }
 	);
 }
@@ -408,7 +420,7 @@ void Turn_User::Kan
 	}
 
 	table.Transition(
-		TableStates::RonAKanChance{table, std::move( canRon )},
+		TableStates::RonAKanChance{table, { i_tile, TileDrawType::KanTheft }, std::move( canRon )},
 		TableEvent{ TableEvent::Tag<TableEventType::HandKan>(), i_tile, !kanResult.m_open }
 	);
 }
@@ -417,12 +429,14 @@ void Turn_User::Kan
 BetweenTurns::BetweenTurns
 (
 	Table& i_table,
+	TileDraw i_discardedTile,
 	Pair<Seat, Vector<Pair<Tile, Tile>>> i_canChi,
 	SeatSet i_canPon,
 	SeatSet i_canKan,
 	SeatSet i_canRon
 )
 	: Base{ i_table }
+	, m_discardedTile{ i_discardedTile }
 	, m_canChi{ std::move( i_canChi ) }
 	, m_canPon{ std::move( i_canPon ) }
 	, m_canKan{ std::move( i_canKan ) }
@@ -442,7 +456,21 @@ void BetweenTurns::UserPass
 
 	if ( round.WallTilesRemaining() == 0u )
 	{
-		table.Transition( TableStates::GameOver{table}, TableEvents::WallDepleted{} );
+		// TODO-MVP: set tenpai etc.
+		// TODO-RULES: allow for negative points play
+		if ( std::ranges::any_of( table.m_standings.m_points, []( Points i_points ) { return i_points < 0; } )
+			|| round.NoMoreRounds( *table.m_rules ) )
+		{
+			table.Transition(
+				TableStates::GameOver{ table },
+				TableEvents::WallDepleted{}
+			);
+		}
+
+		table.Transition(
+			TableStates::BetweenRounds{ table },
+			TableEvents::WallDepleted{}
+		);
 		return;
 	}
 
@@ -606,20 +634,70 @@ void BetweenTurns::UserRon
 	SeatSet const& i_users
 )	const
 {
+	Table& table = m_table.get();
+
 	Ensure( m_canRon.ContainsAllOf( i_users ), "Players tried to ron when not allowed." );
 
-	// TODO-MVP
-	Table& table = m_table.get();
-	table.Transition( TableStates::GameOver{table}, std::string( "nyi" ) );
+	RoundData& round = table.m_rounds.back();
+
+	// TODO-AI: assess whether any AI should join in ron
+	// TODO-RULES: allow/disallow multiple ron
+
+	for ( Seat seat : i_users )
+	{
+		Hand const hand = round.GetHand( seat );
+
+		HandScore const score = table.m_rules->CalculateBasicPoints(
+			round,
+			seat,
+			hand,
+			m_discardedTile
+		);
+
+		round.AddWinner( seat, score );
+
+		bool const isDealer = round.IsDealer( seat );
+		Points const winnings = table.m_rules->PointsFromPlayerRon( score.first, isDealer );
+
+		for ( size_t seatI = 0; seatI < table.m_players.size(); ++seatI )
+		{
+			Seat const standingsSeat = ( Seat )seatI;
+			if ( standingsSeat == seat )
+			{
+				table.m_standings.m_points[ ( size_t )standingsSeat ] += winnings;
+			}
+			else if ( standingsSeat == round.CurrentTurn() )
+			{
+				table.m_standings.m_points[ ( size_t )standingsSeat ] -= winnings;
+			}
+		}
+	}
+
+	// TODO-RULES: allow for negative points play
+	if ( std::ranges::any_of( table.m_standings.m_points, []( Points i_points ) { return i_points < 0; } )
+		|| round.NoMoreRounds( *table.m_rules ) )
+	{
+		table.Transition(
+			TableStates::GameOver{ table },
+			TableEvents::Ron{ m_discardedTile.m_tile, i_users }
+		);
+	}
+
+	table.Transition(
+		TableStates::BetweenRounds{ table },
+		TableEvents::Ron{ m_discardedTile.m_tile, i_users }
+	);
 }
 
 //------------------------------------------------------------------------------
 RonAKanChance::RonAKanChance
 (
 	Table& i_table,
+	TileDraw i_kanTile,
 	SeatSet i_canRon
 )
 	: Base{ i_table }
+	, m_kanTile{ i_kanTile }
 	, m_canRon{ std::move( i_canRon ) }
 {}
 
@@ -677,11 +755,59 @@ void RonAKanChance::Ron
 	SeatSet const& i_players
 )	const
 {
+	Table& table = m_table.get();
+
 	Ensure( m_canRon.ContainsAllOf( i_players ), "Players tried to ron a kan when not allowed." );
 
-	// TODO-MVP
-	Table& table = m_table.get();
-	table.Transition( TableStates::GameOver{table}, std::string( "nyi" ) );
+	RoundData& round = table.m_rounds.back();
+
+	// TODO-AI: assess whether any AI should join in ron
+	// TODO-RULES: allow/disallow multiple ron
+
+	for ( Seat seat : i_players )
+	{
+		Hand const hand = round.GetHand( seat );
+
+		HandScore const score = table.m_rules->CalculateBasicPoints(
+			round,
+			seat,
+			hand,
+			m_kanTile
+		);
+
+		round.AddWinner( seat, score );
+
+		bool const isDealer = round.IsDealer( seat );
+		Points const winnings = table.m_rules->PointsFromPlayerRon( score.first, isDealer );
+
+		for ( size_t seatI = 0; seatI < table.m_players.size(); ++seatI )
+		{
+			Seat const standingsSeat = ( Seat )seatI;
+			if ( standingsSeat == seat )
+			{
+				table.m_standings.m_points[ ( size_t )standingsSeat ] += winnings;
+			}
+			else if ( standingsSeat == round.CurrentTurn() )
+			{
+				table.m_standings.m_points[ ( size_t )standingsSeat ] -= winnings;
+			}
+		}
+	}
+
+	// TODO-RULES: allow for negative points play
+	if ( std::ranges::any_of( table.m_standings.m_points, []( Points i_points ) { return i_points < 0; } )
+		|| round.NoMoreRounds( *table.m_rules ) )
+	{
+		table.Transition(
+			TableStates::GameOver{ table },
+			TableEvents::Ron{ m_kanTile.m_tile, i_players }
+		);
+	}
+
+	table.Transition(
+		TableStates::BetweenRounds{ table },
+		TableEvents::Ron{ m_kanTile.m_tile, i_players }
+	);
 }
 
 }
