@@ -114,7 +114,7 @@ Hand const& RoundData::GetHand
 }
 
 //------------------------------------------------------------------------------
-Option<Tile> const& RoundData::DrawnTile
+Option<TileDraw> const& RoundData::DrawnTile
 (
 	Seat i_player
 )	const
@@ -245,7 +245,7 @@ void RoundData::BreakWall
 }
 
 //------------------------------------------------------------------------------
-Tile RoundData::DealHands
+TileDraw RoundData::DealHands
 (
 )
 {
@@ -259,7 +259,7 @@ Tile RoundData::DealHands
 	}
 
 	m_players.front().m_hand.AddFreeTiles( DrawTiles( 1 ) );
-	m_players.front().m_draw = DrawTile();
+	m_players.front().m_draw = { DrawTile(), TileDrawType::SelfDraw, };
 	for ( size_t playerI = 1; playerI < m_players.size(); ++playerI )
 	{
 		m_players[ playerI ].m_hand.AddFreeTiles( DrawTiles( 1 ) );
@@ -304,7 +304,7 @@ Tile RoundData::DiscardDrawn
 )
 {
 	RoundPlayerData& player = m_players[ ( size_t )m_currentTurn ];
-	Tile discarded = player.m_draw.value();
+	Tile discarded = player.m_draw.value().m_tile;
 	player.m_discards.emplace_back( discarded );
 	player.m_visibleDiscards.emplace_back( discarded );
 	player.m_draw.reset();
@@ -320,13 +320,13 @@ Tile RoundData::DiscardHandTile
 	RoundPlayerData& player = m_players[ ( size_t )m_currentTurn ];
 	player.m_discards.emplace_back( i_discard );
 	player.m_visibleDiscards.emplace_back( i_discard );
-	player.m_hand.Discard( i_discard, player.m_draw.value() );
+	player.m_hand.Discard( i_discard, player.m_draw.value().m_tile );
 	player.m_draw.reset();
 	return i_discard;
 }
 
 //------------------------------------------------------------------------------
-Tile RoundData::PassCalls
+TileDraw RoundData::PassCalls
 (
 	SeatSet const& i_couldRon
 )
@@ -341,12 +341,12 @@ Tile RoundData::PassCalls
 	RoundPlayerData& newPlayer = m_players[ ( size_t )m_currentTurn ];
 	newPlayer.UpdateForTurn();
 
-	newPlayer.m_draw = DrawTile();
+	newPlayer.m_draw = { DrawTile(), TileDrawType::SelfDraw, };
 	return newPlayer.m_draw.value();
 }
 
 //------------------------------------------------------------------------------
-Tile RoundData::HandKan
+TileDraw RoundData::HandKan
 (
 	Tile const& i_tile
 )
@@ -359,7 +359,7 @@ Tile RoundData::HandKan
 
 	Tile drawn = std::move( m_wall.front() );
 	m_wall.erase( m_wall.begin() );
-	return drawn;
+	return { drawn, TileDrawType::DiscardDraw, };
 }
 
 //------------------------------------------------------------------------------

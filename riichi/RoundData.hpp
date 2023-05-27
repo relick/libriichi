@@ -20,7 +20,7 @@ class RoundData
 		Vector<Tile> m_visibleDiscards; // Called tiles removed from this list
 		bool m_tempFuriten{ false }; // Passing up on a ron sets this true until next turn, or until the end of the game if riichi'd
 		Hand m_hand;
-		Option<Tile> m_draw; // Currently drawn tile
+		Option<TileDraw> m_draw; // Currently drawn tile
 
 		explicit RoundPlayerData( size_t i_playerI ) : m_playerIndex( i_playerI ) {}
 
@@ -53,7 +53,7 @@ public:
 	Vector<Tile> const& Discards( Seat i_player ) const;
 	Vector<Tile> const& VisibleDiscards( Seat i_player ) const;
 	Hand const& GetHand( Seat i_player ) const;
-	Option<Tile> const& DrawnTile( Seat i_player ) const;
+	Option<TileDraw> const& DrawnTile( Seat i_player ) const;
 	size_t WallTilesRemaining() const;
 	bool CallsMade() const;
 	Player const& GetPlayer( Seat i_player, Table const& i_table ) const;
@@ -76,19 +76,21 @@ public:
 	);
 
 	void BreakWall( ShuffleRNG& i_shuffleRNG );
-	Tile DealHands();
-
-	Vector<Tile> DrawTiles( size_t i_num );
-	Tile DrawTile();
+	TileDraw DealHands();
 
 	// Player turn actions
 	Tile DiscardDrawn(); // returns discarded tile
 	Tile DiscardHandTile( Tile const& i_discard ); // returns discarded tile
-	Tile PassCalls( SeatSet const& i_couldRon ); // draws for next player, returns draw
-	Tile HandKan( Tile const& i_tile ); // returns dead wall draw ☠
+	TileDraw PassCalls( SeatSet const& i_couldRon ); // draws for next player, returns draw
+	TileDraw HandKan( Tile const& i_tile ); // returns dead wall draw ☠
 	Pair<Seat, Tile> Chi( Seat i_caller, Pair<Tile, Tile> const& i_meldTiles ); // returns called tile and called from
 	Pair<Seat, Tile> Pon( Seat i_caller ); // returns called tile and called from
 	Pair<Seat, Tile> DiscardKan( Seat i_caller ); // returns called tile and called from
+
+private:
+	Vector<Tile> DrawTiles( size_t i_num );
+	Tile DrawTile();
+
 };
 
 }

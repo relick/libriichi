@@ -121,14 +121,14 @@ int main()
 		case DealerDraw:
 		{
 			Riichi::TableEvents::Draw const& draw = event.Get<DealerDraw>();
-			std::cout << "Round started with dealer drawing tile " << draw.TileDrawn() << std::endl;
+			std::cout << "Round started with dealer drawing tile " << draw.TileDrawn().m_tile << std::endl;
 			break;
 		}
 
 		case Draw:
 		{
 			Riichi::TableEvents::Draw const& draw = event.Get<Draw>();
-			std::cout << Riichi::ToString( draw.Player() ) << " drew tile " << draw.TileDrawn() << std::endl;
+			std::cout << Riichi::ToString( draw.Player() ) << " drew tile " << draw.TileDrawn().m_tile << std::endl;
 			break;
 		}
 

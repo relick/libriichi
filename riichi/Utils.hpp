@@ -185,7 +185,7 @@ public:
 		EnumSet const* m_set{ nullptr };
 		size_t m_enumPos{ t_EnumCount };
 
-		void operator++() { do { ++m_enumPos; } while ( !m_set->Contains( ( T_Enum )m_enumPos ) ); }
+		void operator++() { do { ++m_enumPos; } while ( m_enumPos < t_EnumCount && !m_set->Contains( ( T_Enum )m_enumPos ) ); }
 		T_Enum operator*() { return ( T_Enum )m_enumPos; }
 		bool operator!=( Iter const& b ) const { return m_enumPos != b.m_enumPos; }
 	};

@@ -1,11 +1,4 @@
 #include "TableState.hpp"
-#include "TableState.hpp"
-#include "TableState.hpp"
-#include "TableState.hpp"
-#include "TableState.hpp"
-#include "TableState.hpp"
-#include "TableState.hpp"
-#include "TableState.hpp"
 
 #include "Rules.hpp"
 #include "Table.hpp"
@@ -64,7 +57,7 @@ void BetweenRounds::StartRound
 	// They could also be exposed as their own states.
 	// In other words, they're fine here for now, but maybe this decision needs revisiting later
 	round.BreakWall( table.m_shuffleRNG );
-	Tile const& firstDrawnTile = round.DealHands();
+	TileDraw const firstDrawnTile = round.DealHands();
 
 	// TODO-DEBT: we should pull this sort of player assessment -> Turn state stuff to its own function
 	Player const& turnPlayer = round.GetPlayer( round.CurrentTurn(), table );
@@ -76,7 +69,7 @@ void BetweenRounds::StartRound
 		Hand const& playerHand = round.GetHand( round.CurrentTurn() );
 		HandAssessment const assessment( playerHand, *table.m_rules );
 		bool const canRiichi = !assessment.Waits().empty() && playerHand.Melds().empty();
-		bool const canTsumo = assessment.Waits().contains( firstDrawnTile );
+		bool const canTsumo = assessment.Waits().contains( firstDrawnTile.m_tile );
 
 		Vector<Hand::DrawKanResult> kanOptions = round.GetHand( round.CurrentTurn() ).DrawKanOptions( nullptr );
 		table.Transition(
@@ -224,9 +217,39 @@ void Turn_User::Kan
 	Tile const& i_tile
 )	const
 {
-	// TODO-MVP
 	Table& table = m_table.get();
-	table.Transition( TableStates::GameOver{table}, std::string( "nyi" ) );
+
+	RoundData& round = table.m_rounds.back();
+	TileDraw const deadWallDraw = round.HandKan( i_tile );
+
+	// TODO-DEBT: we should pull this sort of player assessment -> Turn state stuff to its own function
+	Player const& turnPlayer = round.GetPlayer( round.CurrentTurn(), table );
+
+	switch ( turnPlayer.Type() )
+	{
+	case PlayerType::User:
+	{
+		Hand const& playerHand = round.GetHand( round.CurrentTurn() );
+		HandAssessment const assessment( playerHand, *table.m_rules );
+		bool const canRiichi = !assessment.Waits().empty() && playerHand.Melds().empty();
+		bool const canTsumo = assessment.Waits().contains( deadWallDraw.m_tile );
+
+		Vector<Hand::DrawKanResult> kanOptions = round.GetHand( round.CurrentTurn() ).DrawKanOptions( nullptr );
+		table.Transition(
+			TableStates::Turn_User{table, round.CurrentTurn(), canRiichi, canTsumo, std::move( kanOptions )},
+			TableEvent{ TableEvent::Tag<TableEventType::Draw>(), deadWallDraw, round.CurrentTurn() }
+		);
+		break;
+	}
+	case PlayerType::AI:
+	{
+		table.Transition(
+			TableStates::Turn_AI{table, round.CurrentTurn()},
+			TableEvent{ TableEvent::Tag<TableEventType::Draw>(), deadWallDraw, round.CurrentTurn() }
+		);
+		break;
+	}
+	}
 }
 
 //------------------------------------------------------------------------------
@@ -262,7 +285,7 @@ void BetweenTurns::UserPass
 		return;
 	}
 
-	Tile const& drawnTile = round.PassCalls( m_canRon );
+	TileDraw const drawnTile = round.PassCalls( m_canRon );
 
 	Player const& turnPlayer = round.GetPlayer( round.CurrentTurn(), table );
 
@@ -273,7 +296,7 @@ void BetweenTurns::UserPass
 		Hand const& playerHand = round.GetHand( round.CurrentTurn() );
 		HandAssessment const assessment( playerHand, *table.m_rules );
 		bool const canRiichi = !assessment.Waits().empty() && playerHand.Melds().empty();
-		bool const canTsumo = assessment.Waits().contains( drawnTile );
+		bool const canTsumo = assessment.Waits().contains( drawnTile.m_tile );
 
 		Vector<Hand::DrawKanResult> kanOptions = round.GetHand( round.CurrentTurn() ).DrawKanOptions( nullptr );
 		table.Transition(

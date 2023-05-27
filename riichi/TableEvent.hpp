@@ -62,15 +62,15 @@ namespace TableEvents
 //------------------------------------------------------------------------------
 class Draw
 {
-	Tile m_tileDrawn;
+	TileDraw m_tileDrawn;
 	Seat m_player;
 public:
-	explicit Draw( Tile const& i_tileDrawn, Seat i_player )
+	explicit Draw( TileDraw const& i_tileDrawn, Seat i_player )
 		: m_tileDrawn{ i_tileDrawn }
 		, m_player{ i_player }
 	{}
 
-	Tile const& TileDrawn() const { return m_tileDrawn; }
+	TileDraw const& TileDrawn() const { return m_tileDrawn; }
 	Seat Player() const { return m_player; }
 };
 using DealerDraw = Draw;

@@ -103,6 +103,7 @@ struct SuitTile;
 enum class DragonTileType : EnumValueType;
 enum class WindTileType : EnumValueType;
 enum class TileDrawType : EnumValueType;
+struct TileDraw;
 
 //------------------------------------------------------------------------------
 // Utils
