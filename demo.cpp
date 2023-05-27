@@ -378,11 +378,11 @@ int main()
 				else
 				{
 					total += yaku.second.Get();
-					std::cout << yaku.second.Get();
+					std::cout << static_cast< int >( yaku.second.Get() );
 				}
 				std::cout << "\n";
 			}
-			std::cout << "Total: " << total << " (" << score.first << ")\n\n";
+			std::cout << "Total: " << static_cast< int >( total ) << " (" << score.first << ")\n\n";
 
 			std::cout << "Standings before next round:\n" << table.Standings() << std::endl;
 			break;
@@ -406,11 +406,11 @@ int main()
 					else
 					{
 						total += yaku.second.Get();
-						std::cout << yaku.second.Get();
+						std::cout << static_cast< int >( yaku.second.Get() );
 					}
 					std::cout << "\n";
 				}
-				std::cout << "Total: " << total << " (" << score.first << ")\n\n";
+				std::cout << "Total: " << static_cast< int >( total ) << " (" << score.first << ")\n\n";
 			}
 
 			std::cout << "Standings before next round:\n" << table.Standings() << std::endl;
