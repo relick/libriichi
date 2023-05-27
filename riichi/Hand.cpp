@@ -251,15 +251,6 @@ Vector<Hand::DrawKanResult> Hand::DrawKanOptions
 		}
 	}
 
-	for ( Meld const& meld : m_melds )
-	{
-		if ( meld.m_type == GroupType::Triplet && std::ranges::contains( std::views::elements<0>( meld.m_tiles ), meld.m_tiles.front().first ) )
-		{
-			results.push_back( { meld.m_tiles.front().first, false } );
-			break;
-		}
-	}
-
 	// Could have more than one set of 4 in hand, so just search for them left to right
 	// n^2 but code is simple and n is small
 	for ( auto tileI = m_freeTiles.begin(); tileI != m_freeTiles.end(); ++tileI )
@@ -277,9 +268,6 @@ Vector<Hand::DrawKanResult> Hand::DrawKanOptions
 //------------------------------------------------------------------------------
 std::ostream& operator<<( std::ostream& io_out, Hand const& i_hand )
 {
-	Vector<Tile> sortedTiles = i_hand.m_freeTiles;
-	std::ranges::sort( sortedTiles );
-
 	auto fnPrintSuit = [ &io_out ]( Suit suit )
 	{
 		switch ( suit )
@@ -290,41 +278,45 @@ std::ostream& operator<<( std::ostream& io_out, Hand const& i_hand )
 		}
 	};
 
-	Option<Suit> lastSuit;
-	for ( Tile const& tile : sortedTiles )
+	auto fnPrintTiles = [ & ]( auto const& i_tiles )
 	{
-		if ( tile.Type() == TileType::Suit )
+		Option<Suit> lastSuit;
+		for ( Tile const& tile : i_tiles )
 		{
-			if ( lastSuit.has_value() && lastSuit.value() != tile.Get<TileType::Suit>().m_suit )
+			if ( tile.Type() == TileType::Suit )
 			{
-				fnPrintSuit( lastSuit.value() );
+				if ( lastSuit.has_value() && lastSuit.value() != tile.Get<TileType::Suit>().m_suit )
+				{
+					fnPrintSuit( lastSuit.value() );
+				}
+				lastSuit = tile.Get<TileType::Suit>().m_suit;
+				io_out << static_cast< int >( tile.Get<TileType::Suit>().m_value.m_val );
 			}
-			lastSuit = tile.Get<TileType::Suit>().m_suit;
-			io_out << static_cast< int >( tile.Get<TileType::Suit>().m_value.m_val );
+			else
+			{
+				if ( lastSuit.has_value() )
+				{
+					fnPrintSuit( lastSuit.value() );
+					lastSuit.reset();
+				}
+				io_out << tile;
+			}
 		}
-		else
+		if ( lastSuit.has_value() )
 		{
-			if ( lastSuit.has_value() )
-			{
-				fnPrintSuit( lastSuit.value() );
-				lastSuit.reset();
-			}
-			io_out << tile;
+			fnPrintSuit( lastSuit.value() );
 		}
-	}
-	if ( lastSuit.has_value() )
-	{
-		fnPrintSuit( lastSuit.value() );
-	}
+	};
+
+	Vector<Tile> sortedTiles = i_hand.m_freeTiles;
+	std::ranges::sort( sortedTiles );
+
+	fnPrintTiles( sortedTiles );
 
 	for ( Meld const& meld : i_hand.m_melds )
 	{
 		io_out << ' ';
-
-		for ( Meld::MeldTile const& tile : meld.m_tiles )
-		{
-			io_out << tile.first;
-		}
+		fnPrintTiles( std::views::elements<0>( meld.m_tiles ) );
 	}
 
 	return io_out;

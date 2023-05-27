@@ -232,19 +232,22 @@ int main()
 			{
 				std::string input;
 				std::cin >> input;
-				if ( input.starts_with( "chi" ) && betweenTurns.CanChi().first == playerSeat && !betweenTurns.CanChi().second.empty() )
+				if ( input == "chi" && betweenTurns.CanChi().first == playerSeat && !betweenTurns.CanChi().second.empty() )
 				{
 					betweenTurns.UserChi( playerSeat, betweenTurns.CanChi().second.front() );
+					break;
 				}
 				else if ( input == "pon" && betweenTurns.CanPon().Contains( playerSeat ) )
 				{
 					betweenTurns.UserPon( playerSeat );
+					break;
 				}
-				else if ( input.starts_with( "kan" ) && betweenTurns.CanKan().Contains( playerSeat ) )
+				else if ( input == "kan" && betweenTurns.CanKan().Contains( playerSeat ) )
 				{
 					betweenTurns.UserKan( playerSeat );
+					break;
 				}
-				else if ( input.starts_with( "ron" ) && betweenTurns.CanRon().Contains( playerSeat ) )
+				else if ( input == "ron" && betweenTurns.CanRon().Contains( playerSeat ) )
 				{
 					betweenTurns.UserRon( Riichi::SeatSet{ playerSeat } );
 					break;
