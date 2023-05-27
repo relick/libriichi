@@ -18,10 +18,13 @@ class RoundData
 		Option<size_t> m_riichiDiscardTile;
 		Vector<Tile> m_discards;
 		Vector<Tile> m_visibleDiscards; // Called tiles removed from this list
+		bool m_tempFuriten{ false }; // Passing up on a ron sets this true until next turn, or until the end of the game if riichi'd
 		Hand m_hand;
 		Option<Tile> m_draw; // Currently drawn tile
 
 		explicit RoundPlayerData( size_t i_playerI ) : m_playerIndex( i_playerI ) {}
+
+		void UpdateForTurn();
 	};
 	size_t m_initialPlayerIndex{ SIZE_MAX };
 	Vector<RoundPlayerData> m_players; // Sorted in seat order
@@ -46,6 +49,7 @@ public:
 	bool CalledRiichi( Seat i_player ) const;
 	bool CalledDoubleRiichi( Seat i_player ) const;
 	bool RiichiIppatsuValid( Seat i_player ) const;
+	bool Furiten( Seat i_player, Set<Tile> const& i_waits ) const;
 	Vector<Tile> const& Discards( Seat i_player ) const;
 	Vector<Tile> const& VisibleDiscards( Seat i_player ) const;
 	Hand const& GetHand( Seat i_player ) const;
@@ -80,7 +84,7 @@ public:
 	// Player turn actions
 	Tile DiscardDrawn(); // returns discarded tile
 	Tile DiscardHandTile( Tile const& i_discard ); // returns discarded tile
-	Tile PassCalls(); // draws for next player, returns draw
+	Tile PassCalls( SeatSet const& i_couldRon ); // draws for next player, returns draw
 	Tile HandKan( Tile const& i_tile ); // returns dead wall draw ☠
 	Pair<Seat, Tile> Chi( Seat i_caller, Pair<Tile, Tile> const& i_meldTiles ); // returns called tile and called from
 	Pair<Seat, Tile> Pon( Seat i_caller ); // returns called tile and called from

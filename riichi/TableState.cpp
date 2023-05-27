@@ -66,16 +66,21 @@ void BetweenRounds::StartRound
 	round.BreakWall( table.m_shuffleRNG );
 	Tile const& firstDrawnTile = round.DealHands();
 
+	// TODO-DEBT: we should pull this sort of player assessment -> Turn state stuff to its own function
 	Player const& turnPlayer = round.GetPlayer( round.CurrentTurn(), table );
 
 	switch ( turnPlayer.Type() )
 	{
 	case PlayerType::User:
 	{
-		// TODO-MVP: calculate tsumo/riichi
+		Hand const& playerHand = round.GetHand( round.CurrentTurn() );
+		HandAssessment const assessment( playerHand, *table.m_rules );
+		bool const canRiichi = !assessment.Waits().empty() && playerHand.Melds().empty();
+		bool const canTsumo = assessment.Waits().contains( firstDrawnTile );
+
 		Vector<Hand::DrawKanResult> kanOptions = round.GetHand( round.CurrentTurn() ).DrawKanOptions( nullptr );
 		table.Transition(
-			TableStates::Turn_User{table, round.CurrentTurn(), false, false, std::move( kanOptions )},
+			TableStates::Turn_User{table, round.CurrentTurn(), canRiichi, canTsumo, std::move( kanOptions )},
 			TableEvent{ TableEvent::Tag<TableEventType::DealerDraw>(), firstDrawnTile, round.CurrentTurn() }
 		);
 		break;
@@ -151,7 +156,13 @@ void Turn_AI::MakeDecision
 		{
 			canKan.Insert( seat );
 		}
-		// TODO-MVP: ron
+
+		Hand const& seatHand = round.GetHand( seat );
+		HandAssessment const assessment( seatHand, *table.m_rules );
+		if ( assessment.Waits().contains( discardedTile ) && !round.Furiten( seat, assessment.Waits() ) )
+		{
+			canRon.Insert( seat );
+		}
 	}
 
 	table.Transition(
@@ -251,7 +262,7 @@ void BetweenTurns::UserPass
 		return;
 	}
 
-	Tile const& drawnTile = round.PassCalls();
+	Tile const& drawnTile = round.PassCalls( m_canRon );
 
 	Player const& turnPlayer = round.GetPlayer( round.CurrentTurn(), table );
 
@@ -259,10 +270,14 @@ void BetweenTurns::UserPass
 	{
 	case PlayerType::User:
 	{
-		// TODO-MVP: calculate tsumo/riichi
+		Hand const& playerHand = round.GetHand( round.CurrentTurn() );
+		HandAssessment const assessment( playerHand, *table.m_rules );
+		bool const canRiichi = !assessment.Waits().empty() && playerHand.Melds().empty();
+		bool const canTsumo = assessment.Waits().contains( drawnTile );
+
 		Vector<Hand::DrawKanResult> kanOptions = round.GetHand( round.CurrentTurn() ).DrawKanOptions( nullptr );
 		table.Transition(
-			TableStates::Turn_User{table, round.CurrentTurn(), false, false, std::move( kanOptions )},
+			TableStates::Turn_User{table, round.CurrentTurn(), canRiichi, canTsumo, std::move( kanOptions )},
 			TableEvent{ TableEvent::Tag<TableEventType::Draw>(), drawnTile, round.CurrentTurn() }
 		);
 		break;

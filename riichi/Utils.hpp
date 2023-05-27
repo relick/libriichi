@@ -190,8 +190,8 @@ public:
 		bool operator!=( Iter const& b ) const { return m_enumPos != b.m_enumPos; }
 	};
 
-	static Iter begin() { return Iter{ this, 0 }; }
-	static Iter end() { return Iter{ this, t_EnumCount }; }
+	Iter begin() const { return Iter{ this, 0 }; }
+	Iter end() const { return Iter{ this, t_EnumCount }; }
 
 	explicit EnumSet() = default;
 	explicit EnumSet( std::initializer_list<T_Enum> i_vals )

@@ -182,7 +182,7 @@ namespace Riichi
 	bool const needPair = !std::ranges::any_of( i_soFar.m_groups, []( HandGroup const& group ) { return group.Type() == GroupType::Pair; } );
 
 	bool madeGroups = false;
-	// TODO-MVP: don't bother with optimisations for now, just repeat
+	// TODO-DEBT: This code needs tidying up, and in general the recursive nature could be optimised to avoid copying vectors
 	for ( size_t tileI = i_nextTileI; tileI < i_sortedRemaining.size() - 1; ++tileI )
 	{
 		Tile const& tile = i_sortedRemaining[ tileI ];

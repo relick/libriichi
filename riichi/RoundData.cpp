@@ -11,6 +11,17 @@ namespace Riichi
 {
 
 //------------------------------------------------------------------------------
+void RoundData::RoundPlayerData::UpdateForTurn
+(
+)
+{
+	if ( !m_riichiDiscardTile.has_value() )
+	{
+		m_tempFuriten = false;
+	}
+}
+
+//------------------------------------------------------------------------------
 Seat RoundData::Wind
 (
 )	const
@@ -61,6 +72,18 @@ bool RoundData::RiichiIppatsuValid
 {
 	// TODO-MVP
 	return false;
+}
+
+//------------------------------------------------------------------------------
+bool RoundData::Furiten
+(
+	Seat i_player,
+	Set<Tile> const& i_waits
+)	const
+{
+	RoundPlayerData const& player = m_players[ ( size_t )i_player ];
+	return player.m_tempFuriten
+		|| std::ranges::any_of( player.m_discards, [ & ]( Tile const& i_tile ) { return i_waits.contains( i_tile ); } );
 }
 
 //------------------------------------------------------------------------------
@@ -305,11 +328,21 @@ Tile RoundData::DiscardHandTile
 //------------------------------------------------------------------------------
 Tile RoundData::PassCalls
 (
+	SeatSet const& i_couldRon
 )
 {
+	for ( Seat seat : i_couldRon )
+	{
+		m_players[ ( size_t )seat ].m_tempFuriten = true;
+	}
+
 	m_currentTurn = NextPlayer( m_currentTurn, m_players.size() );
-	m_players[ ( size_t )m_currentTurn ].m_draw = DrawTile();
-	return m_players[ ( size_t )m_currentTurn ].m_draw.value();
+
+	RoundPlayerData& newPlayer = m_players[ ( size_t )m_currentTurn ];
+	newPlayer.UpdateForTurn();
+
+	newPlayer.m_draw = DrawTile();
+	return newPlayer.m_draw.value();
 }
 
 //------------------------------------------------------------------------------
@@ -345,6 +378,9 @@ Pair<Seat, Tile> RoundData::Chi
 	RoundPlayerData& caller = m_players[ ( size_t )i_caller ];
 	caller.m_hand.MakeMeld( ret, { i_meldTiles.first, i_meldTiles.second }, GroupType::Sequence );
 
+	m_currentTurn = i_caller;
+	caller.UpdateForTurn();
+
 	return ret;
 }
 
@@ -367,6 +403,9 @@ Pair<Seat, Tile> RoundData::Pon
 
 	caller.m_hand.MakeMeld( ret, { *tile1, *tile2 }, GroupType::Triplet );
 
+	m_currentTurn = i_caller;
+	caller.UpdateForTurn();
+
 	return ret;
 }
 
@@ -384,6 +423,9 @@ Pair<Seat, Tile> RoundData::DiscardKan
 
 	RoundPlayerData& caller = m_players[ ( size_t )i_caller ];
 	caller.m_hand.MakeKan( ret.second, ret.first );
+
+	m_currentTurn = i_caller;
+	caller.UpdateForTurn();
 
 	return ret;
 }

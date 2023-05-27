@@ -472,6 +472,11 @@ HandAssessment::HandAssessment
 			i_interpreter.AddInterpretations( m_interpretations, fixedPart, sortedFreeTiles );
 		}
 	);
+
+	for ( HandInterpretation const& interpretation : m_interpretations )
+	{
+		m_overallWaits.insert_range( interpretation.m_waits );
+	}
 }
 
 }

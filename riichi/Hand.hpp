@@ -134,9 +134,11 @@ struct HandAssessment
 	explicit HandAssessment( Hand const& i_hand, Rules const& i_rules );
 
 	Vector<HandInterpretation> const& Interpretations() const { return m_interpretations; }
+	Set<Tile> const& Waits() const { return m_overallWaits; }
 
 private:
 	Vector<HandInterpretation> m_interpretations;
+	Set<Tile> m_overallWaits;
 };
 
 }
