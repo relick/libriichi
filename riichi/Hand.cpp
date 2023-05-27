@@ -327,8 +327,6 @@ std::ostream& operator<<( std::ostream& io_out, Hand const& i_hand )
 		}
 	}
 
-	io_out << '\n';
-
 	return io_out;
 }
 

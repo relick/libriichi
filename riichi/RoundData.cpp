@@ -173,6 +173,25 @@ Player const& RoundData::GetPlayer
 }
 
 //------------------------------------------------------------------------------
+Seat RoundData::GetSeat
+(
+	PlayerID i_playerID
+)	const
+{
+	size_t const playerIndex = i_playerID; // TODO-DEBT: actual id type?
+	for ( size_t playerI = 0; playerI < m_players.size(); ++playerI )
+	{
+		if ( m_players[ playerI ].m_playerIndex == playerIndex )
+		{
+			return ( Seat )playerI;
+		}
+	}
+
+	Error( "Did not find player in this round" );
+	return Seat::East;
+}
+
+//------------------------------------------------------------------------------
 bool RoundData::NoMoreRounds
 (
 	Rules const& i_rules
@@ -268,7 +287,7 @@ RoundData::RoundData
 	bool rotated = false;
 	if ( i_lastRound.NextRoundRotateSeat( i_rules ) )
 	{
-		std::ranges::rotate( m_players, m_players.begin() + 1 );
+		std::ranges::rotate( m_players, m_players.end() - 1 );
 		rotated = true;
 	}
 

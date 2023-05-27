@@ -4,6 +4,7 @@
 
 #include <iostream>
 #include <random>
+#include <ranges>
 
 int main()
 {
@@ -19,22 +20,67 @@ int main()
 		std::random_device()()
 	);
 
+	Riichi::PlayerID const player1 = table.AddPlayer( Riichi::Player{
+		Riichi::PlayerType::User
+	} );
 	table.AddPlayer( Riichi::Player{
-		0,
 		Riichi::PlayerType::AI
 	} );
 	table.AddPlayer( Riichi::Player{
-		1,
 		Riichi::PlayerType::AI
 	} );
 	table.AddPlayer( Riichi::Player{
-		2,
 		Riichi::PlayerType::AI
 	} );
-	table.AddPlayer( Riichi::Player{
-		3,
-		Riichi::PlayerType::AI
-	} );
+
+	auto fnParseTile = []( std::string const& i_input ) -> Riichi::Option<Riichi::Tile>
+	{
+		if ( std::isdigit( i_input[ 0 ] ) )
+		{
+			if ( i_input[ 1 ] == 'm' )
+			{
+				return Riichi::SuitTile{Riichi::Suit::Manzu, Riichi::SuitTileValue(( uint8_t )i_input[ 0 ] - '0')};
+			}
+			else if ( i_input[ 1 ] == 'p' )
+			{
+				return Riichi::SuitTile{Riichi::Suit::Pinzu, Riichi::SuitTileValue(( uint8_t )i_input[ 0 ] - '0')};
+			}
+			else if ( i_input[ 1 ] == 's' )
+			{
+				return Riichi::SuitTile{Riichi::Suit::Souzu, Riichi::SuitTileValue(( uint8_t )i_input[ 0 ] - '0') };
+			}
+		}
+		else if ( i_input == "east" )
+		{
+			return Riichi::WindTileType::East;
+		}
+		else if ( i_input == "south" )
+		{
+			return Riichi::WindTileType::South;
+		}
+		else if ( i_input == "west" )
+		{
+			return Riichi::WindTileType::West;
+		}
+		else if ( i_input == "north" )
+		{
+			return Riichi::WindTileType::North;
+		}
+		else if ( i_input == "white" )
+		{
+			return Riichi::DragonTileType::White;
+		}
+		else if ( i_input == "green" )
+		{
+			return Riichi::DragonTileType::Green;
+		}
+		else if ( i_input == "red" )
+		{
+			return Riichi::DragonTileType::Red;
+		}
+
+		return std::nullopt;
+	};
 
 	int loopCount = 0;
 	// TODO: Let's start with the manual loop + manual switch approach
@@ -62,7 +108,7 @@ int main()
 			std::cout << "Initial Hands: \n";
 			for ( Riichi::Seat seat : Riichi::Seats{} )
 			{
-				std::cout << Riichi::ToString( seat ) << ": " << table.GetRoundData().GetHand( seat );
+				std::cout << Riichi::ToString( seat ) << ": " << table.GetRoundData().GetHand( seat ) << '\n';
 			}
 			std::cout << std::endl;
 			break;
@@ -82,27 +128,175 @@ int main()
 		case Turn_User:
 		{
 			Riichi::TableStates::Turn_User const& turn = state.Get<Turn_User>();
-			std::cout << "Player in seat " << ToString( turn.GetSeat() ) << " taking turn" << std::endl;
+			std::cout << "Player in seat " << ToString( turn.GetSeat() ) << " taking turn\n";
+			std::cout << "Hand: " << turn.GetHand();
 			if ( turn.GetDrawnTile().has_value() )
 			{
-				turn.Discard( std::nullopt );
+				std::cout << " " << turn.GetDrawnTile().value();
 			}
-			else
+			std::cout << "\n";
+
+			if ( turn.CanKan() )
 			{
-				turn.Discard( turn.GetHand().FreeTiles().back() );
+				std::cout << "/Kan ";
 			}
+			if ( turn.CanTsumo() )
+			{
+				std::cout << "/Tsumo ";
+			}
+			if ( turn.CanRiichi() )
+			{
+				std::cout << "/Riichi ";
+			}
+			std::cout << std::endl;
+
+			while ( true )
+			{
+				std::string input;
+				std::cin >> input;
+				if ( input.starts_with( "kan" ) && turn.CanKan() )
+				{
+					Riichi::Option<Riichi::Tile> const tile = fnParseTile( input.substr( 4 ) );
+					if ( tile.has_value() )
+					{
+						turn.Kan( tile.value() );
+						break;
+					}
+				}
+				else if ( input == "tsumo" && turn.CanTsumo() )
+				{
+					turn.Tsumo();
+					break;
+				}
+				else if ( input.starts_with( "riichi" ) && turn.CanRiichi() )
+				{
+					Riichi::Option<Riichi::Tile> const tile = fnParseTile( input.substr( 7 ) );
+					if ( tile.has_value() )
+					{
+						turn.Riichi( tile == turn.GetDrawnTile() ? std::nullopt : tile );
+						break;
+					}
+				}
+				else
+				{
+					Riichi::Option<Riichi::Tile> const tile = fnParseTile( input );
+					if ( tile.has_value() )
+					{
+						turn.Discard( tile == turn.GetDrawnTile() ? std::nullopt : tile );
+						break;
+					}
+				}
+			}
+
 			break;
 		}
 		case BetweenTurns:
 		{
-			std::cout << "Passing to next turn" << std::endl;
-			state.Get<BetweenTurns>().UserPass();
+			Riichi::TableStates::BetweenTurns const& betweenTurns = state.Get<BetweenTurns>();
+			Riichi::Seat const playerSeat = table.GetRoundData().GetSeat( player1 );
+			bool passStraightAway = true;
+			if ( betweenTurns.CanChi().first == playerSeat && !betweenTurns.CanChi().second.empty() )
+			{
+				std::cout << "/Chi ";
+				passStraightAway = false;
+			}
+			if ( betweenTurns.CanPon().Contains( playerSeat ) )
+			{
+				std::cout << "/Pon ";
+				passStraightAway = false;
+			}
+			if ( betweenTurns.CanKan().Contains( playerSeat ) )
+			{
+				std::cout << "/Kan ";
+				passStraightAway = false;
+			}
+			if ( betweenTurns.CanRon().Contains( playerSeat ) )
+			{
+				std::cout << "/Ron ";
+				passStraightAway = false;
+			}
+
+			if ( passStraightAway )
+			{
+				std::cout << "Passing to next turn" << std::endl;
+				betweenTurns.UserPass();
+				break;
+			}
+			else
+			{
+				std::cout << "/Pass ";
+				std::cout << std::endl;
+			}
+
+			while ( true )
+			{
+				std::string input;
+				std::cin >> input;
+				if ( input.starts_with( "chi" ) && betweenTurns.CanChi().first == playerSeat && !betweenTurns.CanChi().second.empty() )
+				{
+					betweenTurns.UserChi( playerSeat, betweenTurns.CanChi().second.front() );
+				}
+				else if ( input == "pon" && betweenTurns.CanPon().Contains( playerSeat ) )
+				{
+					betweenTurns.UserPon( playerSeat );
+				}
+				else if ( input.starts_with( "kan" ) && betweenTurns.CanKan().Contains( playerSeat ) )
+				{
+					betweenTurns.UserKan( playerSeat );
+				}
+				else if ( input.starts_with( "ron" ) && betweenTurns.CanRon().Contains( playerSeat ) )
+				{
+					betweenTurns.UserRon( Riichi::SeatSet{ playerSeat } );
+					break;
+				}
+				else
+				{
+					betweenTurns.UserPass();
+					break;
+				}
+			}
+
 			break;
 		}
 		case RonAKanChance:
 		{
-			std::cout << "Passing on rob-a-kan chance" << std::endl;
-			state.Get<RonAKanChance>().Pass();
+			Riichi::TableStates::RonAKanChance const& ronAKanChance = state.Get<RonAKanChance>();
+			Riichi::Seat const playerSeat = table.GetRoundData().GetSeat( player1 );
+			bool passStraightAway = true;
+			if ( ronAKanChance.CanRon().Contains( playerSeat ) )
+			{
+				std::cout << "/Ron ";
+				passStraightAway = false;
+			}
+
+			if ( passStraightAway )
+			{
+				std::cout << "Passing on rob-a-kan chance" << std::endl;
+				ronAKanChance.Pass();
+				break;
+			}
+			else
+			{
+				std::cout << "/Pass ";
+				std::cout << std::endl;
+			}
+
+			while ( true )
+			{
+				std::string input;
+				std::cin >> input;
+				if ( input.starts_with( "ron" ) && ronAKanChance.CanRon().Contains( playerSeat ) )
+				{
+					ronAKanChance.Ron( Riichi::SeatSet{ playerSeat } );
+					break;
+				}
+				else
+				{
+					ronAKanChance.Pass();
+					break;
+				}
+			}
+
 			break;
 		}
 

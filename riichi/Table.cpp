@@ -44,7 +44,7 @@ Table::Table
 {}
 
 //------------------------------------------------------------------------------
-void Table::AddPlayer
+PlayerID Table::AddPlayer
 (
 	Player&& i_player
 )
@@ -58,6 +58,8 @@ void Table::AddPlayer
 	{
 		Error( "Cannot change players past setup" );
 	}
+
+	return m_players.size() - 1;
 }
 
 //------------------------------------------------------------------------------

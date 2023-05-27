@@ -64,7 +64,7 @@ public:
 	Table& operator=( Table&& ) = delete;
 
 	// Setup
-	void AddPlayer( Player&& i_player );
+	PlayerID AddPlayer( Player&& i_player );
 	
 	// General data access
 	Standings Standings() const { return m_standings; }
@@ -74,7 +74,7 @@ public:
 	TableState const& GetState() { return m_state; }
 	RoundData const& GetRoundData( size_t i_roundIndex = SIZE_MAX ) { return i_roundIndex >= m_rounds.size() ? m_rounds.back() : m_rounds[ i_roundIndex ]; }
 	TableEvent const& GetEvent() const { return m_mostRecentEvent; }
-	Player const& GetPlayer( size_t i_playerIndex ) const { return m_players[ i_playerIndex ]; }
+	Player const& GetPlayer( PlayerID i_playerID ) const { return m_players[ i_playerID ]; }
 
 private:
 	void Transition( TableState&& i_nextState, TableEvent&& i_nextEvent );
