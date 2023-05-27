@@ -78,7 +78,7 @@ void Hand::MakeMeld
 }
 
 //------------------------------------------------------------------------------
-void Hand::MakeKan
+Hand::KanResult Hand::MakeKan
 (
 	Tile const& i_meldTile,
 	Option<Seat> i_calledFrom
@@ -94,7 +94,7 @@ void Hand::MakeKan
 
 			meld.m_tiles.push_back( { i_meldTile, std::nullopt } );
 			meld.m_type = GroupType::Quad;
-			return;
+			return { true, true, };
 		}
 	}
 
@@ -124,6 +124,8 @@ void Hand::MakeKan
 	newMeld.m_open = i_calledFrom.has_value();
 
 	m_melds.push_back( std::move( newMeld ) );
+
+	return { false, i_calledFrom.has_value(), };
 }
 
 //------------------------------------------------------------------------------

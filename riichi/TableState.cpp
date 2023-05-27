@@ -304,36 +304,29 @@ void Turn_User::Kan
 	Table& table = m_table.get();
 
 	RoundData& round = table.m_rounds.back();
-	TileDraw const deadWallDraw = round.HandKan( i_tile );
+	Hand::KanResult const kanResult = round.HandKan( i_tile );
 
-	// TODO-DEBT: we should pull this sort of player assessment -> Turn state stuff to its own function
-	Player const& turnPlayer = round.GetPlayer( round.CurrentTurn(), table );
+	SeatSet canRon;
+	if ( kanResult.m_upgradedFromPon )
+	{
+		bool anyCanRon = false;
+		for ( size_t seatI = 0; seatI < table.m_players.size(); ++seatI )
+		{
+			Seat const seat = ( Seat )seatI;
+			Hand const& seatHand = round.GetHand( seat );
+			HandAssessment const assessment( seatHand, *table.m_rules );
+			if ( assessment.Waits().contains( i_tile ) && !round.Furiten( seat, assessment.Waits() ) )
+			{
+				canRon.Insert( seat );
+				anyCanRon = true;
+			}
+		}
+	}
 
-	switch ( turnPlayer.Type() )
-	{
-	case PlayerType::User:
-	{
-		Hand const& playerHand = round.GetHand( round.CurrentTurn() );
-		HandAssessment const assessment( playerHand, *table.m_rules );
-		bool const canRiichi = !assessment.Waits().empty() && playerHand.Melds().empty();
-		bool const canTsumo = assessment.Waits().contains( deadWallDraw.m_tile );
-
-		Vector<Hand::DrawKanResult> kanOptions = round.GetHand( round.CurrentTurn() ).DrawKanOptions( nullptr );
-		table.Transition(
-			TableStates::Turn_User{table, round.CurrentTurn(), canRiichi, canTsumo, std::move( kanOptions )},
-			TableEvent{ TableEvent::Tag<TableEventType::Draw>(), deadWallDraw, round.CurrentTurn() }
-		);
-		break;
-	}
-	case PlayerType::AI:
-	{
-		table.Transition(
-			TableStates::Turn_AI{table, round.CurrentTurn()},
-			TableEvent{ TableEvent::Tag<TableEventType::Draw>(), deadWallDraw, round.CurrentTurn() }
-		);
-		break;
-	}
-	}
+	table.Transition(
+		TableStates::RonAKanChance{table, std::move( canRon )},
+		TableEvent{ TableEvent::Tag<TableEventType::HandKan>(), i_tile, !kanResult.m_open }
+	);
 }
 
 //------------------------------------------------------------------------------
@@ -521,6 +514,8 @@ void BetweenTurns::UserRon
 	SeatSet const& i_users
 )	const
 {
+	Ensure( m_canRon.ContainsAllOf( i_users ), "Players tried to ron when not allowed." );
+
 	// TODO-MVP
 	Table& table = m_table.get();
 	table.Transition( TableStates::GameOver{table}, std::string( "nyi" ) );
@@ -541,9 +536,39 @@ void RonAKanChance::Pass
 (
 )	const
 {
-	// TODO-MVP
 	Table& table = m_table.get();
-	table.Transition( TableStates::GameOver{table}, std::string( "nyi" ) );
+
+	RoundData& round = table.m_rounds.back();
+	TileDraw const deadWallDraw = round.HandKanRonPass();
+
+	// TODO-DEBT: we should pull this sort of player assessment -> Turn state stuff to its own function
+	Player const& turnPlayer = round.GetPlayer( round.CurrentTurn(), table );
+
+	switch ( turnPlayer.Type() )
+	{
+	case PlayerType::User:
+	{
+		Hand const& playerHand = round.GetHand( round.CurrentTurn() );
+		HandAssessment const assessment( playerHand, *table.m_rules );
+		bool const canRiichi = !assessment.Waits().empty() && playerHand.Melds().empty();
+		bool const canTsumo = assessment.Waits().contains( deadWallDraw.m_tile );
+
+		Vector<Hand::DrawKanResult> kanOptions = round.GetHand( round.CurrentTurn() ).DrawKanOptions( nullptr );
+		table.Transition(
+			TableStates::Turn_User{table, round.CurrentTurn(), canRiichi, canTsumo, std::move( kanOptions )},
+			TableEvent{ TableEvent::Tag<TableEventType::Draw>(), deadWallDraw, round.CurrentTurn() }
+		);
+		break;
+	}
+	case PlayerType::AI:
+	{
+		table.Transition(
+			TableStates::Turn_AI{table, round.CurrentTurn()},
+			TableEvent{ TableEvent::Tag<TableEventType::Draw>(), deadWallDraw, round.CurrentTurn() }
+		);
+		break;
+	}
+	}
 }
 
 //------------------------------------------------------------------------------

@@ -48,7 +48,12 @@ public:
 	void AddFreeTiles( Vector<Tile> const& i_newTiles );
 	void Discard( Tile const& i_toDiscard, Option<TileDraw> const& i_drawToAdd );
 	void MakeMeld( Pair<Seat, Tile> const& i_meldTile, Pair<Tile, Tile> const& i_otherTiles, GroupType i_meldType );
-	void MakeKan( Tile const& i_meldTile, Option<Seat> i_calledFrom );
+	struct KanResult
+	{
+		bool m_upgradedFromPon{ false };
+		bool m_open{ false };
+	};
+	KanResult MakeKan( Tile const& i_meldTile, Option<Seat> i_calledFrom );
 
 	// These questions only consider the hand's tiles and not the actual validity of the call in the round
 	Vector<Pair<Tile, Tile>> ChiOptions( Tile const& i_tile ) const;

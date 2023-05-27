@@ -82,15 +82,16 @@ public:
 	Tile Discard( Option<Tile> const& i_handTileToDiscard ); // returns discarded tile
 	Tile Riichi( Option<Tile> const& i_handTileToDiscard ); // returns discarded tile
 	TileDraw PassCalls( SeatSet const& i_couldRon ); // draws for next player, returns draw
-	TileDraw HandKan( Tile const& i_tile ); // returns dead wall draw ☠
+	Hand::KanResult HandKan( Tile const& i_tile ); // returns if kan was upgraded pon
+	TileDraw HandKanRonPass(); // returns dead wall draw ☠
 	Pair<Seat, Tile> Chi( Seat i_caller, Pair<Tile, Tile> const& i_meldTiles ); // returns called tile and called from
 	Pair<Seat, Tile> Pon( Seat i_caller ); // returns called tile and called from
 	Pair<Seat, Tile> DiscardKan( Seat i_caller ); // returns called tile and called from
 
 private:
-	Vector<Tile> DrawTiles( size_t i_num );
-	Tile DrawTile();
-
+	Vector<Tile> DealTiles( size_t i_num );
+	TileDraw SelfDraw();
+	TileDraw DeadWallDraw();
 };
 
 }

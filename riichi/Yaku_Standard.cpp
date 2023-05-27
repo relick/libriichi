@@ -207,6 +207,8 @@ HanValue Chankan::CalculateValue
 	YAKU_CALCULATEVALUE_PARAMS()
 )	const
 {
+	// TODO-RULES: In almost all cases, players are not allowed to call ron on an ankan (closed kan). The notable exception involves a kokushi tenpai hand, where the last tile needed for the yakuman is called for an ankan. However, the kokushi exception varies on the rules. In some rules, it is disallowed outright. 
+	// TODO-RULES: If a player is tenpai for suukantsu and a fifth kan is invoked, chankan may not be applied if that fifth kan is an added kan. 
 	if ( i_nextTileType == TileDrawType::KanTheft )
 	{
 		return 1;

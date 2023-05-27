@@ -254,48 +254,18 @@ TileDraw RoundData::DealHands
 	{
 		for ( RoundPlayerData& player : m_players )
 		{
-			player.m_hand.AddFreeTiles( DrawTiles( 4 ) );
+			player.m_hand.AddFreeTiles( DealTiles( 4 ) );
 		}
 	}
 
-	m_players.front().m_hand.AddFreeTiles( DrawTiles( 1 ) );
-	m_players.front().m_draw = { DrawTile(), TileDrawType::SelfDraw, };
+	m_players.front().m_hand.AddFreeTiles( DealTiles( 1 ) );
+	m_players.front().m_draw = SelfDraw();
 	for ( size_t playerI = 1; playerI < m_players.size(); ++playerI )
 	{
-		m_players[ playerI ].m_hand.AddFreeTiles( DrawTiles( 1 ) );
+		m_players[ playerI ].m_hand.AddFreeTiles( DealTiles( 1 ) );
 	}
 
 	return m_players.front().m_draw.value();
-}
-
-//------------------------------------------------------------------------------
-Vector<Tile> RoundData::DrawTiles
-(
-	size_t i_num
-)
-{
-	Ensure( WallTilesRemaining() >= i_num, "Tried to draw more tiles than in wall" );
-
-	Vector<Tile> tiles;
-	tiles.reserve( i_num );
-	for ( size_t i = 0; i < i_num; ++i )
-	{
-		tiles.emplace_back( std::move( m_wall.back() ) );
-		m_wall.pop_back();
-	}
-	return tiles;
-}
-
-//------------------------------------------------------------------------------
-Tile RoundData::DrawTile
-(
-)
-{
-	Ensure( WallTilesRemaining() >= 1, "Tried to draw more tiles than in wall" );
-
-	Tile drawn = std::move( m_wall.back() );
-	m_wall.pop_back();
-	return drawn;
 }
 
 //------------------------------------------------------------------------------
@@ -351,25 +321,29 @@ TileDraw RoundData::PassCalls
 	RoundPlayerData& newPlayer = m_players[ ( size_t )m_currentTurn ];
 	newPlayer.UpdateForTurn();
 
-	newPlayer.m_draw = { DrawTile(), TileDrawType::SelfDraw, };
+	newPlayer.m_draw = SelfDraw();
 	return newPlayer.m_draw.value();
 }
 
 //------------------------------------------------------------------------------
-TileDraw RoundData::HandKan
+Hand::KanResult RoundData::HandKan
 (
 	Tile const& i_tile
 )
 {
 	RoundPlayerData& player = m_players[ ( size_t )m_currentTurn ];
-	player.m_hand.MakeKan( i_tile, std::nullopt );
+	return player.m_hand.MakeKan( i_tile, std::nullopt );
+}
 
-	Ensure( WallTilesRemaining() >= 1, "Tried to draw more tiles than in wall" );
-	Ensure( m_deadWallDrawsRemaining >= 1, "Tried to draw more tiles than in dead wall pool" );
+//------------------------------------------------------------------------------
+TileDraw RoundData::HandKanRonPass
+(
+)
+{
+	RoundPlayerData& player = m_players[ ( size_t )m_currentTurn ];
 
-	Tile drawn = std::move( m_wall.front() );
-	m_wall.erase( m_wall.begin() );
-	return { drawn, TileDrawType::DiscardDraw, };
+	player.m_draw = DeadWallDraw();
+	return player.m_draw.value();
 }
 
 //------------------------------------------------------------------------------
@@ -438,6 +412,49 @@ Pair<Seat, Tile> RoundData::DiscardKan
 	caller.UpdateForTurn();
 
 	return ret;
+}
+
+//------------------------------------------------------------------------------
+Vector<Tile> RoundData::DealTiles
+(
+	size_t i_num
+)
+{
+	Ensure( WallTilesRemaining() >= i_num, "Tried to draw more tiles than in wall" );
+
+	Vector<Tile> tiles;
+	tiles.reserve( i_num );
+	for ( size_t i = 0; i < i_num; ++i )
+	{
+		tiles.emplace_back( std::move( m_wall.back() ) );
+		m_wall.pop_back();
+	}
+	return tiles;
+}
+
+//------------------------------------------------------------------------------
+TileDraw RoundData::SelfDraw
+(
+)
+{
+	Ensure( WallTilesRemaining() >= 1, "Tried to draw more tiles than in wall" );
+
+	Tile drawn = std::move( m_wall.back() );
+	m_wall.pop_back();
+	return { drawn, TileDrawType::SelfDraw, };
+}
+
+//------------------------------------------------------------------------------
+TileDraw RoundData::DeadWallDraw
+(
+)
+{
+	Ensure( WallTilesRemaining() >= 1, "Tried to draw more tiles than in wall" );
+	Ensure( m_deadWallDrawsRemaining >= 1, "Tried to draw more tiles than in dead wall pool" );
+
+	Tile drawn = std::move( m_wall.front() );
+	m_wall.erase( m_wall.begin() );
+	return { drawn, TileDrawType::DeadWallDraw, };
 }
 
 }
