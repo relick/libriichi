@@ -79,7 +79,7 @@ void BetweenRounds::StartRound
 
 		bool const canTsumo = validWaits.contains( firstDrawnTile.m_tile );
 
-		Vector<Hand::DrawKanResult> kanOptions = round.GetHand( round.CurrentTurn() ).DrawKanOptions( nullptr );
+		Vector<Hand::DrawKanResult> kanOptions = round.GetHand( round.CurrentTurn() ).DrawKanOptions( &firstDrawnTile.m_tile );
 		table.Transition(
 			TableStates::Turn_User{table, round.CurrentTurn(), canTsumo, canRiichi, std::move( kanOptions )},
 			TableEvent{ TableEvent::Tag<TableEventType::DealerDraw>(), firstDrawnTile, round.CurrentTurn() }
@@ -164,6 +164,10 @@ void Turn_AI::MakeDecision
 	for ( size_t seatI = 0; seatI < table.m_players.size(); ++seatI )
 	{
 		Seat const seat = ( Seat )seatI;
+		if ( seat == round.CurrentTurn() )
+		{
+			continue;
+		}
 		if ( round.GetHand( seat ).CanPon( discardedTile ) )
 		{
 			canPon.Insert( seat );
@@ -296,6 +300,10 @@ void Turn_User::Discard
 	for ( size_t seatI = 0; seatI < table.m_players.size(); ++seatI )
 	{
 		Seat const seat = ( Seat )seatI;
+		if ( seat == round.CurrentTurn() )
+		{
+			continue;
+		}
 		if ( round.GetHand( seat ).CanPon( discardedTile ) )
 		{
 			canPon.Insert( seat );
@@ -351,6 +359,10 @@ void Turn_User::Riichi
 	for ( size_t seatI = 0; seatI < table.m_players.size(); ++seatI )
 	{
 		Seat const seat = ( Seat )seatI;
+		if ( seat == round.CurrentTurn() )
+		{
+			continue;
+		}
 		if ( round.GetHand( seat ).CanPon( discardedTile ) )
 		{
 			canPon.Insert( seat );
@@ -399,10 +411,13 @@ void Turn_User::Kan
 	SeatSet canRon;
 	if ( kanResult.m_upgradedFromPon )
 	{
-		bool anyCanRon = false;
 		for ( size_t seatI = 0; seatI < table.m_players.size(); ++seatI )
 		{
 			Seat const seat = ( Seat )seatI;
+			if ( seat == round.CurrentTurn() )
+			{
+				continue;
+			}
 			bool constexpr c_allowedToRiichi = false;
 			auto const [ validWaits, canRiichi ] = table.m_rules->WaitsWithYaku(
 				round,
@@ -414,7 +429,6 @@ void Turn_User::Kan
 			if ( !validWaits.empty() && !round.Furiten( seat, validWaits ) )
 			{
 				canRon.Insert( seat );
-				anyCanRon = true;
 			}
 		}
 	}
@@ -521,7 +535,7 @@ void BetweenTurns::UserPass
 
 		bool const canTsumo = validWaits.contains( drawnTile.m_tile );
 
-		Vector<Hand::DrawKanResult> kanOptions = round.GetHand( round.CurrentTurn() ).DrawKanOptions( nullptr );
+		Vector<Hand::DrawKanResult> kanOptions = round.GetHand( round.CurrentTurn() ).DrawKanOptions( &drawnTile.m_tile );
 		table.Transition(
 			TableStates::Turn_User{table, round.CurrentTurn(), canTsumo, canRiichi, std::move( kanOptions )},
 			TableEvent{ TableEvent::Tag<TableEventType::Draw>(), drawnTile, round.CurrentTurn() }
@@ -757,7 +771,7 @@ void RonAKanChance::Pass
 
 		bool const canTsumo = validWaits.contains( deadWallDraw.m_tile );
 
-		Vector<Hand::DrawKanResult> kanOptions = round.GetHand( round.CurrentTurn() ).DrawKanOptions( nullptr );
+		Vector<Hand::DrawKanResult> kanOptions = round.GetHand( round.CurrentTurn() ).DrawKanOptions( &deadWallDraw.m_tile );
 		table.Transition(
 			TableStates::Turn_User{table, round.CurrentTurn(), canTsumo, canRiichi, std::move( kanOptions )},
 			TableEvent{ TableEvent::Tag<TableEventType::Draw>(), deadWallDraw, round.CurrentTurn() }
