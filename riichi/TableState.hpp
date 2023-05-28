@@ -126,10 +126,11 @@ struct Turn_AI
 struct Turn_User
 	: BaseTurn
 {
-	Turn_User( Table& i_table, Seat i_seat, bool i_canTsumo, bool i_canRiichi, Vector<Hand::DrawKanResult> i_kanOptions );
+	Turn_User( Table& i_table, Seat i_seat, bool i_canTsumo, bool i_canRiichi, bool i_isRiichi, Vector<Hand::DrawKanResult> i_kanOptions );
 
 	bool CanTsumo() const { return m_canTsumo; }
 	bool CanRiichi() const { return m_canRiichi; }
+	bool IsRiichi() const { return m_isRiichi; } // if true, only valid options are tsumo and discard
 	bool CanKan() const { return !m_kanOptions.empty(); }
 	Vector<Hand::DrawKanResult> const& KanOptions() const { return m_kanOptions; }
 
@@ -141,6 +142,7 @@ struct Turn_User
 private:
 	bool m_canTsumo;
 	bool m_canRiichi;
+	bool m_isRiichi;
 	Vector<Hand::DrawKanResult> m_kanOptions;
 };
 

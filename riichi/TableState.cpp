@@ -28,10 +28,12 @@ void BetweenTurnsBase::TransitionToTurn
 		bool canTsumo = false;
 		bool canRiichi = false;
 
+		bool const isRiichi = round.CalledRiichi( round.CurrentTurn() );
+
 		if ( i_tileDraw.has_value() )
 		{
 			bool const allowedToRiichi = playerHand.Melds().empty()
-				&& !round.CalledRiichi( round.CurrentTurn() )
+				&& !isRiichi
 				&& table.GetPoints( round.GetPlayerID( round.CurrentTurn() ) ) >= table.m_rules->RiichiBet();
 			auto const [ validWaits, ableToRiichi ] = table.m_rules->WaitsWithYaku(
 				round,
@@ -47,7 +49,7 @@ void BetweenTurnsBase::TransitionToTurn
 
 		Vector<Hand::DrawKanResult> kanOptions = round.GetHand( round.CurrentTurn() ).DrawKanOptions( i_tileDraw.has_value() ? Option<Tile>( i_tileDraw.value().m_tile ) : Option<Tile>( std::nullopt ) );
 		table.Transition(
-			TableStates::Turn_User{ table, round.CurrentTurn(), canTsumo, canRiichi, std::move( kanOptions ) },
+			TableStates::Turn_User{ table, round.CurrentTurn(), canTsumo, canRiichi, isRiichi, std::move( kanOptions ) },
 			std::move( i_tableEvent )
 		);
 		break;
@@ -227,6 +229,10 @@ void BaseTurn::TransitionToBetweenTurns
 	// TODO-RULES: call options (particularly chi) should be controllable by rules
 	Seat const nextPlayer = NextPlayer( round.CurrentTurn(), table.m_players.size() );
 	Pair<Seat, Vector<Pair<Tile, Tile>>> canChi{nextPlayer, round.GetHand( nextPlayer ).ChiOptions( i_discardedTile )};
+	if ( round.CalledRiichi( nextPlayer ) )
+	{
+		canChi.second.clear();
+	}
 	SeatSet canPon;
 	SeatSet canKan;
 	SeatSet canRon;
@@ -239,11 +245,14 @@ void BaseTurn::TransitionToBetweenTurns
 		{
 			continue;
 		}
-		if ( round.GetHand( seat ).CanPon( i_discardedTile ) )
+
+		bool const isRiichi = round.CalledRiichi( seat );
+
+		if ( !isRiichi && round.GetHand( seat ).CanPon( i_discardedTile ) )
 		{
 			canPon.Insert( seat );
 		}
-		if ( round.GetHand( seat ).CanCallKan( i_discardedTile ) )
+		if ( !isRiichi && round.GetHand( seat ).CanCallKan( i_discardedTile ) )
 		{
 			canKan.Insert( seat );
 		}
@@ -302,11 +311,13 @@ Turn_User::Turn_User
 	Seat i_seat,
 	bool i_canTsumo,
 	bool i_canRiichi,
+	bool i_isRiichi,
 	Vector<Hand::DrawKanResult> i_kanOptions
 )
 	: BaseTurn{ i_table, i_seat }
 	, m_canTsumo{ i_canTsumo }
 	, m_canRiichi{ i_canRiichi }
+	, m_isRiichi{ i_isRiichi }
 	, m_kanOptions{ std::move( i_kanOptions ) }
 {}
 

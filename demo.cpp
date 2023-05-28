@@ -110,6 +110,13 @@ int main()
 			{
 				std::cout << Riichi::ToString( seat ) << ": " << table.GetRound().GetHand( seat ) << '\n';
 			}
+
+			std::cout << "Dora: \n";
+			for ( Riichi::Tile const& tile : table.GetRound().GatherDoraTiles() )
+			{
+				std::cout << tile;
+			}
+
 			std::cout << std::endl;
 			break;
 		}
@@ -136,55 +143,74 @@ int main()
 			}
 			std::cout << "\n";
 
+			bool passStraightAway = turn.IsRiichi();
 			if ( turn.CanKan() )
 			{
 				std::cout << "/Kan ";
+				passStraightAway = false;
 			}
 			if ( turn.CanTsumo() )
 			{
 				std::cout << "/Tsumo ";
+				passStraightAway = false;
 			}
 			if ( turn.CanRiichi() )
 			{
 				std::cout << "/Riichi ";
+				passStraightAway = false;
 			}
 			std::cout << std::endl;
+
+			if ( passStraightAway )
+			{
+				turn.Discard( std::nullopt );
+				break;
+			}
 
 			while ( true )
 			{
 				std::string input;
 				std::cin >> input;
-				if ( input.starts_with( "kan" ) && input.size() > 4 && turn.CanKan() )
+				if ( input.starts_with( "kan" ) )
 				{
-					Riichi::Option<Riichi::Tile> const tile = fnParseTile( input.substr( 4 ) );
-					if ( tile.has_value() && std::ranges::any_of( turn.KanOptions(), [ & ]( auto const& i_option ) -> bool
-						{
-							return i_option.kanTile == tile.value();
-						} ) )
+					if ( input.size() > 4 && turn.CanKan() )
 					{
-						turn.Kan( tile.value() );
-						break;
-					}
-				}
-				else if ( input == "tsumo" && turn.CanTsumo() )
-				{
-					turn.Tsumo();
-					break;
-				}
-				else if ( input.starts_with( "riichi" ) && input.size() > 7 && turn.CanRiichi() )
-				{
-					Riichi::Option<Riichi::Tile> const tile = fnParseTile( input.substr( 7 ) );
-					if ( tile.has_value() )
-					{
-						if ( tile == turn.GetDrawnTile() )
+						Riichi::Option<Riichi::Tile> const tile = fnParseTile( input.substr( 4 ) );
+						if ( tile.has_value() && std::ranges::any_of( turn.KanOptions(), [ & ]( auto const& i_option ) -> bool
+							{
+								return i_option.kanTile == tile.value();
+							} ) )
 						{
-							turn.Riichi( std::nullopt );
+							turn.Kan( tile.value() );
 							break;
 						}
-						else if ( std::ranges::contains( turn.GetHand().FreeTiles(), tile.value() ) )
+					}
+				}
+				else if ( input == "tsumo" )
+				{
+					if ( turn.CanTsumo() )
+					{
+						turn.Tsumo();
+					}
+					break;
+				}
+				else if ( input.starts_with( "riichi" ) )
+				{
+					if ( input.size() > 7 && turn.CanRiichi() )
+					{
+						Riichi::Option<Riichi::Tile> const tile = fnParseTile( input.substr( 7 ) );
+						if ( tile.has_value() )
 						{
-							turn.Riichi( tile );
-							break;
+							if ( tile == turn.GetDrawnTile() )
+							{
+								turn.Riichi( std::nullopt );
+								break;
+							}
+							else if ( std::ranges::contains( turn.GetHand().FreeTiles(), tile.value() ) )
+							{
+								turn.Riichi( tile );
+								break;
+							}
 						}
 					}
 				}
@@ -251,24 +277,36 @@ int main()
 			{
 				std::string input;
 				std::cin >> input;
-				if ( input == "chi" && betweenTurns.CanChi().first == playerSeat && !betweenTurns.CanChi().second.empty() )
+				if ( input == "chi" )
 				{
-					betweenTurns.UserChi( playerSeat, betweenTurns.CanChi().second.front() );
+					if ( betweenTurns.CanChi().first == playerSeat && !betweenTurns.CanChi().second.empty() )
+					{
+						betweenTurns.UserChi( playerSeat, betweenTurns.CanChi().second.front() );
+					}
 					break;
 				}
-				else if ( input == "pon" && betweenTurns.CanPon().Contains( playerSeat ) )
+				else if ( input == "pon" )
 				{
-					betweenTurns.UserPon( playerSeat );
+					if ( betweenTurns.CanPon().Contains( playerSeat ) )
+					{
+						betweenTurns.UserPon( playerSeat );
+					}
 					break;
 				}
-				else if ( input == "kan" && betweenTurns.CanKan().Contains( playerSeat ) )
+				else if ( input == "kan" )
 				{
-					betweenTurns.UserKan( playerSeat );
+					if ( betweenTurns.CanKan().Contains( playerSeat ) )
+					{
+						betweenTurns.UserKan( playerSeat );
+					}
 					break;
 				}
-				else if ( input == "ron" && betweenTurns.CanRon().Contains( playerSeat ) )
+				else if ( input == "ron" )
 				{
-					betweenTurns.UserRon( Riichi::SeatSet{ playerSeat } );
+					if ( betweenTurns.CanRon().Contains( playerSeat ) )
+					{
+						betweenTurns.UserRon( Riichi::SeatSet{ playerSeat } );
+					}
 					break;
 				}
 				else
