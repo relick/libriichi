@@ -366,7 +366,83 @@ void ThirteenOrphansInterpreter::AddInterpretations
 	Vector<Tile> const& i_sortedFreeTiles
 )	const
 {
-	// TODO-MVP
+	// Unlike standard interpretations, there's only one way this can go.
+	// We'll pretty much implement the full yaku here (the yaku calculation can then just confirm things are as expected)
+
+	// Requires hand with no melds
+	if ( !i_fixedPart.m_groups.empty() )
+	{
+		return;
+	}
+
+	auto fnRequiredTile = []( Tile const& i_tile )
+	{
+		if ( i_tile.Type() != TileType::Suit )
+		{
+			return true;
+		}
+		SuitTile const& suitTile = i_tile.Get<TileType::Suit>();
+		return suitTile.m_value == 1 || suitTile.m_value == 9;
+	};
+
+	// We're going to add all free tiles to the ungrouped list
+	// But then assess the waits based on if we actually have kokushi musou
+	HandInterpretation interp = i_fixedPart;
+	interp.m_ungrouped = i_sortedFreeTiles;
+
+	// TODO-OPT: Can we do this without filling a container?
+
+	Vector<Tile> requiredTiles{
+		SuitTile{ Suit::Manzu, SuitTileValue::Min },
+		SuitTile{ Suit::Manzu, SuitTileValue::Max },
+		SuitTile{ Suit::Pinzu, SuitTileValue::Min },
+		SuitTile{ Suit::Pinzu, SuitTileValue::Max },
+		SuitTile{ Suit::Souzu, SuitTileValue::Min },
+		SuitTile{ Suit::Souzu, SuitTileValue::Max },
+		DragonTileType::White,
+		DragonTileType::Green,
+		DragonTileType::Red,
+		WindTileType::East,
+		WindTileType::South,
+		WindTileType::West,
+		WindTileType::North,
+	};
+
+	for ( Tile const& tile : interp.m_ungrouped )
+	{
+		if ( !fnRequiredTile( tile ) )
+		{
+			// We have an invalid tile for 13 orphans, so definitely no waits here
+			io_interps.push_back( std::move( interp ) );
+			return;
+		}
+		std::erase( requiredTiles, tile );
+	}
+	
+	if ( requiredTiles.size() > 1 )
+	{
+		// Don't have enough unique tiles to have a wait for 13 orphans
+		io_interps.push_back( std::move( interp ) );
+		return;
+	}
+
+	// Must have a wait if we reached this far
+	interp.m_waitType = WaitType::Tanki;
+
+	if ( requiredTiles.size() == 1 )
+	{
+		// Have a pair inside the hand already, so there's exactly 1 tile left
+		interp.m_waits.insert( requiredTiles[ 0 ] );
+	}
+	else
+	{
+		Ensure( requiredTiles.size() == 0, "Did not have a valid number of unique tiles when assessing 13 orphans" );
+		// We have 1 of every tile, so this is a 13 tile wait. Luckily we have a full set of 13 tiles in our ungrouped list! :)
+		interp.m_waits.insert_range( interp.m_ungrouped );
+	}
+
+	io_interps.push_back( std::move( interp ) );
+	return;
 }
 
 }
