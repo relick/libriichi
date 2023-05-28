@@ -30,7 +30,9 @@ void Base::TransitionToTurn
 
 		if ( i_tileDraw.has_value() )
 		{
-			bool const allowedToRiichi = playerHand.Melds().empty() && !round.CalledRiichi( round.CurrentTurn() );
+			bool const allowedToRiichi = playerHand.Melds().empty()
+				&& !round.CalledRiichi( round.CurrentTurn() )
+				&& table.m_standings.m_points[ round.GetPlayerID(round.CurrentTurn(), table)] >= table.m_rules->RiichiBet();
 			auto const [ validWaits, ableToRiichi ] = table.m_rules->WaitsWithYaku(
 				round,
 				round.CurrentTurn(),
@@ -343,6 +345,11 @@ void Turn_User::Riichi
 	Ensure( m_canRiichi, "This user cannot riichi" );
 
 	RoundData& round = table.m_rounds.back();
+	
+	// Pay the bet
+	table.m_standings.m_points[ round.GetPlayerID( round.CurrentTurn(), table ) ] -= table.m_rules->RiichiBet();
+
+	// Make the discard
 	Tile const discardedTile = round.Riichi( i_handTileToDiscard );
 
 	TransitionToBetweenTurns(

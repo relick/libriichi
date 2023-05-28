@@ -16,6 +16,7 @@ public:
 
 	PlayerCount GetPlayerCount() const override { return 4_Players; }
 	Points InitialPoints() const override { return 25'000; }
+	Points RiichiBet() const override { return 1'000; }
 	Vector<Tile> const& Tileset() const override { return m_tileSet; }
 	size_t DeadWallDrawsAvailable() const override { return 4u; }
 	Seat LastRound() const override { return Seat::East; } // TODO-RULES: this would be nice on a template? I guess

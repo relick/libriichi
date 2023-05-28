@@ -22,6 +22,7 @@ struct Rules
 
 	virtual PlayerCount GetPlayerCount() const = 0;
 	virtual Points InitialPoints() const = 0;
+	virtual Points RiichiBet() const = 0;
 	virtual Vector<Tile> const& Tileset() const = 0;
 	// Not sure there's a reason to vary this, but it's a nice place to put it
 	// Dead wall size derived from this, and kan call maximum is treated as equal
