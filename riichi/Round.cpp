@@ -243,7 +243,11 @@ bool Round::NextPlayerIsInitial
 (
 )	const
 {
-	return m_players.back().m_playerID == m_initialPlayerID;
+	if ( m_players.size() <= 1 )
+	{
+		return true;
+	}
+	return m_players[ 1 ].m_playerID == m_initialPlayerID;
 }
 
 //------------------------------------------------------------------------------
@@ -339,24 +343,30 @@ Round::Round
 	}
 
 	bool const repeatRound = i_rules.RepeatRound( i_previousRound );
-	if ( repeatRound )
+	if ( !repeatRound )
 	{
-		if ( i_rules.ShouldAddHonba( i_previousRound ) )
-		{
-			++m_honbaSticks;
-		}
-	}
-	else
-	{
-		m_honbaSticks = 0;
-		m_riichiSticks = 0;
-		std::ranges::rotate( m_players, m_players.end() - 1 );
+		std::ranges::rotate( m_players, m_players.begin() + 1 );
 	}
 
 	// Increment round wind if we've done a full circuit
 	if ( !repeatRound && m_players.front().m_playerID == m_initialPlayerID )
 	{
 		m_roundWind = ( Seat )( ( EnumValueType )m_roundWind + 1 );
+	}
+
+	bool const addHonba = i_rules.ShouldAddHonba( i_previousRound );
+	if ( i_previousRound.AnyWinners() )
+	{
+		m_riichiSticks = 0;
+		if ( !addHonba )
+		{
+			m_honbaSticks = 0;
+		}
+	}
+
+	if ( addHonba )
+	{
+		++m_honbaSticks;
 	}
 
 	// Shuffle the tiles to build the wall

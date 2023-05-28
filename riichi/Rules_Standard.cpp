@@ -450,7 +450,7 @@ bool StandardYonma::RepeatRound
 )	const
 {
 	// We repeat if dealer won, or there was a draw and dealer was in tenpai whilst others in tenpai
-	return i_previousRound.IsWinner( Seat::East ) || i_previousRound.FinishedInTenpai( Seat::East ) || ( !i_previousRound.AnyWinners() && !i_previousRound.AnyFinishedInTenpai() );
+	return i_previousRound.IsWinner( Seat::East ) || i_previousRound.FinishedInTenpai( Seat::East );
 }
 
 //------------------------------------------------------------------------------
