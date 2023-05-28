@@ -12,7 +12,7 @@ void TestYaku()
 	// Set up mock
 	Seat mockSeat{ Seat::East };
 	Vector<PlayerID> mockPlayers{ PlayerID{}, PlayerID{}, PlayerID{}, PlayerID{} };
-	StandardYonma mockRules;
+	StandardYonma<Seat::East> mockRules;
 	ShuffleRNG mockRNG( 0 );
 	Round mockRound( mockSeat, mockPlayers, mockRules, mockRNG );
 

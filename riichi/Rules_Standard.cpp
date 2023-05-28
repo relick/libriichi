@@ -10,7 +10,7 @@ namespace Riichi
 {
 
 //------------------------------------------------------------------------------
-StandardYonma::StandardYonma
+StandardYonmaCore::StandardYonmaCore
 (
 )
 {
@@ -89,7 +89,7 @@ StandardYonma::StandardYonma
 }
 
 //------------------------------------------------------------------------------
-Pair<Set<Tile>, Vector<Tile>> StandardYonma::WaitsWithYaku
+Pair<Set<Tile>, Vector<Tile>> StandardYonmaCore::WaitsWithYaku
 (
 	Round const& i_round,
 	Seat const& i_playerSeat,
@@ -196,7 +196,7 @@ Pair<Set<Tile>, Vector<Tile>> StandardYonma::WaitsWithYaku
 }
 
 //------------------------------------------------------------------------------
-HandScore StandardYonma::CalculateBasicPoints
+HandScore StandardYonmaCore::CalculateBasicPoints
 (
 	Round const& i_round,
 	Seat const& i_playerSeat,
@@ -462,12 +462,12 @@ HandScore StandardYonma::CalculateBasicPoints
 	return { basePoints, std::move( maxScore ) };
 }
 
-
 //------------------------------------------------------------------------------
-bool StandardYonma::NoMoreRounds
+bool StandardYonmaCore::NoMoreRounds
 (
 	Table const& i_table,
-	Round const& i_previousRound
+	Round const& i_previousRound,
+	Seat i_gameLength
 )	const
 {
 	// TODO-RULES: allow for negative points play
@@ -483,7 +483,7 @@ bool StandardYonma::NoMoreRounds
 	// TODO-RULES: extension rounds if not enough points earned
 
 	bool const roundWindWillIncrement = !RepeatRound( i_previousRound ) && i_previousRound.NextPlayerIsInitial();
-	if ( roundWindWillIncrement && i_previousRound.Wind() == Seat::East )
+	if ( roundWindWillIncrement && i_previousRound.Wind() == i_gameLength )
 	{
 		return true;
 	}
@@ -492,7 +492,7 @@ bool StandardYonma::NoMoreRounds
 }
 
 //------------------------------------------------------------------------------
-bool StandardYonma::RepeatRound
+bool StandardYonmaCore::RepeatRound
 (
 	Round const& i_previousRound
 )	const
@@ -502,7 +502,7 @@ bool StandardYonma::RepeatRound
 }
 
 //------------------------------------------------------------------------------
-bool StandardYonma::ShouldAddHonba
+bool StandardYonmaCore::ShouldAddHonba
 (
 	Round const& i_previousRound
 )	const
@@ -512,7 +512,7 @@ bool StandardYonma::ShouldAddHonba
 }
 
 //------------------------------------------------------------------------------
-Pair<Points, Points> StandardYonma::PotPoints
+Pair<Points, Points> StandardYonmaCore::PotPoints
 (
 	size_t i_honbaSticks,
 	size_t i_riichiSticks,
@@ -532,7 +532,7 @@ Pair<Points, Points> StandardYonma::PotPoints
 }
 
 //------------------------------------------------------------------------------
-Pair<Points, Points> StandardYonma::PointsFromEachPlayerTsumo
+Pair<Points, Points> StandardYonmaCore::PointsFromEachPlayerTsumo
 (
 	Points i_basicPoints,
 	bool i_isDealer
@@ -547,7 +547,7 @@ Pair<Points, Points> StandardYonma::PointsFromEachPlayerTsumo
 }
 
 //------------------------------------------------------------------------------
-Points StandardYonma::PointsFromPlayerRon
+Points StandardYonmaCore::PointsFromPlayerRon
 (
 	Points i_basicPoints,
 	bool i_isDealer
@@ -562,7 +562,7 @@ Points StandardYonma::PointsFromPlayerRon
 }
 
 //------------------------------------------------------------------------------
-Pair<Points, Points> StandardYonma::PointsEachPlayerInTenpaiDraw
+Pair<Points, Points> StandardYonmaCore::PointsEachPlayerInTenpaiDraw
 (
 	size_t i_playersInTenpai
 )	const
@@ -582,7 +582,7 @@ Pair<Points, Points> StandardYonma::PointsEachPlayerInTenpaiDraw
 }
 
 //------------------------------------------------------------------------------
-/*static*/ Points StandardYonma::RoundTo100
+/*static*/ Points StandardYonmaCore::RoundTo100
 (
 	Points i_finalPoints
 )

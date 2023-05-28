@@ -16,7 +16,7 @@ int main()
 	//// Should be serialisable and deserialisable, as well as replayable
 
 	Riichi::Table table(
-		std::make_unique<Riichi::StandardYonma>(),
+		std::make_unique< Riichi::StandardYonma<Riichi::Seat::East> > (),
 		std::random_device()(),
 		std::random_device()()
 	);

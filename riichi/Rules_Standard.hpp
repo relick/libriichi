@@ -7,12 +7,12 @@ namespace Riichi
 {
 
 //------------------------------------------------------------------------------
-class StandardYonma
+class StandardYonmaCore
 	: public Rules
 {
 	Vector<Tile> m_tileSet;
 public:
-	StandardYonma();
+	StandardYonmaCore();
 
 	PlayerCount GetPlayerCount() const override { return 4_Players; }
 	Points InitialPoints() const override { return 25'000; }
@@ -37,7 +37,7 @@ public:
 		TileDraw const& i_lastTile
 	) const override;
 
-	bool NoMoreRounds( Table const& i_table, Round const& i_previousRound ) const override;
+	bool NoMoreRounds( Table const& i_table, Round const& i_previousRound, Seat i_gameLength ) const;
 	bool RepeatRound( Round const& i_previousRound ) const override;
 	bool ShouldAddHonba( Round const& i_previousRound ) const override;
 
@@ -50,4 +50,17 @@ private:
 	static Points RoundTo100( Points i_finalPoints );
 };
 
+//------------------------------------------------------------------------------
+template<Seat t_GameLength>
+class StandardYonma
+	: public StandardYonmaCore
+{
+public:
+	using StandardYonmaCore::StandardYonmaCore;
+
+	bool NoMoreRounds( Table const& i_table, Round const& i_previousRound ) const override;
+};
+
 }
+
+#include "Rules_Standard.inl"

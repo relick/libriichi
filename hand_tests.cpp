@@ -7,7 +7,7 @@
 
 int main()
 {
-	Riichi::StandardYonma yonma;
+	Riichi::StandardYonma<Riichi::Seat::East> yonma;
 
 	Riichi::Hand nineGatesHand;
 	for ( Riichi::SuitTileValue val : Riichi::SuitTileValue::InclusiveRange( Riichi::SuitTileValue::Min, Riichi::SuitTileValue::Max ) )
