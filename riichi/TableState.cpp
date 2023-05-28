@@ -62,6 +62,62 @@ void Base::TransitionToTurn
 }
 
 //------------------------------------------------------------------------------
+void Base::TransitionToBetweenTurns
+(
+	Tile const& i_discardedTile,
+	TableEvent&& i_tableEvent
+)	const
+{
+	Table& table = m_table.get();
+
+	RoundData& round = table.m_rounds.back();
+
+	// TODO-RULES: call options (particularly chi) should be controllable by rules
+	Seat const nextPlayer = NextPlayer( round.CurrentTurn(), table.m_players.size() );
+	Pair<Seat, Vector<Pair<Tile, Tile>>> canChi{nextPlayer, round.GetHand( nextPlayer ).ChiOptions( i_discardedTile )};
+	SeatSet canPon;
+	SeatSet canKan;
+	SeatSet canRon;
+
+	TileDraw const discardedTileAsDraw{ i_discardedTile, TileDrawType::DiscardDraw };
+	for ( size_t seatI = 0; seatI < table.m_players.size(); ++seatI )
+	{
+		Seat const seat = ( Seat )seatI;
+		if ( seat == round.CurrentTurn() )
+		{
+			continue;
+		}
+		if ( round.GetHand( seat ).CanPon( i_discardedTile ) )
+		{
+			canPon.Insert( seat );
+		}
+		if ( round.GetHand( seat ).CanCallKan( i_discardedTile ) )
+		{
+			canKan.Insert( seat );
+		}
+
+		bool constexpr c_allowedToRiichi = false;
+		auto const [validWaits, canRiichi] = table.m_rules->WaitsWithYaku(
+			round,
+			seat,
+			round.GetHand( seat ),
+			discardedTileAsDraw,
+			c_allowedToRiichi
+		);
+		if ( !validWaits.empty() && !round.Furiten( seat, validWaits ) )
+		{
+			canRon.Insert( seat );
+		}
+	}
+
+	table.Transition(
+		TableStates::BetweenTurns{table, discardedTileAsDraw, std::move( canChi ), std::move( canPon ), std::move( canKan ), std::move( canRon )},
+		std::move( i_tableEvent )
+	);
+
+}
+
+//------------------------------------------------------------------------------
 void Setup::StartGame
 (
 )	const
@@ -174,48 +230,8 @@ void Turn_AI::MakeDecision
 	RoundData& round = table.m_rounds.back();
 	Tile const discardedTile = round.Discard( std::nullopt );
 
-	// TODO-DEBT: can this be pulled into a function instead of repeating it?
-
-	// TODO-RULES: call options (particularly chi) should be controllable by rules
-	Seat const nextPlayer = NextPlayer( round.CurrentTurn(), table.m_players.size() );
-	Pair<Seat, Vector<Pair<Tile, Tile>>> canChi{nextPlayer, round.GetHand( nextPlayer ).ChiOptions( discardedTile )};
-	SeatSet canPon;
-	SeatSet canKan;
-	SeatSet canRon;
-
-	TileDraw const discardedTileAsDraw{ discardedTile, TileDrawType::DiscardDraw };
-	for ( size_t seatI = 0; seatI < table.m_players.size(); ++seatI )
-	{
-		Seat const seat = ( Seat )seatI;
-		if ( seat == round.CurrentTurn() )
-		{
-			continue;
-		}
-		if ( round.GetHand( seat ).CanPon( discardedTile ) )
-		{
-			canPon.Insert( seat );
-		}
-		if ( round.GetHand( seat ).CanCallKan( discardedTile ) )
-		{
-			canKan.Insert( seat );
-		}
-
-		bool constexpr c_allowedToRiichi = false;
-		auto const [ validWaits, canRiichi ] = table.m_rules->WaitsWithYaku(
-			round,
-			seat,
-			round.GetHand( seat ),
-			discardedTileAsDraw,
-			c_allowedToRiichi
-		);
-		if ( !validWaits.empty() && !round.Furiten( seat, validWaits ) )
-		{
-			canRon.Insert( seat );
-		}
-	}
-
-	table.Transition(
-		TableStates::BetweenTurns{table, discardedTileAsDraw, std::move( canChi ), std::move( canPon ), std::move( canKan ), std::move( canRon )},
+	TransitionToBetweenTurns(
+		discardedTile,
 		TableEvent{ TableEvent::Tag<TableEventType::Discard>(), discardedTile, round.CurrentTurn() }
 	);
 }
@@ -310,48 +326,8 @@ void Turn_User::Discard
 	RoundData& round = table.m_rounds.back();
 	Tile const discardedTile = round.Discard( i_handTileToDiscard );
 
-	// TODO-DEBT: can this be pulled into a function instead of repeating it?
-
-	// TODO-RULES: call options (particularly chi) should be controllable by rules
-	Seat const nextPlayer = NextPlayer( round.CurrentTurn(), table.m_players.size() );
-	Pair<Seat, Vector<Pair<Tile, Tile>>> canChi{nextPlayer, round.GetHand( nextPlayer ).ChiOptions( discardedTile )};
-	SeatSet canPon;
-	SeatSet canKan;
-	SeatSet canRon;
-
-	TileDraw const discardedTileAsDraw{ discardedTile, TileDrawType::DiscardDraw };
-	for ( size_t seatI = 0; seatI < table.m_players.size(); ++seatI )
-	{
-		Seat const seat = ( Seat )seatI;
-		if ( seat == round.CurrentTurn() )
-		{
-			continue;
-		}
-		if ( round.GetHand( seat ).CanPon( discardedTile ) )
-		{
-			canPon.Insert( seat );
-		}
-		if ( round.GetHand( seat ).CanCallKan( discardedTile ) )
-		{
-			canKan.Insert( seat );
-		}
-
-		bool constexpr c_allowedToRiichi = false;
-		auto const [ validWaits, canRiichi ] = table.m_rules->WaitsWithYaku(
-			round,
-			seat,
-			round.GetHand( seat ),
-			discardedTileAsDraw,
-			c_allowedToRiichi
-		);
-		if ( !validWaits.empty() && !round.Furiten( seat, validWaits ) )
-		{
-			canRon.Insert( seat );
-		}
-	}
-
-	table.Transition(
-		TableStates::BetweenTurns{table, discardedTileAsDraw, std::move( canChi ), std::move( canPon ), std::move( canKan ), std::move( canRon )},
+	TransitionToBetweenTurns(
+		discardedTile,
 		TableEvent{ TableEvent::Tag<TableEventType::Discard>(), discardedTile, round.CurrentTurn() }
 	);
 }
@@ -369,48 +345,8 @@ void Turn_User::Riichi
 	RoundData& round = table.m_rounds.back();
 	Tile const discardedTile = round.Riichi( i_handTileToDiscard );
 
-	// TODO-DEBT: can this be pulled into a function instead of repeating it?
-
-	// TODO-RULES: call options (particularly chi) should be controllable by rules
-	Seat const nextPlayer = NextPlayer( round.CurrentTurn(), table.m_players.size() );
-	Pair<Seat, Vector<Pair<Tile, Tile>>> canChi{nextPlayer, round.GetHand( nextPlayer ).ChiOptions( discardedTile )};
-	SeatSet canPon;
-	SeatSet canKan;
-	SeatSet canRon;
-
-	TileDraw const discardedTileAsDraw{ discardedTile, TileDrawType::DiscardDraw };
-	for ( size_t seatI = 0; seatI < table.m_players.size(); ++seatI )
-	{
-		Seat const seat = ( Seat )seatI;
-		if ( seat == round.CurrentTurn() )
-		{
-			continue;
-		}
-		if ( round.GetHand( seat ).CanPon( discardedTile ) )
-		{
-			canPon.Insert( seat );
-		}
-		if ( round.GetHand( seat ).CanCallKan( discardedTile ) )
-		{
-			canKan.Insert( seat );
-		}
-
-		bool constexpr c_allowedToRiichi = false;
-		auto const [ validWaits, canRiichi ] = table.m_rules->WaitsWithYaku(
-			round,
-			seat,
-			round.GetHand( seat ),
-			discardedTileAsDraw,
-			c_allowedToRiichi
-		);
-		if ( !validWaits.empty() && !round.Furiten( seat, validWaits ) )
-		{
-			canRon.Insert( seat );
-		}
-	}
-
-	table.Transition(
-		TableStates::BetweenTurns{table, discardedTileAsDraw, std::move( canChi ), std::move( canPon ), std::move( canKan ), std::move( canRon )},
+	TransitionToBetweenTurns(
+		discardedTile,
 		TableEvent{ TableEvent::Tag<TableEventType::Riichi>(), discardedTile, round.CurrentTurn() }
 	);
 }

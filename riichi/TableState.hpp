@@ -94,6 +94,7 @@ protected:
 	std::reference_wrapper<Table> m_table;
 
 	void TransitionToTurn( Option<TileDraw> const& i_tileDraw, TableEvent&& i_tableEvent ) const;
+	void TransitionToBetweenTurns( Tile const& i_discardedTile, TableEvent&& i_tableEvent ) const;
 };
 
 //------------------------------------------------------------------------------
