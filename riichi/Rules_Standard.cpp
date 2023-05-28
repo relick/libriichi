@@ -102,8 +102,11 @@ Pair<Set<Tile>, bool> StandardYonma::WaitsWithYaku
 	HandAssessment const assessment( i_hand, *this );
 
 	Set<Tile> waits;
+	bool hasInterpsWithWaits = false;
 	for ( HandInterpretation const& interp : assessment.Interpretations() )
 	{
+		hasInterpsWithWaits |= interp.m_waitType != WaitType::None;
+
 		if ( interp.m_waitType == WaitType::None || !interp.m_waits.contains( i_lastTile.m_tile ) )
 		{
 			continue;
@@ -129,7 +132,7 @@ Pair<Set<Tile>, bool> StandardYonma::WaitsWithYaku
 	}
 
 	bool allowedToRiichi = false;
-	if ( i_considerForRiichi )
+	if ( i_considerForRiichi && hasInterpsWithWaits )
 	{
 		for ( auto const& yaku : m_yaku )
 		{

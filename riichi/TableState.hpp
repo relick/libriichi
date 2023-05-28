@@ -129,7 +129,7 @@ struct Turn_User
 	Turn_User( Table& i_table, Seat i_seat, bool i_canTsumo, bool i_canRiichi, Vector<Hand::DrawKanResult> i_kanOptions );
 
 	bool CanTsumo() const { return m_canTsumo; }
-	bool CanRiichi() const { return m_canTsumo; }
+	bool CanRiichi() const { return m_canRiichi; }
 	bool CanKan() const { return !m_kanOptions.empty(); }
 	Vector<Hand::DrawKanResult> const& KanOptions() const { return m_kanOptions; }
 
