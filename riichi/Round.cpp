@@ -254,7 +254,7 @@ Vector<Tile> Round::GatherDoraTiles
 {
 	Vector<Tile> doraTiles;
 
-	size_t firstDoraTileI = m_deadWallDrawsRemaining;
+	size_t firstDoraTileI = m_deadWallDrawsRemaining + 1;
 
 	for ( size_t i = 0; i < m_doraCount; ++i )
 	{
@@ -274,7 +274,7 @@ Vector<Tile> Round::GatherUradoraTiles
 {
 	Vector<Tile> doraTiles;
 
-	size_t firstUradoraTileI = m_deadWallDrawsRemaining + 1;
+	size_t firstUradoraTileI = m_deadWallDrawsRemaining;
 
 	for ( size_t i = 0; i < m_doraCount; ++i )
 	{
