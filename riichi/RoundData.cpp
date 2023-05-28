@@ -182,6 +182,16 @@ Player const& RoundData::GetPlayer
 }
 
 //------------------------------------------------------------------------------
+PlayerID RoundData::GetPlayerID
+(
+	Seat i_player,
+	Table const& i_table
+)	const
+{
+	return PlayerID( m_players[ ( size_t )i_player ].m_playerIndex );
+}
+
+//------------------------------------------------------------------------------
 Seat RoundData::GetSeat
 (
 	PlayerID i_playerID

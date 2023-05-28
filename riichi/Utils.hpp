@@ -190,7 +190,7 @@ public:
 		bool operator!=( Iter const& b ) const { return m_enumPos != b.m_enumPos; }
 	};
 
-	Iter begin() const { return Iter{ this, 0 }; }
+	Iter begin() const { return Iter{ this, [ this ] { size_t pos = 0; while ( pos < t_EnumCount && !Contains( ( T_Enum )pos ) ) { ++pos; } return pos; }() }; }
 	Iter end() const { return Iter{ this, t_EnumCount }; }
 
 	explicit EnumSet() = default;

@@ -63,6 +63,7 @@ public:
 	size_t WallTilesRemaining() const;
 	bool CallsMade() const;
 	Player const& GetPlayer( Seat i_player, Table const& i_table ) const;
+	PlayerID GetPlayerID( Seat i_player, Table const& i_table ) const;
 	Seat GetSeat( PlayerID i_playerID ) const;
 	bool NoMoreRounds( Rules const& i_rules ) const;
 	bool NextRoundRotateSeat( Rules const& i_rules ) const;

@@ -244,7 +244,7 @@ void Turn_User::Tsumo
 		Seat const seat = ( Seat )seatI;
 		if ( seat == round.CurrentTurn() )
 		{
-			table.m_standings.m_points[ ( size_t )seat ] += static_cast<Points>(
+			table.m_standings.m_points[ round.GetPlayerID( seat, table ) ] += static_cast<Points>(
 				isDealer
 				? ( ( table.m_players.size() - 1 ) * winnings.second )
 				: ( winnings.first + ( table.m_players.size() - 2 ) * winnings.second )
@@ -252,11 +252,11 @@ void Turn_User::Tsumo
 		}
 		else if ( round.IsDealer( seat ) )
 		{
-			table.m_standings.m_points[ ( size_t )seat ] -= winnings.first;
+			table.m_standings.m_points[ round.GetPlayerID( seat, table ) ] -= winnings.first;
 		}
 		else
 		{
-			table.m_standings.m_points[ ( size_t )seat ] -= winnings.second;
+			table.m_standings.m_points[ round.GetPlayerID( seat, table ) ] -= winnings.second;
 		}
 	}
 
@@ -489,11 +489,11 @@ void BetweenTurns::UserPass
 			Seat const seat = ( Seat )seatI;
 			if ( round.FinishedInTenpai( seat ) )
 			{
-				table.m_standings.m_points[ ( size_t )seat ] += pointsForEachPlayer;
+				table.m_standings.m_points[ round.GetPlayerID( seat, table ) ] += pointsForEachPlayer;
 			}
 			else
 			{
-				table.m_standings.m_points[ ( size_t )seat ] -= pointsForEachPlayer;
+				table.m_standings.m_points[ round.GetPlayerID( seat, table ) ] -= pointsForEachPlayer;
 			}
 		}
 
@@ -704,11 +704,11 @@ void BetweenTurns::UserRon
 			Seat const standingsSeat = ( Seat )seatI;
 			if ( standingsSeat == seat )
 			{
-				table.m_standings.m_points[ ( size_t )standingsSeat ] += winnings;
+				table.m_standings.m_points[ round.GetPlayerID( standingsSeat, table ) ] += winnings;
 			}
 			else if ( standingsSeat == round.CurrentTurn() )
 			{
-				table.m_standings.m_points[ ( size_t )standingsSeat ] -= winnings;
+				table.m_standings.m_points[ round.GetPlayerID( standingsSeat, table ) ] -= winnings;
 			}
 		}
 	}
@@ -825,11 +825,11 @@ void RonAKanChance::Ron
 			Seat const standingsSeat = ( Seat )seatI;
 			if ( standingsSeat == seat )
 			{
-				table.m_standings.m_points[ ( size_t )standingsSeat ] += winnings;
+				table.m_standings.m_points[ round.GetPlayerID( standingsSeat, table ) ] += winnings;
 			}
 			else if ( standingsSeat == round.CurrentTurn() )
 			{
-				table.m_standings.m_points[ ( size_t )standingsSeat ] -= winnings;
+				table.m_standings.m_points[ round.GetPlayerID( standingsSeat, table ) ] -= winnings;
 			}
 		}
 	}

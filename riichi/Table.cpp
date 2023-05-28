@@ -23,7 +23,7 @@ std::ostream& operator<<( std::ostream& io_out, Standings const& i_standings )
 	for ( size_t i = 0; i < i_standings.m_points.size(); ++i )
 	{
 		if ( i > 0 ) { io_out << '\n'; }
-		io_out << ToString( ( Seat )i ) << ":\t" << i_standings.m_points[ i ];
+		io_out << "Player " << i << ":\t" << i_standings.m_points[i];
 	}
 
 	return io_out;
