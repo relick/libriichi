@@ -3,13 +3,14 @@
 #include "Containers.hpp"
 
 #include <concepts>
+#include <type_traits>
 
 namespace Riichi
 {
 
 //------------------------------------------------------------------------------
 template<typename T, typename S>
-concept DifferentTypes = !std::same_as<std::remove_cvref_t<T>, std::remove_cvref_t<S>>;
+concept DifferentTypes = !std::same_as<std::decay_t<T>, std::decay_t<S>>;
 
 //------------------------------------------------------------------------------
 template<typename T_Tags, T_Tags t_Tag>
