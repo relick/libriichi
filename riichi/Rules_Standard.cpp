@@ -131,6 +131,8 @@ Pair<Set<Tile>, bool> StandardYonma::WaitsWithYaku
 		}
 	}
 
+	// TODO-MVP: hasInterpsWithWaits works as long as our 13 hand tiles are have waits
+	// but if it's one of the hand tiles we have to discard for riichi, this needs handling
 	bool allowedToRiichi = false;
 	if ( i_considerForRiichi && hasInterpsWithWaits )
 	{

@@ -524,7 +524,7 @@ void BetweenTurns::UserPass
 		for ( size_t seatI = 0; seatI < table.m_players.size(); ++seatI )
 		{
 			Seat const seat = ( Seat )seatI;
-			if ( round.FinishedInTenpai( seat ) )
+			if ( inTenpai.Contains( seat ) )
 			{
 				table.ModifyPoints( round.GetPlayerID( seat ), pointsForEachPlayer );
 			}
