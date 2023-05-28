@@ -459,6 +459,26 @@ bool StandardYonma::ShouldAddHonba
 }
 
 //------------------------------------------------------------------------------
+Pair<Points, Points> StandardYonma::PotPoints
+(
+	size_t i_honbaSticks,
+	size_t i_riichiSticks,
+	bool i_isTsumo,
+	size_t i_winners
+)	const
+{
+	if ( i_isTsumo )
+	{
+		// Honba paid by all non-winners
+		Ensure( i_winners == 1, "Only 1 tsumo" );
+		return { static_cast< Points >( i_honbaSticks * 100 ), static_cast< Points >( i_riichiSticks * RiichiBet() ) };
+	}
+
+	// Honba paid by ron'd player
+	return { static_cast< Points >( i_honbaSticks * 300 ), RoundTo100( static_cast< Points >( ( i_riichiSticks * RiichiBet() ) / i_winners ) ) };
+}
+
+//------------------------------------------------------------------------------
 Pair<Points, Points> StandardYonma::PointsFromEachPlayerTsumo
 (
 	Points i_basicPoints,

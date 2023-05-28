@@ -77,7 +77,8 @@ void BetweenTurnsBase::HandleRon
 	// TODO-AI: assess whether any AI should join in ron
 	// TODO-RULES: allow/disallow multiple ron
 
-	// TODO-MVP: honba/riichi sticks
+	bool constexpr c_isTsumo = false;
+	Pair<Points, Points> const pot = table.m_rules->PotPoints( round.HonbaSticks(), round.RiichiSticks(), c_isTsumo, i_winners.Size() );
 
 	for ( Seat seat : i_winners )
 	{
@@ -100,11 +101,11 @@ void BetweenTurnsBase::HandleRon
 			Seat const standingsSeat = ( Seat )seatI;
 			if ( standingsSeat == seat )
 			{
-				table.ModifyPoints( round.GetPlayerID( standingsSeat ), winnings );
+				table.ModifyPoints( round.GetPlayerID( standingsSeat ), winnings + pot.second );
 			}
 			else if ( standingsSeat == round.CurrentTurn() )
 			{
-				table.ModifyPoints( round.GetPlayerID( standingsSeat ), -winnings );
+				table.ModifyPoints( round.GetPlayerID( standingsSeat ), -winnings - pot.first );
 			}
 		}
 	}
@@ -340,7 +341,8 @@ void Turn_User::Tsumo
 	bool const isDealer = round.IsDealer( round.CurrentTurn() );
 	Pair<Points, Points> const winnings = table.m_rules->PointsFromEachPlayerTsumo( score.first, isDealer );
 
-	// TODO-MVP: honba/riichi sticks
+	bool constexpr c_isTsumo = true;
+	Pair<Points, Points> const pot = table.m_rules->PotPoints( round.HonbaSticks(), round.RiichiSticks(), c_isTsumo, 1 );
 
 	for ( size_t seatI = 0; seatI < table.m_players.size(); ++seatI )
 	{
@@ -351,16 +353,16 @@ void Turn_User::Tsumo
 				isDealer
 				? ( ( table.m_players.size() - 1 ) * winnings.second )
 				: ( winnings.first + ( table.m_players.size() - 2 ) * winnings.second )
-				);
+				) + static_cast< Points >( pot.first * ( table.m_players.size() - 1 ) ) + pot.second;
 			table.ModifyPoints( round.GetPlayerID( seat ), points );
 		}
 		else if ( round.IsDealer( seat ) )
 		{
-			table.ModifyPoints( round.GetPlayerID( seat ), -winnings.first );
+			table.ModifyPoints( round.GetPlayerID( seat ), -winnings.first - pot.first );
 		}
 		else
 		{
-			table.ModifyPoints( round.GetPlayerID( seat ), -winnings.second );
+			table.ModifyPoints( round.GetPlayerID( seat ), -winnings.second - pot.first );
 		}
 	}
 

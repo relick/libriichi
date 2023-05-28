@@ -56,9 +56,10 @@ struct Rules
 	// TODO-RULES: special draw actions (9-honor hand, 4 discarded winds, 5 kantsu)
 
 	// Scoring
-	virtual Pair<Points, Points> PointsFromEachPlayerTsumo( Points i_basicPoints, bool i_isDealer ) const = 0;
+	virtual Pair<Points, Points> PotPoints( size_t i_honbaSticks, size_t i_riichiSticks, bool i_isTsumo, size_t i_winners ) const = 0; // 1: paid by losers, 2: gained by winners
+	virtual Pair<Points, Points> PointsFromEachPlayerTsumo( Points i_basicPoints, bool i_isDealer ) const = 0; // 1: paid by dealer, 2: paid by non-dealers
 	virtual Points PointsFromPlayerRon( Points i_basicPoints, bool i_isDealer ) const = 0;
-	virtual Pair<Points, Points> PointsEachPlayerInTenpaiDraw( size_t i_playersInTenpai ) const = 0;
+	virtual Pair<Points, Points> PointsEachPlayerInTenpaiDraw( size_t i_playersInTenpai ) const = 0;  // 1: gained by players in tenpai, 2: paid by players in tenpai
 
 
 	// Common to all rulesets

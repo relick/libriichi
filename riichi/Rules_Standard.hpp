@@ -41,6 +41,7 @@ public:
 	bool RepeatRound( RoundData const& i_previousRound ) const override;
 	bool ShouldAddHonba( RoundData const& i_previousRound ) const override;
 
+	Pair<Points, Points> PotPoints( size_t i_honbaSticks, size_t i_riichiSticks, bool i_isTsumo, size_t i_winners ) const override;
 	Pair<Points, Points> PointsFromEachPlayerTsumo( Points i_basicPoints, bool i_isDealer ) const override;
 	Points PointsFromPlayerRon( Points i_basicPoints, bool i_isDealer ) const override;
 	Pair<Points, Points> PointsEachPlayerInTenpaiDraw( size_t i_playersInTenpai ) const override;

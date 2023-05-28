@@ -248,6 +248,22 @@ RoundData::RoundData
 }
 
 //------------------------------------------------------------------------------
+size_t RoundData::HonbaSticks
+(
+)	const
+{
+	return m_honbaSticks;
+}
+
+//------------------------------------------------------------------------------
+size_t RoundData::RiichiSticks
+(
+)	const
+{
+	return m_riichiSticks;
+}
+
+//------------------------------------------------------------------------------
 bool RoundData::NextPlayerIsInitial
 (
 )	const

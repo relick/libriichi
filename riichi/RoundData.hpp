@@ -76,6 +76,8 @@ public:
 	bool NextPlayerIsInitial() const;
 	Vector<Tile> GatherDoraTiles() const;
 	Vector<Tile> GatherUradoraTiles() const;
+	size_t HonbaSticks() const;
+	size_t RiichiSticks() const;
 
 public:
 	// non-const interface, only accessible by table states
