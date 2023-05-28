@@ -37,49 +37,49 @@ void TestYaku()
 	{
 		Hand failHand;
 		failHand.AddFreeTiles( {
-			SuitTile{ Suit::Manzu, SuitTileValue::Set<1>() },
-			SuitTile{ Suit::Manzu, SuitTileValue::Set<2>() },
-			SuitTile{ Suit::Manzu, SuitTileValue::Set<3>() },
-			SuitTile{ Suit::Manzu, SuitTileValue::Set<9>() },
-			SuitTile{ Suit::Manzu, SuitTileValue::Set<9>() },
-			SuitTile{ Suit::Pinzu, SuitTileValue::Set<1>() },
-			SuitTile{ Suit::Pinzu, SuitTileValue::Set<2>() },
-			SuitTile{ Suit::Pinzu, SuitTileValue::Set<3>() },
-			SuitTile{ Suit::Pinzu, SuitTileValue::Set<3>() },
-			SuitTile{ Suit::Pinzu, SuitTileValue::Set<5>() },
-			SuitTile{ Suit::Pinzu, SuitTileValue::Set<7>() },
-			SuitTile{ Suit::Pinzu, SuitTileValue::Set<8>() },
-			SuitTile{ Suit::Pinzu, SuitTileValue::Set<9>() },
+			SuitTile::Make<Suit::Manzu, 1>(),
+			SuitTile::Make<Suit::Manzu, 2>(),
+			SuitTile::Make<Suit::Manzu, 3>(),
+			SuitTile::Make<Suit::Manzu, 9>(),
+			SuitTile::Make<Suit::Manzu, 9>(),
+			SuitTile::Make<Suit::Pinzu, 1>(),
+			SuitTile::Make<Suit::Pinzu, 2>(),
+			SuitTile::Make<Suit::Pinzu, 3>(),
+			SuitTile::Make<Suit::Pinzu, 3>(),
+			SuitTile::Make<Suit::Pinzu, 5>(),
+			SuitTile::Make<Suit::Pinzu, 7>(),
+			SuitTile::Make<Suit::Pinzu, 8>(),
+			SuitTile::Make<Suit::Pinzu, 9>(),
 			} );
 
 		bool const fail = fnTestForYaku(
 			StandardYaku::MenzenchinTsumohou(),
 			failHand,
-			{ SuitTile{ Suit::Pinzu, SuitTileValue::Set<4>() }, TileDrawType::DiscardDraw }
+			{ SuitTile::Make<Suit::Pinzu, 4>(), TileDrawType::DiscardDraw }
 		);
 		Ensure( !fail, "MenzenchinTsumohou failed!" );
 
 		Hand successHand;
 		successHand.AddFreeTiles( {
-			SuitTile{ Suit::Manzu, SuitTileValue::Set<1>() },
-			SuitTile{ Suit::Manzu, SuitTileValue::Set<2>() },
-			SuitTile{ Suit::Manzu, SuitTileValue::Set<3>() },
-			SuitTile{ Suit::Manzu, SuitTileValue::Set<9>() },
-			SuitTile{ Suit::Manzu, SuitTileValue::Set<9>() },
-			SuitTile{ Suit::Pinzu, SuitTileValue::Set<1>() },
-			SuitTile{ Suit::Pinzu, SuitTileValue::Set<2>() },
-			SuitTile{ Suit::Pinzu, SuitTileValue::Set<3>() },
-			SuitTile{ Suit::Pinzu, SuitTileValue::Set<4>() },
-			SuitTile{ Suit::Pinzu, SuitTileValue::Set<6>() },
-			SuitTile{ Suit::Pinzu, SuitTileValue::Set<7>() },
-			SuitTile{ Suit::Pinzu, SuitTileValue::Set<8>() },
-			SuitTile{ Suit::Pinzu, SuitTileValue::Set<9>() },
+			SuitTile::Make<Suit::Manzu, 1>(),
+			SuitTile::Make<Suit::Manzu, 2>(),
+			SuitTile::Make<Suit::Manzu, 3>(),
+			SuitTile::Make<Suit::Manzu, 9>(),
+			SuitTile::Make<Suit::Manzu, 9>(),
+			SuitTile::Make<Suit::Pinzu, 1>(),
+			SuitTile::Make<Suit::Pinzu, 2>(),
+			SuitTile::Make<Suit::Pinzu, 3>(),
+			SuitTile::Make<Suit::Pinzu, 4>(),
+			SuitTile::Make<Suit::Pinzu, 6>(),
+			SuitTile::Make<Suit::Pinzu, 7>(),
+			SuitTile::Make<Suit::Pinzu, 8>(),
+			SuitTile::Make<Suit::Pinzu, 9>(),
 			} );
 
 		bool const success = fnTestForYaku(
 			StandardYaku::MenzenchinTsumohou(),
 			successHand,
-			{ SuitTile{ Suit::Pinzu, SuitTileValue::Set<5>() }, TileDrawType::SelfDraw }
+			{ SuitTile::Make<Suit::Pinzu, 5>(), TileDrawType::SelfDraw }
 		);
 		Ensure( success, "MenzenchinTsumohou failed!" );
 	}
@@ -88,25 +88,25 @@ void TestYaku()
 	{
 		Hand failHand;
 		failHand.AddFreeTiles( {
-			SuitTile{ Suit::Manzu, SuitTileValue::Set<1>() },
-			SuitTile{ Suit::Manzu, SuitTileValue::Set<2>() },
-			SuitTile{ Suit::Manzu, SuitTileValue::Set<3>() },
-			SuitTile{ Suit::Manzu, SuitTileValue::Set<9>() },
-			SuitTile{ Suit::Manzu, SuitTileValue::Set<9>() },
-			SuitTile{ Suit::Pinzu, SuitTileValue::Set<1>() },
-			SuitTile{ Suit::Pinzu, SuitTileValue::Set<2>() },
-			SuitTile{ Suit::Pinzu, SuitTileValue::Set<3>() },
-			SuitTile{ Suit::Pinzu, SuitTileValue::Set<3>() },
-			SuitTile{ Suit::Pinzu, SuitTileValue::Set<5>() },
-			SuitTile{ Suit::Pinzu, SuitTileValue::Set<7>() },
-			SuitTile{ Suit::Pinzu, SuitTileValue::Set<8>() },
-			SuitTile{ Suit::Pinzu, SuitTileValue::Set<9>() },
+			SuitTile::Make<Suit::Manzu, 1>(),
+			SuitTile::Make<Suit::Manzu, 2>(),
+			SuitTile::Make<Suit::Manzu, 3>(),
+			SuitTile::Make<Suit::Manzu, 9>(),
+			SuitTile::Make<Suit::Manzu, 9>(),
+			SuitTile::Make<Suit::Pinzu, 1>(),
+			SuitTile::Make<Suit::Pinzu, 2>(),
+			SuitTile::Make<Suit::Pinzu, 3>(),
+			SuitTile::Make<Suit::Pinzu, 3>(),
+			SuitTile::Make<Suit::Pinzu, 5>(),
+			SuitTile::Make<Suit::Pinzu, 7>(),
+			SuitTile::Make<Suit::Pinzu, 8>(),
+			SuitTile::Make<Suit::Pinzu, 9>(),
 			} );
 
 		bool const fail = fnTestForYaku(
 			StandardYaku::Riichi(),
 			failHand,
-			{ SuitTile{ Suit::Pinzu, SuitTileValue::Set<4>() }, TileDrawType::SelfDraw }
+			{ SuitTile::Make<Suit::Pinzu, 4>(), TileDrawType::SelfDraw }
 		);
 		Ensure( !fail, "Riichi failed!" );
 
@@ -116,25 +116,25 @@ void TestYaku()
 
 		Hand successHand;
 		successHand.AddFreeTiles( {
-			SuitTile{ Suit::Manzu, SuitTileValue::Set<1>() },
-			SuitTile{ Suit::Manzu, SuitTileValue::Set<2>() },
-			SuitTile{ Suit::Manzu, SuitTileValue::Set<3>() },
-			SuitTile{ Suit::Manzu, SuitTileValue::Set<9>() },
-			SuitTile{ Suit::Manzu, SuitTileValue::Set<9>() },
-			SuitTile{ Suit::Pinzu, SuitTileValue::Set<1>() },
-			SuitTile{ Suit::Pinzu, SuitTileValue::Set<2>() },
-			SuitTile{ Suit::Pinzu, SuitTileValue::Set<3>() },
-			SuitTile{ Suit::Pinzu, SuitTileValue::Set<4>() },
-			SuitTile{ Suit::Pinzu, SuitTileValue::Set<6>() },
-			SuitTile{ Suit::Pinzu, SuitTileValue::Set<7>() },
-			SuitTile{ Suit::Pinzu, SuitTileValue::Set<8>() },
-			SuitTile{ Suit::Pinzu, SuitTileValue::Set<9>() },
+			SuitTile::Make<Suit::Manzu, 1>(),
+			SuitTile::Make<Suit::Manzu, 2>(),
+			SuitTile::Make<Suit::Manzu, 3>(),
+			SuitTile::Make<Suit::Manzu, 9>(),
+			SuitTile::Make<Suit::Manzu, 9>(),
+			SuitTile::Make<Suit::Pinzu, 1>(),
+			SuitTile::Make<Suit::Pinzu, 2>(),
+			SuitTile::Make<Suit::Pinzu, 3>(),
+			SuitTile::Make<Suit::Pinzu, 4>(),
+			SuitTile::Make<Suit::Pinzu, 6>(),
+			SuitTile::Make<Suit::Pinzu, 7>(),
+			SuitTile::Make<Suit::Pinzu, 8>(),
+			SuitTile::Make<Suit::Pinzu, 9>(),
 			} );
 
 		bool const success = fnTestForYaku(
 			StandardYaku::Riichi(),
 			successHand,
-			{ SuitTile{ Suit::Pinzu, SuitTileValue::Set<5>() }, TileDrawType::SelfDraw },
+			{ SuitTile::Make<Suit::Pinzu, 5>(), TileDrawType::SelfDraw },
 			&riichiMockRound
 		);
 		Ensure( success, "Riichi failed!" );
@@ -157,25 +157,25 @@ void TestYaku()
 
 			Hand failHand;
 			failHand.AddFreeTiles( {
-				SuitTile{ Suit::Manzu, SuitTileValue::Set<1>() },
-				SuitTile{ Suit::Manzu, SuitTileValue::Set<2>() },
-				SuitTile{ Suit::Manzu, SuitTileValue::Set<3>() },
-				SuitTile{ Suit::Manzu, SuitTileValue::Set<9>() },
-				SuitTile{ Suit::Manzu, SuitTileValue::Set<9>() },
-				SuitTile{ Suit::Pinzu, SuitTileValue::Set<1>() },
-				SuitTile{ Suit::Pinzu, SuitTileValue::Set<2>() },
-				SuitTile{ Suit::Pinzu, SuitTileValue::Set<3>() },
-				SuitTile{ Suit::Pinzu, SuitTileValue::Set<3>() },
-				SuitTile{ Suit::Pinzu, SuitTileValue::Set<5>() },
-				SuitTile{ Suit::Pinzu, SuitTileValue::Set<7>() },
-				SuitTile{ Suit::Pinzu, SuitTileValue::Set<8>() },
-				SuitTile{ Suit::Pinzu, SuitTileValue::Set<9>() },
+				SuitTile::Make<Suit::Manzu, 1>(),
+				SuitTile::Make<Suit::Manzu, 2>(),
+				SuitTile::Make<Suit::Manzu, 3>(),
+				SuitTile::Make<Suit::Manzu, 9>(),
+				SuitTile::Make<Suit::Manzu, 9>(),
+				SuitTile::Make<Suit::Pinzu, 1>(),
+				SuitTile::Make<Suit::Pinzu, 2>(),
+				SuitTile::Make<Suit::Pinzu, 3>(),
+				SuitTile::Make<Suit::Pinzu, 3>(),
+				SuitTile::Make<Suit::Pinzu, 5>(),
+				SuitTile::Make<Suit::Pinzu, 7>(),
+				SuitTile::Make<Suit::Pinzu, 8>(),
+				SuitTile::Make<Suit::Pinzu, 9>(),
 				} );
 
 			bool const fail = fnTestForYaku(
 				StandardYaku::Ippatsu(),
 				failHand,
-				{ SuitTile{ Suit::Pinzu, SuitTileValue::Set<4>() }, TileDrawType::SelfDraw },
+				{ SuitTile::Make<Suit::Pinzu, 4>(), TileDrawType::SelfDraw },
 				&riichiMockRound
 			);
 			Ensure( !fail, "Ippatsu failed!" );
@@ -188,25 +188,25 @@ void TestYaku()
 
 			Hand successHand;
 			successHand.AddFreeTiles( {
-				SuitTile{ Suit::Manzu, SuitTileValue::Set<1>() },
-				SuitTile{ Suit::Manzu, SuitTileValue::Set<2>() },
-				SuitTile{ Suit::Manzu, SuitTileValue::Set<3>() },
-				SuitTile{ Suit::Manzu, SuitTileValue::Set<9>() },
-				SuitTile{ Suit::Manzu, SuitTileValue::Set<9>() },
-				SuitTile{ Suit::Pinzu, SuitTileValue::Set<1>() },
-				SuitTile{ Suit::Pinzu, SuitTileValue::Set<2>() },
-				SuitTile{ Suit::Pinzu, SuitTileValue::Set<3>() },
-				SuitTile{ Suit::Pinzu, SuitTileValue::Set<4>() },
-				SuitTile{ Suit::Pinzu, SuitTileValue::Set<6>() },
-				SuitTile{ Suit::Pinzu, SuitTileValue::Set<7>() },
-				SuitTile{ Suit::Pinzu, SuitTileValue::Set<8>() },
-				SuitTile{ Suit::Pinzu, SuitTileValue::Set<9>() },
+				SuitTile::Make<Suit::Manzu, 1>(),
+				SuitTile::Make<Suit::Manzu, 2>(),
+				SuitTile::Make<Suit::Manzu, 3>(),
+				SuitTile::Make<Suit::Manzu, 9>(),
+				SuitTile::Make<Suit::Manzu, 9>(),
+				SuitTile::Make<Suit::Pinzu, 1>(),
+				SuitTile::Make<Suit::Pinzu, 2>(),
+				SuitTile::Make<Suit::Pinzu, 3>(),
+				SuitTile::Make<Suit::Pinzu, 4>(),
+				SuitTile::Make<Suit::Pinzu, 6>(),
+				SuitTile::Make<Suit::Pinzu, 7>(),
+				SuitTile::Make<Suit::Pinzu, 8>(),
+				SuitTile::Make<Suit::Pinzu, 9>(),
 				} );
 
 			bool const success = fnTestForYaku(
 				StandardYaku::Ippatsu(),
 				successHand,
-				{ SuitTile{ Suit::Pinzu, SuitTileValue::Set<5>() }, TileDrawType::SelfDraw },
+				{ SuitTile::Make<Suit::Pinzu, 5>(), TileDrawType::SelfDraw },
 				&riichiMockRound
 			);
 			Ensure( success, "Ippatsu failed!" );
@@ -219,49 +219,49 @@ void TestYaku()
 
 		Hand failHand;
 		failHand.AddFreeTiles( {
-			SuitTile{ Suit::Manzu, SuitTileValue::Set<1>() },
-			SuitTile{ Suit::Manzu, SuitTileValue::Set<2>() },
-			SuitTile{ Suit::Manzu, SuitTileValue::Set<3>() },
-			SuitTile{ Suit::Manzu, SuitTileValue::Set<4>() },
-			SuitTile{ Suit::Manzu, SuitTileValue::Set<5>() },
-			SuitTile{ Suit::Manzu, SuitTileValue::Set<6>() },
-			SuitTile{ Suit::Manzu, SuitTileValue::Set<4>() },
-			SuitTile{ Suit::Manzu, SuitTileValue::Set<5>() },
-			SuitTile{ Suit::Manzu, SuitTileValue::Set<6>() },
-			SuitTile{ Suit::Manzu, SuitTileValue::Set<7>() },
-			SuitTile{ Suit::Manzu, SuitTileValue::Set<7>() },
-			SuitTile{ Suit::Pinzu, SuitTileValue::Set<3>() },
-			SuitTile{ Suit::Pinzu, SuitTileValue::Set<6>() },
+			SuitTile::Make<Suit::Manzu, 1>(),
+			SuitTile::Make<Suit::Manzu, 2>(),
+			SuitTile::Make<Suit::Manzu, 3>(),
+			SuitTile::Make<Suit::Manzu, 4>(),
+			SuitTile::Make<Suit::Manzu, 5>(),
+			SuitTile::Make<Suit::Manzu, 6>(),
+			SuitTile::Make<Suit::Manzu, 4>(),
+			SuitTile::Make<Suit::Manzu, 5>(),
+			SuitTile::Make<Suit::Manzu, 6>(),
+			SuitTile::Make<Suit::Manzu, 7>(),
+			SuitTile::Make<Suit::Manzu, 7>(),
+			SuitTile::Make<Suit::Pinzu, 3>(),
+			SuitTile::Make<Suit::Pinzu, 6>(),
 			} );
 
 		bool const fail = fnTestForYaku(
 			StandardYaku::Pinfu(),
 			failHand,
-			{ SuitTile{ Suit::Pinzu, SuitTileValue::Set<5>() }, TileDrawType::SelfDraw }
+			{ SuitTile::Make<Suit::Pinzu, 5>(), TileDrawType::SelfDraw }
 		);
 		Ensure( !fail, "Pinfu failed!" );
 
 		Hand successHand;
 		successHand.AddFreeTiles( {
-			SuitTile{ Suit::Manzu, SuitTileValue::Set<1>() },
-			SuitTile{ Suit::Manzu, SuitTileValue::Set<2>() },
-			SuitTile{ Suit::Manzu, SuitTileValue::Set<3>() },
-			SuitTile{ Suit::Manzu, SuitTileValue::Set<4>() },
-			SuitTile{ Suit::Manzu, SuitTileValue::Set<5>() },
-			SuitTile{ Suit::Manzu, SuitTileValue::Set<6>() },
-			SuitTile{ Suit::Manzu, SuitTileValue::Set<4>() },
-			SuitTile{ Suit::Manzu, SuitTileValue::Set<5>() },
-			SuitTile{ Suit::Manzu, SuitTileValue::Set<6>() },
-			SuitTile{ Suit::Manzu, SuitTileValue::Set<7>() },
-			SuitTile{ Suit::Manzu, SuitTileValue::Set<7>() },
-			SuitTile{ Suit::Pinzu, SuitTileValue::Set<3>() },
-			SuitTile{ Suit::Pinzu, SuitTileValue::Set<4>() },
+			SuitTile::Make<Suit::Manzu, 1>(),
+			SuitTile::Make<Suit::Manzu, 2>(),
+			SuitTile::Make<Suit::Manzu, 3>(),
+			SuitTile::Make<Suit::Manzu, 4>(),
+			SuitTile::Make<Suit::Manzu, 5>(),
+			SuitTile::Make<Suit::Manzu, 6>(),
+			SuitTile::Make<Suit::Manzu, 4>(),
+			SuitTile::Make<Suit::Manzu, 5>(),
+			SuitTile::Make<Suit::Manzu, 6>(),
+			SuitTile::Make<Suit::Manzu, 7>(),
+			SuitTile::Make<Suit::Manzu, 7>(),
+			SuitTile::Make<Suit::Pinzu, 3>(),
+			SuitTile::Make<Suit::Pinzu, 4>(),
 			} );
 
 		bool const success = fnTestForYaku(
 			StandardYaku::Pinfu(),
 			successHand,
-			{ SuitTile{ Suit::Pinzu, SuitTileValue::Set<5>() }, TileDrawType::SelfDraw }
+			{ SuitTile::Make<Suit::Pinzu, 5>(), TileDrawType::SelfDraw }
 		);
 		Ensure( success, "Pinfu failed!" );
 	}
@@ -270,49 +270,49 @@ void TestYaku()
 	{
 		Hand failHand;
 		failHand.AddFreeTiles( {
-			SuitTile{ Suit::Manzu, SuitTileValue::Set<1>() },
-			SuitTile{ Suit::Manzu, SuitTileValue::Set<2>() },
-			SuitTile{ Suit::Manzu, SuitTileValue::Set<3>() },
-			SuitTile{ Suit::Manzu, SuitTileValue::Set<2>() },
-			SuitTile{ Suit::Manzu, SuitTileValue::Set<3>() },
-			SuitTile{ Suit::Pinzu, SuitTileValue::Set<3>() },
-			SuitTile{ Suit::Pinzu, SuitTileValue::Set<3>() },
-			SuitTile{ Suit::Pinzu, SuitTileValue::Set<3>() },
-			SuitTile{ Suit::Pinzu, SuitTileValue::Set<4>() },
-			SuitTile{ Suit::Pinzu, SuitTileValue::Set<4>() },
-			SuitTile{ Suit::Pinzu, SuitTileValue::Set<4>() },
-			SuitTile{ Suit::Pinzu, SuitTileValue::Set<6>() },
-			SuitTile{ Suit::Pinzu, SuitTileValue::Set<6>() },
+			SuitTile::Make<Suit::Manzu, 1>(),
+			SuitTile::Make<Suit::Manzu, 2>(),
+			SuitTile::Make<Suit::Manzu, 3>(),
+			SuitTile::Make<Suit::Manzu, 2>(),
+			SuitTile::Make<Suit::Manzu, 3>(),
+			SuitTile::Make<Suit::Pinzu, 3>(),
+			SuitTile::Make<Suit::Pinzu, 3>(),
+			SuitTile::Make<Suit::Pinzu, 3>(),
+			SuitTile::Make<Suit::Pinzu, 4>(),
+			SuitTile::Make<Suit::Pinzu, 4>(),
+			SuitTile::Make<Suit::Pinzu, 4>(),
+			SuitTile::Make<Suit::Pinzu, 6>(),
+			SuitTile::Make<Suit::Pinzu, 6>(),
 			} );
 
 		bool const fail = fnTestForYaku(
 			StandardYaku::Iipeikou(),
 			failHand,
-			{ SuitTile{ Suit::Manzu, SuitTileValue::Set<4>() }, TileDrawType::DiscardDraw }
+			{ SuitTile::Make<Suit::Manzu, 4>(), TileDrawType::DiscardDraw }
 		);
 		Ensure( !fail, "Iipeikou failed!" );
 
 		Hand successHand;
 		successHand.AddFreeTiles( {
-			SuitTile{ Suit::Manzu, SuitTileValue::Set<1>() },
-			SuitTile{ Suit::Manzu, SuitTileValue::Set<2>() },
-			SuitTile{ Suit::Manzu, SuitTileValue::Set<3>() },
-			SuitTile{ Suit::Manzu, SuitTileValue::Set<2>() },
-			SuitTile{ Suit::Manzu, SuitTileValue::Set<3>() },
-			SuitTile{ Suit::Pinzu, SuitTileValue::Set<3>() },
-			SuitTile{ Suit::Pinzu, SuitTileValue::Set<3>() },
-			SuitTile{ Suit::Pinzu, SuitTileValue::Set<3>() },
-			SuitTile{ Suit::Pinzu, SuitTileValue::Set<4>() },
-			SuitTile{ Suit::Pinzu, SuitTileValue::Set<4>() },
-			SuitTile{ Suit::Pinzu, SuitTileValue::Set<4>() },
-			SuitTile{ Suit::Pinzu, SuitTileValue::Set<6>() },
-			SuitTile{ Suit::Pinzu, SuitTileValue::Set<6>() },
+			SuitTile::Make<Suit::Manzu, 1>(),
+			SuitTile::Make<Suit::Manzu, 2>(),
+			SuitTile::Make<Suit::Manzu, 3>(),
+			SuitTile::Make<Suit::Manzu, 2>(),
+			SuitTile::Make<Suit::Manzu, 3>(),
+			SuitTile::Make<Suit::Pinzu, 3>(),
+			SuitTile::Make<Suit::Pinzu, 3>(),
+			SuitTile::Make<Suit::Pinzu, 3>(),
+			SuitTile::Make<Suit::Pinzu, 4>(),
+			SuitTile::Make<Suit::Pinzu, 4>(),
+			SuitTile::Make<Suit::Pinzu, 4>(),
+			SuitTile::Make<Suit::Pinzu, 6>(),
+			SuitTile::Make<Suit::Pinzu, 6>(),
 			} );
 
 		bool const success = fnTestForYaku(
 			StandardYaku::Iipeikou(),
 			successHand,
-			{ SuitTile{ Suit::Manzu, SuitTileValue::Set<1>() }, TileDrawType::DiscardDraw }
+			{ SuitTile::Make<Suit::Manzu, 1>(), TileDrawType::DiscardDraw }
 		);
 		Ensure( success, "Iipeikou failed!" );
 	}
@@ -335,49 +335,49 @@ void TestYaku()
 	{
 		Hand failHand;
 		failHand.AddFreeTiles( {
-			SuitTile{ Suit::Manzu, SuitTileValue::Set<1>() },
-			SuitTile{ Suit::Manzu, SuitTileValue::Set<2>() },
-			SuitTile{ Suit::Manzu, SuitTileValue::Set<3>() },
-			SuitTile{ Suit::Manzu, SuitTileValue::Set<9>() },
-			SuitTile{ Suit::Manzu, SuitTileValue::Set<9>() },
-			SuitTile{ Suit::Pinzu, SuitTileValue::Set<1>() },
-			SuitTile{ Suit::Pinzu, SuitTileValue::Set<2>() },
-			SuitTile{ Suit::Pinzu, SuitTileValue::Set<3>() },
-			SuitTile{ Suit::Pinzu, SuitTileValue::Set<3>() },
-			SuitTile{ Suit::Pinzu, SuitTileValue::Set<5>() },
-			SuitTile{ Suit::Pinzu, SuitTileValue::Set<7>() },
-			SuitTile{ Suit::Pinzu, SuitTileValue::Set<8>() },
-			SuitTile{ Suit::Pinzu, SuitTileValue::Set<9>() },
+			SuitTile::Make<Suit::Manzu, 1>(),
+			SuitTile::Make<Suit::Manzu, 2>(),
+			SuitTile::Make<Suit::Manzu, 3>(),
+			SuitTile::Make<Suit::Manzu, 9>(),
+			SuitTile::Make<Suit::Manzu, 9>(),
+			SuitTile::Make<Suit::Pinzu, 1>(),
+			SuitTile::Make<Suit::Pinzu, 2>(),
+			SuitTile::Make<Suit::Pinzu, 3>(),
+			SuitTile::Make<Suit::Pinzu, 3>(),
+			SuitTile::Make<Suit::Pinzu, 5>(),
+			SuitTile::Make<Suit::Pinzu, 7>(),
+			SuitTile::Make<Suit::Pinzu, 8>(),
+			SuitTile::Make<Suit::Pinzu, 9>(),
 			} );
 
 		bool const fail = fnTestForYaku(
 			StandardYaku::Ikkitsuukan(),
 			failHand,
-			{ SuitTile{ Suit::Pinzu, SuitTileValue::Set<4>() }, TileDrawType::SelfDraw }
+			{ SuitTile::Make<Suit::Pinzu, 4>(), TileDrawType::SelfDraw }
 		);
 		Ensure( !fail, "Ikkitsuukan failed!" );
 
 		Hand successHand;
 		successHand.AddFreeTiles( {
-			SuitTile{ Suit::Manzu, SuitTileValue::Set<1>() },
-			SuitTile{ Suit::Manzu, SuitTileValue::Set<2>() },
-			SuitTile{ Suit::Manzu, SuitTileValue::Set<3>() },
-			SuitTile{ Suit::Manzu, SuitTileValue::Set<9>() },
-			SuitTile{ Suit::Manzu, SuitTileValue::Set<9>() },
-			SuitTile{ Suit::Pinzu, SuitTileValue::Set<1>() },
-			SuitTile{ Suit::Pinzu, SuitTileValue::Set<2>() },
-			SuitTile{ Suit::Pinzu, SuitTileValue::Set<3>() },
-			SuitTile{ Suit::Pinzu, SuitTileValue::Set<4>() },
-			SuitTile{ Suit::Pinzu, SuitTileValue::Set<6>() },
-			SuitTile{ Suit::Pinzu, SuitTileValue::Set<7>() },
-			SuitTile{ Suit::Pinzu, SuitTileValue::Set<8>() },
-			SuitTile{ Suit::Pinzu, SuitTileValue::Set<9>() },
+			SuitTile::Make<Suit::Manzu, 1>(),
+			SuitTile::Make<Suit::Manzu, 2>(),
+			SuitTile::Make<Suit::Manzu, 3>(),
+			SuitTile::Make<Suit::Manzu, 9>(),
+			SuitTile::Make<Suit::Manzu, 9>(),
+			SuitTile::Make<Suit::Pinzu, 1>(),
+			SuitTile::Make<Suit::Pinzu, 2>(),
+			SuitTile::Make<Suit::Pinzu, 3>(),
+			SuitTile::Make<Suit::Pinzu, 4>(),
+			SuitTile::Make<Suit::Pinzu, 6>(),
+			SuitTile::Make<Suit::Pinzu, 7>(),
+			SuitTile::Make<Suit::Pinzu, 8>(),
+			SuitTile::Make<Suit::Pinzu, 9>(),
 			} );
 
 		bool const success = fnTestForYaku(
 			StandardYaku::Ikkitsuukan(),
 			successHand,
-			{ SuitTile{ Suit::Pinzu, SuitTileValue::Set<5>() }, TileDrawType::SelfDraw }
+			{ SuitTile::Make<Suit::Pinzu, 5>(), TileDrawType::SelfDraw }
 		);
 		Ensure( success, "Ikkitsuukan failed!" );
 	}

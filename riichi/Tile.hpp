@@ -41,6 +41,14 @@ struct SuitTile
 	friend SuitTile NextTile( SuitTile const& i_tile );
 	friend bool StrictEqualTo( SuitTile const&, SuitTile const& );
 	friend std::strong_ordering operator<=>( SuitTile const&, SuitTile const& ) = default;
+
+	template<Suit t_Suit, SuitTileValue::CoreType t_Value>
+	static SuitTile Make()
+	{
+		static_assert( t_Value >= SuitTileValue::Min.m_val, "Value needs to be within range" );
+		static_assert( t_Value <= SuitTileValue::Max.m_val, "Value needs to be within range" );
+		return { t_Suit, SuitTileValue{ t_Value } };
+	}
 };
 
 //------------------------------------------------------------------------------
