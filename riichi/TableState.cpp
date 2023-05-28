@@ -26,7 +26,7 @@ void BetweenTurnsBase::TransitionToTurn
 		Hand const& playerHand = round.GetHand( round.CurrentTurn() );
 
 		bool canTsumo = false;
-		bool canRiichi = false;
+		Vector<Tile> riichiDiscards;
 
 		bool const isRiichi = round.CalledRiichi( round.CurrentTurn() );
 
@@ -35,7 +35,7 @@ void BetweenTurnsBase::TransitionToTurn
 			bool const allowedToRiichi = playerHand.Melds().empty()
 				&& !isRiichi
 				&& table.GetPoints( round.GetPlayerID( round.CurrentTurn() ) ) >= table.m_rules->RiichiBet();
-			auto const [ validWaits, ableToRiichi ] = table.m_rules->WaitsWithYaku(
+			auto [ validWaits, validRiichiDiscards ] = table.m_rules->WaitsWithYaku(
 				round,
 				round.CurrentTurn(),
 				playerHand,
@@ -44,12 +44,12 @@ void BetweenTurnsBase::TransitionToTurn
 			);
 
 			canTsumo = validWaits.contains( i_tileDraw.value().m_tile );
-			canRiichi = ableToRiichi;
+			riichiDiscards = std::move( validRiichiDiscards );
 		}
 
 		Vector<Hand::DrawKanResult> kanOptions = round.GetHand( round.CurrentTurn() ).DrawKanOptions( i_tileDraw.has_value() ? Option<Tile>( i_tileDraw.value().m_tile ) : Option<Tile>( std::nullopt ) );
 		table.Transition(
-			TableStates::Turn_User{ table, round.CurrentTurn(), canTsumo, canRiichi, isRiichi, std::move( kanOptions ) },
+			TableStates::Turn_User{ table, round.CurrentTurn(), canTsumo, std::move( riichiDiscards ), isRiichi, std::move( kanOptions ) },
 			std::move( i_tableEvent )
 		);
 		break;
@@ -310,13 +310,13 @@ Turn_User::Turn_User
 	Table& i_table,
 	Seat i_seat,
 	bool i_canTsumo,
-	bool i_canRiichi,
+	Vector<Tile> i_riichiDiscards,
 	bool i_isRiichi,
 	Vector<Hand::DrawKanResult> i_kanOptions
 )
 	: BaseTurn{ i_table, i_seat }
 	, m_canTsumo{ i_canTsumo }
-	, m_canRiichi{ i_canRiichi }
+	, m_riichiDiscards( std::move( i_riichiDiscards ) )
 	, m_isRiichi{ i_isRiichi }
 	, m_kanOptions{ std::move( i_kanOptions ) }
 {}
@@ -412,10 +412,17 @@ void Turn_User::Riichi
 {
 	Table& table = m_table.get();
 
-	Ensure( m_canRiichi, "This user cannot riichi" );
+	Ensure( CanRiichi(), "This user cannot riichi" );
 
 	Round& round = table.m_rounds.back();
-	
+
+	Ensure(
+		i_handTileToDiscard.has_value()
+		? std::ranges::contains( m_riichiDiscards, i_handTileToDiscard.value() )
+		: std::ranges::contains( m_riichiDiscards, round.DrawnTile( round.CurrentTurn() ).value().m_tile )
+		, "Invalid tile to riichi with"
+	);
+
 	// Pay the bet
 	table.ModifyPoints( round.GetPlayerID( round.CurrentTurn() ), -table.m_rules->RiichiBet() );
 

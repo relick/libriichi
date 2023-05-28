@@ -89,7 +89,7 @@ StandardYonma::StandardYonma
 }
 
 //------------------------------------------------------------------------------
-Pair<Set<Tile>, bool> StandardYonma::WaitsWithYaku
+Pair<Set<Tile>, Vector<Tile>> StandardYonma::WaitsWithYaku
 (
 	Round const& i_round,
 	Seat const& i_playerSeat,
@@ -98,14 +98,75 @@ Pair<Set<Tile>, bool> StandardYonma::WaitsWithYaku
 	bool i_considerForRiichi
 ) const
 {
+	bool riichiAddsYaku = false;
+	Vector<Tile> validDiscardsForRiichi;
+
+	auto fnAddDiscardsForRiichi = [ & ]( HandAssessment const& i_assessment, HandInterpretation const& i_interp, Tile const& i_discardedTile )
+	{
+		if ( !i_considerForRiichi || i_interp.m_waitType == WaitType::None )
+		{
+			return;
+		}
+		if ( riichiAddsYaku )
+		{
+			validDiscardsForRiichi.push_back( i_discardedTile );
+			return;
+		}
+
+		for ( auto const& yaku : m_yaku )
+		{
+			if ( yaku->UsesInterpreter( i_interp.m_interpreter ) )
+			{
+				if ( yaku->CalculateValue(
+					i_round,
+					i_playerSeat,
+					i_hand,
+					i_assessment,
+					i_interp,
+					{ *i_interp.m_waits.begin(), TileDrawType::DiscardDraw }
+				).IsValid() )
+				{
+					validDiscardsForRiichi.push_back( i_discardedTile );
+				}
+			}
+		}
+	};
+
+	if ( i_considerForRiichi )
+	{
+		for ( auto const& yaku : m_yaku )
+		{
+			if ( yaku->AddsYakuToRiichi() )
+			{
+				riichiAddsYaku = true;
+				break;
+			}
+		}
+
+		// TODO-DEBT TODO-OPT: I've decided the easiest code to write here is to assess all discard options to see if there are any waits
+		// but this is probably the worst way to do it
+
+		for ( size_t tileI = 0; tileI < i_hand.FreeTiles().size(); ++tileI )
+		{
+			Hand alteredHand = i_hand;
+			alteredHand.Discard( i_hand.FreeTiles()[ tileI ], i_lastTile );
+			HandAssessment const assessment( alteredHand, *this );
+
+			for ( HandInterpretation const& interp : assessment.Interpretations() )
+			{
+				fnAddDiscardsForRiichi( assessment, interp, i_hand.FreeTiles()[ tileI ] );
+			}
+		}
+
+	}
+
 	// Let's  a s s e s s
 	HandAssessment const assessment( i_hand, *this );
 
 	Set<Tile> waits;
-	bool hasInterpsWithWaits = false;
 	for ( HandInterpretation const& interp : assessment.Interpretations() )
 	{
-		hasInterpsWithWaits |= interp.m_waitType != WaitType::None;
+		fnAddDiscardsForRiichi( assessment, interp, i_lastTile.m_tile );
 
 		if ( interp.m_waitType == WaitType::None || !interp.m_waits.contains( i_lastTile.m_tile ) )
 		{
@@ -131,22 +192,7 @@ Pair<Set<Tile>, bool> StandardYonma::WaitsWithYaku
 		}
 	}
 
-	// TODO-MVP: hasInterpsWithWaits works as long as our 13 hand tiles are have waits
-	// but if it's one of the hand tiles we have to discard for riichi, this needs handling
-	bool allowedToRiichi = false;
-	if ( i_considerForRiichi && hasInterpsWithWaits )
-	{
-		for ( auto const& yaku : m_yaku )
-		{
-			if ( yaku->AddsYakuToRiichi() )
-			{
-				allowedToRiichi = true;
-				break;
-			}
-		}
-	}
-
-	return { waits, allowedToRiichi };
+	return { std::move( waits ), std::move( validDiscardsForRiichi ) };
 }
 
 //------------------------------------------------------------------------------
@@ -249,10 +295,12 @@ HandScore StandardYonma::CalculateBasicPoints
 		if ( doraValue > 0 )
 		{
 			maxScore.push_back( { "Dora", doraValue } );
+			max += doraValue;
 		}
 		if ( uradoraValue > 0 )
 		{
 			maxScore.push_back( { "Uradora", uradoraValue } );
+			max += uradoraValue;
 		}
 	}
 

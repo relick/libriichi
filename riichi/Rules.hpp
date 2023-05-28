@@ -31,8 +31,8 @@ struct Rules
 	size_t DeadWallSize() const { return ( 1 + DeadWallDrawsAvailable() ) * 2 + DeadWallDrawsAvailable(); }
 
 	// Hand evaluation
-	// Returns valid waits for a win, and a bool for whether a riichi is allowed
-	virtual Pair<Set<Tile>, bool> WaitsWithYaku
+	// Returns valid waits for a win, and valid discards for riichi
+	virtual Pair<Set<Tile>, Vector<Tile>> WaitsWithYaku
 	(
 		Round const& i_round,
 		Seat const& i_playerSeat,
@@ -41,6 +41,7 @@ struct Rules
 		bool i_considerForRiichi
 	) const = 0;
 
+	// Returns the best score of a completed hand
 	virtual HandScore CalculateBasicPoints
 	(
 		Round const& i_round,

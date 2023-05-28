@@ -20,7 +20,7 @@ public:
 	Vector<Tile> const& Tileset() const override { return m_tileSet; }
 	size_t DeadWallDrawsAvailable() const override { return 4u; }
 
-	Pair<Set<Tile>, bool> WaitsWithYaku
+	Pair<Set<Tile>, Vector<Tile>> WaitsWithYaku
 	(
 		Round const& i_round,
 		Seat const& i_playerSeat,

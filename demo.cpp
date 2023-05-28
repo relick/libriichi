@@ -201,7 +201,7 @@ int main()
 					if ( input.size() > 7 && turn.CanRiichi() )
 					{
 						Riichi::Option<Riichi::Tile> const tile = fnParseTile( input.substr( 7 ) );
-						if ( tile.has_value() )
+						if ( tile.has_value() && std::ranges::contains( turn.RiichiOptions(), tile.value() ) )
 						{
 							if ( tile == turn.GetDrawnTile() )
 							{
