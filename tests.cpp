@@ -317,19 +317,19 @@ void TestYaku()
 		Ensure( success, "Iipeikou failed!" );
 	}
 
-	// TODO: HaiteiRaoyue
-	// TODO: HouteiRaoyui
-	// TODO: RinshanKaihou
-	// TODO: Chankan
-	// TODO: Tanyao<>
-	// TODO: Yakuhai_Haku
-	// TODO: Yakuhai_Hatsu
-	// TODO: Yakuhai_Chun
-	// TODO: Bakaze
-	// TODO: Jikaze
-	// TODO: DoubleRiichi
-	// TODO: Chantaiyao
-	// TODO: SanshokuDoujun
+	// TODO-TEST: HaiteiRaoyue
+	// TODO-TEST: HouteiRaoyui
+	// TODO-TEST: RinshanKaihou
+	// TODO-TEST: Chankan
+	// TODO-TEST: Tanyao<>
+	// TODO-TEST: Yakuhai_Haku
+	// TODO-TEST: Yakuhai_Hatsu
+	// TODO-TEST: Yakuhai_Chun
+	// TODO-TEST: Bakaze
+	// TODO-TEST: Jikaze
+	// TODO-TEST: DoubleRiichi
+	// TODO-TEST: Chantaiyao
+	// TODO-TEST: SanshokuDoujun
 
 	// Ikkitsuukan
 	{
@@ -382,29 +382,29 @@ void TestYaku()
 		Ensure( success, "Ikkitsuukan failed!" );
 	}
 
-	// TODO: Toitoi
-	// TODO: Sanankou
-	// TODO: SanshokuDoukou
-	// TODO: Sankantsu
-	// TODO: Chiitoitsu
-	// TODO: Honroutou
-	// TODO: Shousangen
-	// TODO: Honitsu
-	// TODO: JunchanTaiyao
-	// TODO: Ryanpeikou
-	// TODO: Chinitsu
-	// TODO: KokushiMusou
-	// TODO: Suuankou
-	// TODO: Daisangen
-	// TODO: Shousuushii
-	// TODO: Daisuushii
-	// TODO: Tsuuiisou
-	// TODO: Chinroutou
-	// TODO: Ryuuiisou
-	// TODO: ChuurenPoutou
-	// TODO: Suukantsu
-	// TODO: Tenhou
-	// TODO: Chihou
+	// TODO-TEST: Toitoi
+	// TODO-TEST: Sanankou
+	// TODO-TEST: SanshokuDoukou
+	// TODO-TEST: Sankantsu
+	// TODO-TEST: Chiitoitsu
+	// TODO-TEST: Honroutou
+	// TODO-TEST: Shousangen
+	// TODO-TEST: Honitsu
+	// TODO-TEST: JunchanTaiyao
+	// TODO-TEST: Ryanpeikou
+	// TODO-TEST: Chinitsu
+	// TODO-TEST: KokushiMusou
+	// TODO-TEST: Suuankou
+	// TODO-TEST: Daisangen
+	// TODO-TEST: Shousuushii
+	// TODO-TEST: Daisuushii
+	// TODO-TEST: Tsuuiisou
+	// TODO-TEST: Chinroutou
+	// TODO-TEST: Ryuuiisou
+	// TODO-TEST: ChuurenPoutou
+	// TODO-TEST: Suukantsu
+	// TODO-TEST: Tenhou
+	// TODO-TEST: Chihou
 }
 
 int main()
