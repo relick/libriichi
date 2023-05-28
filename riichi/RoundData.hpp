@@ -41,6 +41,7 @@ class RoundData
 	size_t m_breakPointFromDealerRight{ 0 }; // Unused other than for indicating to the user where to put the wall visuals
 	size_t m_deadWallSize{ 0 };
 	size_t m_deadWallDrawsRemaining{ 0 }; // This will decrement as dead wall draws are made
+	size_t m_doraCount{ 1 }; // This will increment as dead wall draws are made // TODO-RULES: kandora timing can change depending on ruleset
 
 	Seat m_roundWind{ Seat::East };
 	Seat m_currentTurn{ Seat::East };
@@ -73,6 +74,8 @@ public:
 	bool AnyWinners() const;
 	bool AnyFinishedInTenpai() const;
 	bool NextPlayerIsInitial() const;
+	Vector<Tile> GatherDoraTiles() const;
+	Vector<Tile> GatherUradoraTiles() const;
 
 public:
 	// non-const interface, only accessible by table states

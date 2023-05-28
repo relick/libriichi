@@ -256,6 +256,40 @@ bool RoundData::NextPlayerIsInitial
 }
 
 //------------------------------------------------------------------------------
+Vector<Tile> RoundData::GatherDoraTiles
+(
+)	const
+{
+	Vector<Tile> doraTiles;
+
+	size_t firstDoraTileI = m_deadWallDrawsRemaining;
+
+	for ( size_t i = 0; i < m_doraCount; ++i )
+	{
+		doraTiles.push_back( m_wall[ firstDoraTileI + ( i * 2 ) ] );
+	}
+
+	return doraTiles;
+}
+
+//------------------------------------------------------------------------------
+Vector<Tile> RoundData::GatherUradoraTiles
+(
+)	const
+{
+	Vector<Tile> doraTiles;
+
+	size_t firstUradoraTileI = m_deadWallDrawsRemaining + 1;
+
+	for ( size_t i = 0; i < m_doraCount; ++i )
+	{
+		doraTiles.push_back( m_wall[ firstUradoraTileI + ( i * 2 ) ] );
+	}
+
+	return doraTiles;
+}
+
+//------------------------------------------------------------------------------
 RoundData::RoundData
 (
 	Table const& i_table,
@@ -597,6 +631,9 @@ TileDraw RoundData::DeadWallDraw
 {
 	Ensure( WallTilesRemaining() >= 1, "Tried to draw more tiles than in wall" );
 	Ensure( m_deadWallDrawsRemaining >= 1, "Tried to draw more tiles than in dead wall pool" );
+
+	--m_deadWallDrawsRemaining;
+	++m_doraCount;
 
 	Tile drawn = std::move( m_wall.front() );
 	m_wall.erase( m_wall.begin() );

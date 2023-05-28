@@ -205,7 +205,50 @@ HandScore StandardYonma::CalculateBasicPoints
 
 	Ensure( maxInterp, "Had max points more than 0 but no valid interpretation" );
 
-	// TODO-MVP: add dora
+	auto fnHandHasYaku = [ & ]( char const* i_yakuName )
+	{
+		return std::ranges::any_of( maxScore, [ & ]( auto const& yaku ) { return std::strcmp( yaku.first, i_yakuName ) == 0; } );
+	};
+
+	// Handle Dora
+	{
+		bool const includeUradora = fnHandHasYaku( "Riichi" ) || fnHandHasYaku( "DoubleRiichi" );
+		Vector<Tile> const doraTiles = i_round.GatherDoraTiles();
+		Vector<Tile> const uraDoraTiles = includeUradora ? i_round.GatherUradoraTiles() : Vector<Tile>{};
+
+		Han doraValue{ 0 };
+		Han uradoraValue{ 0 };
+
+		auto fnAssessTile = [ & ]( Tile const& i_tile )
+		{
+			for ( Tile const& doraTile : doraTiles )
+			{
+				if ( doraTile == i_tile )
+				{
+					++doraValue;
+				}
+			}
+			for ( Tile const& uradoraTile : uraDoraTiles )
+			{
+				if ( uradoraTile == i_tile )
+				{
+					++uradoraValue;
+				}
+			}
+		};
+
+		i_hand.VisitTiles( fnAssessTile	);
+		fnAssessTile( i_lastTile.m_tile );
+
+		if ( doraValue > 0 )
+		{
+			maxScore.push_back( { "Dora", doraValue } );
+		}
+		if ( uradoraValue > 0 )
+		{
+			maxScore.push_back( { "Uradora", uradoraValue } );
+		}
+	}
 
 	if ( max >= 5 )
 	{
@@ -307,7 +350,7 @@ HandScore StandardYonma::CalculateBasicPoints
 	}
 
 	// Win condition
-	bool const wonWithPinfu = std::ranges::any_of( maxScore, []( auto const& yaku ) { return std::strcmp( yaku.first, "Pinfu" ) == 0; } );
+	bool const wonWithPinfu = fnHandHasYaku( "Pinfu" );
 	switch ( i_lastTile.m_type )
 	{
 	using enum TileDrawType;
@@ -334,7 +377,7 @@ HandScore StandardYonma::CalculateBasicPoints
 	}
 	}
 
-	bool const wonWithChiitoitsu = std::ranges::any_of( maxScore, []( auto const& yaku ) { return std::strcmp( yaku.first, "Chiitoitsu" ) == 0; } );
+	bool const wonWithChiitoitsu = fnHandHasYaku( "Chiitoitsu" );
 	if ( wonWithChiitoitsu )
 	{
 		fu = 25;
