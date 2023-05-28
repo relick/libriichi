@@ -84,7 +84,7 @@ enum class WaitType : EnumValueType
 	Shanpon, // Triplet
 };
 //------------------------------------------------------------------------------
-inline bool SequenceWait( WaitType i_type ) { return i_type != WaitType::Tanki && i_type == WaitType::Shanpon; }
+inline bool SequenceWait( WaitType i_type ) { return i_type != WaitType::Tanki && i_type != WaitType::Shanpon; }
 
 //------------------------------------------------------------------------------
 inline GroupType WaitTypeToGroupType( WaitType i_wait )

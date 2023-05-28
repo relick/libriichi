@@ -28,3 +28,7 @@ target_link_libraries (libriichi_demo PRIVATE libriichi)
 # Hand tests
 add_executable (libriichi_hand_tests "hand_tests.cpp")
 target_link_libraries (libriichi_hand_tests PRIVATE libriichi)
+
+# Tests
+add_executable (libriichi_tests "tests.cpp")
+target_link_libraries (libriichi_tests PRIVATE libriichi)

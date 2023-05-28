@@ -416,13 +416,13 @@ HanValue Ikkitsuukan::CalculateValue
 			return;
 		}
 
-		for ( size_t i = 1; i <= 3; ++i )
+		for ( size_t i = 0; i < 3; ++i )
 		{
-			if ( i_group[ 0 ].Get<TileType::Suit>().m_value == ( SuitTileValue::Set<1>() * i )
-				&& i_group[ 1 ].Get<TileType::Suit>().m_value == ( SuitTileValue::Set<2>() * i )
-				&& i_group[ 2 ].Get<TileType::Suit>().m_value == ( SuitTileValue::Set<3>() * i ) )
+			if ( i_group[ 0 ].Get<TileType::Suit>().m_value == SuitTileValue::Set<1>() + ( SuitTileValue::Set<3>() * i )
+				&& i_group[ 1 ].Get<TileType::Suit>().m_value == SuitTileValue::Set<2>() + ( SuitTileValue::Set<3>() * i )
+				&& i_group[ 2 ].Get<TileType::Suit>().m_value == SuitTileValue::Set<3>() + ( SuitTileValue::Set<3>() * i ) )
 			{
-				groupsPerSuit[ i_group.CommonSuit() ][ i - 1 ] = true;
+				groupsPerSuit[ i_group.CommonSuit() ][ i ] = true;
 				break;
 			}
 		}
