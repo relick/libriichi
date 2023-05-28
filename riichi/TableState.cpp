@@ -500,7 +500,7 @@ void BetweenTurns::UserPass
 	if ( round.WallTilesRemaining() == 0u )
 	{
 		// Ryuukyoku/draw has occurred
-		// TODO-MVP: nagashi mangan
+		// TODO-RULES: nagashi mangan
 
 		SeatSet inTenpai;
 		for ( size_t seatI = 0; seatI < table.m_players.size(); ++seatI )

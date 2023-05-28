@@ -7,9 +7,9 @@ Aims:
 - Fun to play
 
 TODOs key (in order of priority):
-1. TODO-MVP: Critical to play a game of riichi mahjong.
-2. TODO-AI: Required for functioning AI. AI not usable until all TODO-AI cleared.
+1. ~~TODO-MVP: Critical to play a game of riichi mahjong.~~
+2. TODO-DEBT: Tech debt that it would be nice to find solutions for.
 3. TODO-RULES: Required for implementing rulesets other than a standard yonma.
-4. TODO-QOL: Quality of life feature not necessary for a playable game.
-5. TODO-DEBT: Tech debt that it would be nice to find solutions for.
+4. TODO-AI: Required for functioning AI. AI not usable until all TODO-AI cleared.
+5. TODO-QOL: Quality of life feature not necessary for a playable game.
 6. TODO-OPT: Optimisation opportunity that it would be nice to improve if possible.
