@@ -1,7 +1,5 @@
 #include "RoundData.hpp"
 
-#include "Player.hpp"
-#include "Rules.hpp"
 #include "Table.hpp"
 
 #include <numeric>
@@ -178,17 +176,16 @@ Player const& RoundData::GetPlayer
 	Table const& i_table
 )	const
 {
-	return i_table.GetPlayer( m_players[ ( size_t )i_player ].m_playerIndex );
+	return i_table.GetPlayer( m_players[ ( size_t )i_player ].m_playerID );
 }
 
 //------------------------------------------------------------------------------
 PlayerID RoundData::GetPlayerID
 (
-	Seat i_player,
-	Table const& i_table
+	Seat i_player
 )	const
 {
-	return PlayerID( m_players[ ( size_t )i_player ].m_playerIndex );
+	return m_players[ ( size_t )i_player ].m_playerID;
 }
 
 //------------------------------------------------------------------------------
@@ -197,10 +194,9 @@ Seat RoundData::GetSeat
 	PlayerID i_playerID
 )	const
 {
-	size_t const playerIndex = i_playerID; // TODO-DEBT: actual id type?
 	for ( size_t playerI = 0; playerI < m_players.size(); ++playerI )
 	{
-		if ( m_players[ playerI ].m_playerIndex == playerIndex )
+		if ( m_players[ playerI ].m_playerID == i_playerID )
 		{
 			return ( Seat )playerI;
 		}
@@ -218,7 +214,7 @@ bool RoundData::NoMoreRounds
 {
 	// TODO-RULES: Should account for extension rounds
 	bool const roundWindWillIncrement = NextRoundRotateSeat( i_rules )
-		&& m_players[ ( size_t )NextPlayer( Seat::East, m_players.size() ) ].m_playerIndex == m_initialPlayerIndex;
+		&& m_players[ ( size_t )NextPlayer( Seat::East, m_players.size() ) ].m_playerID == m_initialPlayerID;
 	return roundWindWillIncrement && i_rules.LastRound() == m_roundWind;
 }
 
@@ -253,7 +249,7 @@ bool RoundData::AnyFinishedInTenpai
 RoundData::RoundData
 (
 	Seat i_roundWind,
-	Vector<Player> const& i_players,
+	Vector<PlayerID> const& i_playerIDs,
 	Rules const& i_rules,
 	ShuffleRNG& i_shuffleRNG
 )
@@ -261,15 +257,13 @@ RoundData::RoundData
 	, m_deadWallDrawsRemaining{ i_rules.DeadWallDrawsAvailable() }
 {
 	// Randomly determine initial seats
-	Vector<size_t> playerIndices( i_players.size() );
-	std::ranges::iota( playerIndices, 0 );
-	std::ranges::shuffle( playerIndices, i_shuffleRNG );
-	m_players.reserve( i_players.size() );
-	for ( size_t index : playerIndices )
+	m_players.reserve( i_playerIDs.size() );
+	for ( PlayerID playerID : i_playerIDs )
 	{
-		m_players.emplace_back(index );
+		m_players.emplace_back( playerID );
 	}
-	m_initialPlayerIndex = m_players.front().m_playerIndex;
+	std::ranges::shuffle( m_players, i_shuffleRNG );
+	m_initialPlayerID = m_players.front().m_playerID;
 
 	// Shuffle the tiles to build the wall
 	m_wall = i_rules.Tileset();
@@ -283,7 +277,7 @@ RoundData::RoundData
 	Rules const& i_rules,
 	ShuffleRNG& i_shuffleRNG
 )
-	: m_initialPlayerIndex{ i_lastRound.m_initialPlayerIndex }
+	: m_initialPlayerID{ i_lastRound.m_initialPlayerID }
 	, m_deadWallSize{ i_rules.DeadWallSize() }
 	, m_deadWallDrawsRemaining{ i_rules.DeadWallDrawsAvailable() }
 	, m_roundWind{ i_lastRound.m_roundWind }
@@ -294,7 +288,7 @@ RoundData::RoundData
 	m_players.reserve( i_lastRound.m_players.size() );
 	for ( RoundPlayerData const& player : i_lastRound.m_players )
 	{
-		m_players.emplace_back( player.m_playerIndex );
+		m_players.emplace_back( player.m_playerID );
 	}
 
 	// TODO-RULES: honba
@@ -312,7 +306,7 @@ RoundData::RoundData
 	}
 
 	// Increment round wind if we've done a full circuit
-	if ( rotated && m_players[ ( size_t )Seat::East ].m_playerIndex == m_initialPlayerIndex )
+	if ( rotated && m_players[ ( size_t )Seat::East ].m_playerID == m_initialPlayerID )
 	{
 		m_roundWind = ( Seat )( ( EnumValueType )m_roundWind + 1 );
 	}

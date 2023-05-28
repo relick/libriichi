@@ -384,7 +384,7 @@ int main()
 			}
 			std::cout << "Total: " << static_cast< int >( total ) << " (" << score.first << ")\n\n";
 
-			std::cout << table.Standings() << "\n" << std::endl;
+			table.PrintStandings( std::cout ) << "\n" << std::endl;
 			break;
 		}
 
@@ -413,14 +413,14 @@ int main()
 				std::cout << "Total: " << static_cast< int >( total ) << " (" << score.first << ")\n\n";
 			}
 
-			std::cout << table.Standings() << "\n" << std::endl;
+			table.PrintStandings( std::cout ) << "\n" << std::endl;
 			break;
 		}
 
 		case WallDepleted:
 		{
 			std::cout << "Draw\n\n";
-			std::cout << table.Standings() << "\n" << std::endl;
+			table.PrintStandings( std::cout ) << "\n" << std::endl;
 			break;
 		}
 
@@ -435,7 +435,7 @@ int main()
 	} while ( table.Playing() );
 
 	std::cout << "Game over!\n";
-	std::cout << table.Standings() << std::endl;
+	table.PrintStandings( std::cout ) << std::endl;
 
 	return 0;
 }

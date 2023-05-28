@@ -32,7 +32,7 @@ void BetweenTurnsBase::TransitionToTurn
 		{
 			bool const allowedToRiichi = playerHand.Melds().empty()
 				&& !round.CalledRiichi( round.CurrentTurn() )
-				&& table.m_standings.m_points[ round.GetPlayerID(round.CurrentTurn(), table)] >= table.m_rules->RiichiBet();
+				&& table.GetPoints( round.GetPlayerID( round.CurrentTurn() ) ) >= table.m_rules->RiichiBet();
 			auto const [ validWaits, ableToRiichi ] = table.m_rules->WaitsWithYaku(
 				round,
 				round.CurrentTurn(),
@@ -98,17 +98,17 @@ void BetweenTurnsBase::HandleRon
 			Seat const standingsSeat = ( Seat )seatI;
 			if ( standingsSeat == seat )
 			{
-				table.m_standings.m_points[ round.GetPlayerID( standingsSeat, table ) ] += winnings;
+				table.ModifyPoints( round.GetPlayerID( standingsSeat ), winnings );
 			}
 			else if ( standingsSeat == round.CurrentTurn() )
 			{
-				table.m_standings.m_points[ round.GetPlayerID( standingsSeat, table ) ] -= winnings;
+				table.ModifyPoints( round.GetPlayerID( standingsSeat ), -winnings );
 			}
 		}
 	}
 
 	// TODO-RULES: allow for negative points play
-	if ( std::ranges::any_of( table.m_standings.m_points, []( Points i_points ) { return i_points < 0; } )
+	if ( std::ranges::any_of( std::views::elements<1>( table.m_players ), []( Points i_points ) { return i_points < 0; } )
 		|| round.NoMoreRounds( *table.m_rules ) )
 	{
 		table.Transition(
@@ -152,7 +152,7 @@ void BetweenRounds::StartRound
 		// First round starts on east, shuffle players
 		table.m_rounds.emplace_back(
 			Seat::East,
-			table.m_players,
+			table.m_playerIDs,
 			*table.m_rules,
 			table.m_shuffleRNG
 		);
@@ -344,24 +344,25 @@ void Turn_User::Tsumo
 		Seat const seat = ( Seat )seatI;
 		if ( seat == round.CurrentTurn() )
 		{
-			table.m_standings.m_points[ round.GetPlayerID( seat, table ) ] += static_cast<Points>(
+			Points const points = static_cast< Points >(
 				isDealer
 				? ( ( table.m_players.size() - 1 ) * winnings.second )
 				: ( winnings.first + ( table.m_players.size() - 2 ) * winnings.second )
 				);
+			table.ModifyPoints( round.GetPlayerID( seat ), points );
 		}
 		else if ( round.IsDealer( seat ) )
 		{
-			table.m_standings.m_points[ round.GetPlayerID( seat, table ) ] -= winnings.first;
+			table.ModifyPoints( round.GetPlayerID( seat ), -winnings.first );
 		}
 		else
 		{
-			table.m_standings.m_points[ round.GetPlayerID( seat, table ) ] -= winnings.second;
+			table.ModifyPoints( round.GetPlayerID( seat ), -winnings.second );
 		}
 	}
 
 	// TODO-RULES: allow for negative points play
-	if ( std::ranges::any_of( table.m_standings.m_points, []( Points i_points ) { return i_points < 0; } )
+	if ( std::ranges::any_of( std::views::elements<1>( table.m_players ), []( Points i_points ) { return i_points < 0; } )
 		|| round.NoMoreRounds( *table.m_rules ) )
 	{
 		table.Transition(
@@ -406,7 +407,7 @@ void Turn_User::Riichi
 	RoundData& round = table.m_rounds.back();
 	
 	// Pay the bet
-	table.m_standings.m_points[ round.GetPlayerID( round.CurrentTurn(), table ) ] -= table.m_rules->RiichiBet();
+	table.ModifyPoints( round.GetPlayerID( round.CurrentTurn() ), -table.m_rules->RiichiBet() );
 
 	// Make the discard
 	Tile const discardedTile = round.Riichi( i_handTileToDiscard );
@@ -515,16 +516,16 @@ void BetweenTurns::UserPass
 			Seat const seat = ( Seat )seatI;
 			if ( round.FinishedInTenpai( seat ) )
 			{
-				table.m_standings.m_points[ round.GetPlayerID( seat, table ) ] += pointsForEachPlayer;
+				table.ModifyPoints( round.GetPlayerID( seat ), pointsForEachPlayer );
 			}
 			else
 			{
-				table.m_standings.m_points[ round.GetPlayerID( seat, table ) ] -= pointsFromEachPlayer;
+				table.ModifyPoints( round.GetPlayerID( seat ), -pointsFromEachPlayer );
 			}
 		}
 
 		// TODO-RULES: allow for negative points play
-		if ( std::ranges::any_of( table.m_standings.m_points, []( Points i_points ) { return i_points < 0; } )
+		if ( std::ranges::any_of( std::views::elements<1>( table.m_players ), []( Points i_points ) { return i_points < 0; } )
 			|| round.NoMoreRounds( *table.m_rules ) )
 		{
 			table.Transition(

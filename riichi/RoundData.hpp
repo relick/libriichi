@@ -3,6 +3,7 @@
 #include "Containers.hpp"
 #include "Declare.hpp"
 #include "Hand.hpp"
+#include "Player.hpp"
 #include "Random.hpp"
 #include "Rules.hpp"
 #include "Seat.hpp"
@@ -15,7 +16,7 @@ class RoundData
 {
 	struct RoundPlayerData
 	{
-		size_t m_playerIndex; // index to Table's player list
+		PlayerID m_playerID; // index to Table's player list
 		Option<size_t> m_riichiDiscardTile;
 		bool m_riichiIppatsuValid{ false };
 		Vector<Tile> m_discards;
@@ -26,11 +27,11 @@ class RoundData
 		Option<HandScore> m_winningScore;
 		bool m_finishedInTenpai{ false };
 
-		explicit RoundPlayerData( size_t i_playerI ) : m_playerIndex( i_playerI ) {}
+		explicit RoundPlayerData( PlayerID i_playerID ) : m_playerID( i_playerID ) {}
 
 		void UpdateForTurn();
 	};
-	size_t m_initialPlayerIndex{ SIZE_MAX };
+	PlayerID m_initialPlayerID;
 	Vector<RoundPlayerData> m_players; // Sorted in seat order
 
 	// Wall is ordered in columns, clockwise from the dealer's right corner (initially), and reversed
@@ -64,7 +65,7 @@ public:
 	size_t WallTilesRemaining() const;
 	bool CallsMade() const;
 	Player const& GetPlayer( Seat i_player, Table const& i_table ) const;
-	PlayerID GetPlayerID( Seat i_player, Table const& i_table ) const;
+	PlayerID GetPlayerID( Seat i_player ) const;
 	Seat GetSeat( PlayerID i_playerID ) const;
 	bool NoMoreRounds( Rules const& i_rules ) const;
 	bool NextRoundRotateSeat( Rules const& i_rules ) const;
@@ -76,7 +77,7 @@ public:
 	RoundData
 	(
 		Seat i_roundWind,
-		Vector<Player> const& i_players,
+		Vector<PlayerID> const& i_playerIDs,
 		Rules const& i_rules,
 		ShuffleRNG& i_shuffleRNG
 	);

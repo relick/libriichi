@@ -14,17 +14,6 @@ namespace Riichi
 {
 
 //------------------------------------------------------------------------------
-struct Standings
-{
-	// TODO-MVP: how do we relate these points with the players? Should we handle this differently?
-	Vector<Points> m_points;
-
-	explicit Standings( Rules const& i_rules );
-
-	friend std::ostream& operator<<( std::ostream& io_out, Standings const& i_standings );
-};
-
-//------------------------------------------------------------------------------
 // The table runs the game, including each round (rounds are not self-sufficient)
 //------------------------------------------------------------------------------
 class Table
@@ -41,9 +30,11 @@ class Table
 	friend TableStates::RonAKanChance;
 
 private:
+	uint32_t m_ident{ 0 }; // TODO-DEBT: come up with some way to generate idents
+
 	std::unique_ptr<Rules> m_rules;
-	Vector<Player> m_players;
-	Standings m_standings;
+	Vector<PlayerID> m_playerIDs;
+	Vector<Pair<Player, Points>> m_players;
 	Vector<RoundData> m_rounds;
 	TableState m_state;
 	TableEvent m_mostRecentEvent;
@@ -69,14 +60,16 @@ public:
 	PlayerID AddPlayer( Player&& i_player );
 	
 	// General data access
-	Standings Standings() const { return m_standings; }
+	Player const& GetPlayer( PlayerID i_playerID ) const;
+	Points GetPoints( PlayerID i_playerID ) const;
+	Points ModifyPoints( PlayerID i_playerID, Points i_amount );
+	std::ostream& PrintStandings( std::ostream& io_out ) const;
 
 	// Simulation
 	bool Playing() const;
 	TableState const& GetState() { return m_state; }
 	RoundData const& GetRoundData( size_t i_roundIndex = SIZE_MAX ) { return i_roundIndex >= m_rounds.size() ? m_rounds.back() : m_rounds[ i_roundIndex ]; }
 	TableEvent const& GetEvent() const { return m_mostRecentEvent; }
-	Player const& GetPlayer( PlayerID i_playerID ) const { return m_players[ i_playerID ]; }
 
 private:
 	void Transition( TableState&& i_nextState, TableEvent&& i_nextEvent );

@@ -9,27 +9,6 @@ namespace Riichi
 {
 
 //------------------------------------------------------------------------------
-Standings::Standings
-(
-	Rules const& i_rules
-)
-	: m_points( i_rules.GetPlayerCount(), i_rules.InitialPoints() )
-{}
-
-//------------------------------------------------------------------------------
-std::ostream& operator<<( std::ostream& io_out, Standings const& i_standings )
-{
-	io_out << "Standings:\n";
-	for ( size_t i = 0; i < i_standings.m_points.size(); ++i )
-	{
-		if ( i > 0 ) { io_out << '\n'; }
-		io_out << "Player " << i << ":\t" << i_standings.m_points[i];
-	}
-
-	return io_out;
-}
-
-//------------------------------------------------------------------------------
 Table::Table
 (
 	std::unique_ptr<Rules>&& i_rules,
@@ -37,7 +16,6 @@ Table::Table
 	unsigned int i_aiSeed
 )
 	: m_rules{ std::move( i_rules ) }
-	, m_standings{ *m_rules }
 	, m_state{ TableState::Tag<TableStateType::Setup>{}, *this }
 	, m_shuffleRNG{ i_shuffleSeed }
 	, m_aiRNG{ i_aiSeed }
@@ -52,14 +30,63 @@ PlayerID Table::AddPlayer
 	if ( m_state.Type() == TableStateType::Setup )
 	{
 		Ensure( m_players.size() < m_rules->GetPlayerCount(), "Too many players added" );
-		m_players.emplace_back( std::move( i_player ) );
-	}
-	else
-	{
-		Error( "Cannot change players past setup" );
+		m_players.push_back( { std::move( i_player ), m_rules->InitialPoints() } );
+		m_playerIDs.push_back( PlayerID{ m_players.size() - 1, m_ident } );
+
+		return m_playerIDs.back();
 	}
 
-	return m_players.size() - 1;
+	Error( "Cannot change players past setup" );
+	return {};
+}
+
+//------------------------------------------------------------------------------
+Player const& Table::GetPlayer
+(
+	PlayerID i_playerID
+)	const
+{
+	Ensure( i_playerID.m_tableIdent == m_ident, "Player ID not for this table" );
+	return m_players[ i_playerID.m_index ].first;
+}
+
+//------------------------------------------------------------------------------
+Points Table::GetPoints
+(
+	PlayerID i_playerID
+)	const
+{
+	Ensure( i_playerID.m_tableIdent == m_ident, "Player ID not for this table" );
+	return m_players[ i_playerID.m_index ].second;
+}
+
+//------------------------------------------------------------------------------
+Points Table::ModifyPoints
+(
+	PlayerID i_playerID,
+	Points i_amount
+)
+{
+	Ensure( i_playerID.m_tableIdent == m_ident, "Player ID not for this table" );
+	m_players[ i_playerID.m_index ].second += i_amount;
+
+	return m_players[ i_playerID.m_index ].second;
+}
+
+//------------------------------------------------------------------------------
+std::ostream& Table::PrintStandings
+(
+	std::ostream& io_out
+)	const
+{
+	io_out << "Standings:\n";
+	for ( size_t i = 0; i < m_players.size(); ++i )
+	{
+		if ( i > 0 ) { io_out << '\n'; }
+		io_out << "Player " << i << ":\t" << m_players[ i ].second;
+	}
+
+	return io_out;
 }
 
 //------------------------------------------------------------------------------
