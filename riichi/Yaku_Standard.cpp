@@ -628,17 +628,6 @@ HanValue Chiitoitsu::CalculateValue
 	return NoYaku;
 }
 
-/*static*/ bool Chiitoitsu::ValidTile( Tile const& i_tile )
-{
-	if ( i_tile.Type() != TileType::Suit )
-	{
-		return true;
-	}
-
-	SuitTile const& suitTile = i_tile.Get<TileType::Suit>();
-	return suitTile.m_value == 1 || suitTile.m_value == 9;
-}
-
 //------------------------------------------------------------------------------
 HanValue Honroutou::CalculateValue
 (

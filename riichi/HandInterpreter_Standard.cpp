@@ -159,7 +159,7 @@ namespace Riichi
 		++interpI;
 	}
 
-	io_interps.push_back( io_interpToPush );
+	io_interps.push_back( std::move( io_interpToPush ) );
 }
 
 //------------------------------------------------------------------------------
@@ -302,6 +302,71 @@ void StandardInterpreter::AddInterpretations
 	//             But it comes with the caveat that there *may* be a novel interpretation worth considering that happened to be ranked weaker. TODO-DEBT: test whether these actually exist
 
 	RecursivelyGenerate( io_interps, i_fixedPart, i_sortedFreeTiles, 0 );
+}
+
+//------------------------------------------------------------------------------
+void SevenPairsInterpreter::AddInterpretations
+(
+	Vector<HandInterpretation>& io_interps,
+	HandInterpretation const& i_fixedPart,
+	Vector<Tile> const& i_sortedFreeTiles
+)	const
+{
+	// Unlike standard interpretations, there's only one way this can go.
+	// We'll pretty much implement the full yaku here (the yaku calculation can then just confirm things are as expected)
+
+	// Requires hand with no melds
+	if ( !i_fixedPart.m_groups.empty() )
+	{
+		return;
+	}
+
+	// Fill as many pairs as we can make - there's only ever 1 interpretation with chiitoitsu
+	HandInterpretation interp = i_fixedPart;
+
+	for ( size_t tileI = 0; tileI < i_sortedFreeTiles.size(); ++tileI )
+	{
+		Tile const& tile1 = i_sortedFreeTiles[ tileI ];
+
+		if ( tileI == i_sortedFreeTiles.size() - 1 )
+		{
+			interp.m_ungrouped.push_back( tile1 );
+			break;
+		}
+
+		Tile const& tile2 = i_sortedFreeTiles[ tileI + 1 ];
+
+		// Matching and unique
+		if ( tile1 == tile2 && !std::ranges::any_of( interp.m_groups, [ & ]( HandGroup const& group ) { return group[ 0 ] == tile1; } ) )
+		{
+			interp.m_groups.push_back( HandGroup{ {tile1, tile2}, GroupType::Pair, false } );
+			tileI++;
+		}
+		else
+		{
+			interp.m_ungrouped.push_back( tile1 );
+		}
+	}
+	
+	if ( interp.m_ungrouped.size() == 1 && !std::ranges::any_of( interp.m_groups, [ & ]( HandGroup const& group ) { return group[ 0 ] == interp.m_ungrouped[ 0 ]; } ) )
+	{
+		interp.m_waits.insert( interp.m_ungrouped[ 0 ] );
+		interp.m_waitType = WaitType::Tanki;
+	}
+
+	io_interps.push_back( std::move( interp ) );
+
+}
+
+//------------------------------------------------------------------------------
+void ThirteenOrphansInterpreter::AddInterpretations
+(
+	Vector<HandInterpretation>& io_interps,
+	HandInterpretation const& i_fixedPart,
+	Vector<Tile> const& i_sortedFreeTiles
+)	const
+{
+	// TODO-MVP
 }
 
 }

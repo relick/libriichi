@@ -40,6 +40,32 @@ private:
 	);
 };
 
-// TODO-MVP: SevenPairs + ThirteenOrphans
+//------------------------------------------------------------------------------
+class SevenPairsInterpreter final
+	: public HandInterpreter
+{
+	char const* Name() const { return "SevenPairs"; }
+
+	void AddInterpretations
+	(
+		Vector<HandInterpretation>& io_interps,
+		HandInterpretation const& i_fixedPart,
+		Vector<Tile> const& i_sortedFreeTiles
+	) const;
+};
+
+//------------------------------------------------------------------------------
+class ThirteenOrphansInterpreter final
+	: public HandInterpreter
+{
+	char const* Name() const { return "ThirteenOrphans"; }
+
+	void AddInterpretations
+	(
+		Vector<HandInterpretation>& io_interps,
+		HandInterpretation const& i_fixedPart,
+		Vector<Tile> const& i_sortedFreeTiles
+	) const;
+};
 
 }

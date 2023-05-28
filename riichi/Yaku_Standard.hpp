@@ -177,9 +177,7 @@ DECLARE_YAKU( Sankantsu, Standard );
 // Hand consists of 7 unique pairs
 // Must be closed, by nature of the hand structure
 //------------------------------------------------------------------------------
-BEGIN_YAKU( Chiitoitsu, SevenPairs )
-	static bool ValidTile( Tile const& i_tile );
-END_YAKU();
+DECLARE_YAKU( Chiitoitsu, SevenPairs );
 
 //------------------------------------------------------------------------------
 // All tiles are terminals or honours
