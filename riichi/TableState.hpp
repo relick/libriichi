@@ -54,9 +54,19 @@ struct Base
 	Base( Table& i_table ) : m_table{ i_table } {}
 protected:
 	std::reference_wrapper<Table> m_table;
+};
 
+//------------------------------------------------------------------------------
+// Common function for transitioning to a turn
+//------------------------------------------------------------------------------
+struct BetweenTurnsBase
+	: Base
+{
+	using Base::Base;
+
+protected:
 	void TransitionToTurn( Option<TileDraw> const& i_tileDraw, TableEvent&& i_tableEvent ) const;
-	void TransitionToBetweenTurns( Tile const& i_discardedTile, TableEvent&& i_tableEvent ) const;
+	void HandleRon( SeatSet const& i_winners, TileDraw const& i_tileDraw ) const;
 };
 
 //------------------------------------------------------------------------------
@@ -70,9 +80,9 @@ struct Setup
 
 //------------------------------------------------------------------------------
 struct BetweenRounds
-	: Base
+	: BetweenTurnsBase
 {
-	using Base::Base;
+	using BetweenTurnsBase::BetweenTurnsBase;
 
 	void StartRound() const;
 };
@@ -95,6 +105,9 @@ struct BaseTurn
 	Hand const& GetHand() const;
 	Option<Tile> GetDrawnTile() const;
 	Seat GetSeat() const { return m_seat; }
+
+protected:
+	void TransitionToBetweenTurns( Tile const& i_discardedTile, TableEvent&& i_tableEvent ) const;
 
 private:
 	Seat m_seat;
@@ -133,7 +146,7 @@ private:
 
 //------------------------------------------------------------------------------
 struct BetweenTurns
-	: Base
+	: BetweenTurnsBase
 {
 	BetweenTurns( Table& i_table, TileDraw i_discardedTile, Pair<Seat, Vector<Pair<Tile, Tile>>> i_canChi, SeatSet i_canPon, SeatSet i_canKan, SeatSet i_canRon );
 
@@ -162,7 +175,7 @@ private:
 
 //------------------------------------------------------------------------------
 struct RonAKanChance
-	: Base
+	: BetweenTurnsBase
 {
 	RonAKanChance( Table& i_table, TileDraw i_kanTile, SeatSet i_canRon );
 
