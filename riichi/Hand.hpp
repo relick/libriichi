@@ -64,7 +64,7 @@ public:
 		Tile kanTile;
 		bool closed;
 	};
-	Vector<DrawKanResult> DrawKanOptions( Tile const* i_drawnTile ) const;
+	Vector<DrawKanResult> DrawKanOptions( Option<Tile> const& i_drawnTile ) const;
 
 	template<typename T_Visitor>
 	void VisitTiles( T_Visitor&& i_visitor ) const;

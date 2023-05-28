@@ -229,28 +229,28 @@ bool Hand::CanCallKan
 //------------------------------------------------------------------------------
 Vector<Hand::DrawKanResult> Hand::DrawKanOptions
 (
-	Tile const* i_drawnTile
+	Option<Tile> const& i_drawnTile
 )	const
 {
 	Vector<DrawKanResult> results;
 
-	if ( i_drawnTile )
+	if ( i_drawnTile.has_value() )
 	{
 		for ( Meld const& meld : m_melds )
 		{
-			if ( meld.m_type == GroupType::Triplet && meld.m_tiles.front().first == *i_drawnTile )
+			if ( meld.m_type == GroupType::Triplet && meld.m_tiles.front().first == i_drawnTile.value() )
 			{
-				results.push_back( { *i_drawnTile, false } );
+				results.push_back( { i_drawnTile.value(), false } );
 				break;
 			}
 		}
 
 		if ( results.empty() )
 		{
-			size_t const othersCount = std::ranges::count( m_freeTiles, *i_drawnTile );
+			size_t const othersCount = std::ranges::count( m_freeTiles, i_drawnTile.value() );
 			if ( othersCount >= 3 )
 			{
-				results.push_back( { *i_drawnTile, true } );
+				results.push_back( { i_drawnTile.value(), true } );
 			}
 		}
 	}

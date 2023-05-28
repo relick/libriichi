@@ -30,6 +30,7 @@ struct Standings
 class Table
 {
 	// Table states all considered an extension of the table class
+	friend TableStates::Base;
 	friend TableStates::Setup;
 	friend TableStates::BetweenRounds;
 	friend TableStates::GameOver;

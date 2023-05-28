@@ -7,6 +7,61 @@ namespace Riichi::TableStates
 {
 
 //------------------------------------------------------------------------------
+void Base::TransitionToTurn
+(
+	Option<TileDraw> const& i_tileDraw,
+	TableEvent&& i_tableEvent
+)	const
+{
+	Table& table = m_table.get();
+
+	RoundData& round = table.m_rounds.back();
+
+	Player const& turnPlayer = round.GetPlayer( round.CurrentTurn(), table );
+
+	switch ( turnPlayer.Type() )
+	{
+	case PlayerType::User:
+	{
+		Hand const& playerHand = round.GetHand( round.CurrentTurn() );
+
+		bool canTsumo = false;
+		bool canRiichi = false;
+
+		if ( i_tileDraw.has_value() )
+		{
+			bool const allowedToRiichi = playerHand.Melds().empty() && !round.CalledRiichi( round.CurrentTurn() );
+			auto const [ validWaits, ableToRiichi ] = table.m_rules->WaitsWithYaku(
+				round,
+				round.CurrentTurn(),
+				playerHand,
+				i_tileDraw.value(),
+				allowedToRiichi
+			);
+
+			canTsumo = validWaits.contains( i_tileDraw.value().m_tile );
+			canRiichi = ableToRiichi;
+		}
+
+		Vector<Hand::DrawKanResult> kanOptions = round.GetHand( round.CurrentTurn() ).DrawKanOptions( i_tileDraw.has_value() ? Option<Tile>( i_tileDraw.value().m_tile ) : Option<Tile>( std::nullopt ) );
+		table.Transition(
+			TableStates::Turn_User{ table, round.CurrentTurn(), canTsumo, canRiichi, std::move( kanOptions ) },
+			std::move( i_tableEvent )
+		);
+		break;
+	}
+	case PlayerType::AI:
+	{
+		table.Transition(
+			TableStates::Turn_AI{ table, round.CurrentTurn() },
+			std::move( i_tableEvent )
+		);
+		break;
+	}
+	}
+}
+
+//------------------------------------------------------------------------------
 void Setup::StartGame
 (
 )	const
@@ -59,42 +114,10 @@ void BetweenRounds::StartRound
 	round.BreakWall( table.m_shuffleRNG );
 	TileDraw const firstDrawnTile = round.DealHands();
 
-	// TODO-DEBT: we should pull this sort of player assessment -> Turn state stuff to its own function
-	Player const& turnPlayer = round.GetPlayer( round.CurrentTurn(), table );
-
-	switch ( turnPlayer.Type() )
-	{
-	case PlayerType::User:
-	{
-		Hand const& playerHand = round.GetHand( round.CurrentTurn() );
-
-		bool const allowedToRiichi = playerHand.Melds().empty() && !round.CalledRiichi( round.CurrentTurn() );
-		auto const [ validWaits, canRiichi ] = table.m_rules->WaitsWithYaku(
-			round,
-			round.CurrentTurn(),
-			playerHand,
-			firstDrawnTile,
-			allowedToRiichi
-		);
-
-		bool const canTsumo = validWaits.contains( firstDrawnTile.m_tile );
-
-		Vector<Hand::DrawKanResult> kanOptions = round.GetHand( round.CurrentTurn() ).DrawKanOptions( &firstDrawnTile.m_tile );
-		table.Transition(
-			TableStates::Turn_User{table, round.CurrentTurn(), canTsumo, canRiichi, std::move( kanOptions )},
-			TableEvent{ TableEvent::Tag<TableEventType::DealerDraw>(), firstDrawnTile, round.CurrentTurn() }
-		);
-		break;
-	}
-	case PlayerType::AI:
-	{
-		table.Transition(
-			TableStates::Turn_AI{table, round.CurrentTurn()},
-			TableEvent{ TableEvent::Tag<TableEventType::DealerDraw>(), firstDrawnTile, round.CurrentTurn() }
-		);
-		break;
-	}
-	}
+	TransitionToTurn(
+		firstDrawnTile,
+		TableEvent{ TableEvent::Tag<TableEventType::DealerDraw>(), firstDrawnTile, round.CurrentTurn() }
+	);
 }
 
 //------------------------------------------------------------------------------
@@ -516,41 +539,10 @@ void BetweenTurns::UserPass
 
 	TileDraw const drawnTile = round.PassCalls( m_canRon );
 
-	Player const& turnPlayer = round.GetPlayer( round.CurrentTurn(), table );
-
-	switch ( turnPlayer.Type() )
-	{
-	case PlayerType::User:
-	{
-		Hand const& playerHand = round.GetHand( round.CurrentTurn() );
-
-		bool const allowedToRiichi = playerHand.Melds().empty() && !round.CalledRiichi( round.CurrentTurn() );
-		auto const [ validWaits, canRiichi ] = table.m_rules->WaitsWithYaku(
-			round,
-			round.CurrentTurn(),
-			playerHand,
-			drawnTile,
-			allowedToRiichi
-		);
-
-		bool const canTsumo = validWaits.contains( drawnTile.m_tile );
-
-		Vector<Hand::DrawKanResult> kanOptions = round.GetHand( round.CurrentTurn() ).DrawKanOptions( &drawnTile.m_tile );
-		table.Transition(
-			TableStates::Turn_User{table, round.CurrentTurn(), canTsumo, canRiichi, std::move( kanOptions )},
-			TableEvent{ TableEvent::Tag<TableEventType::Draw>(), drawnTile, round.CurrentTurn() }
-		);
-		break;
-	}
-	case PlayerType::AI:
-	{
-		table.Transition(
-			TableStates::Turn_AI{table, round.CurrentTurn()},
-			TableEvent{ TableEvent::Tag<TableEventType::Draw>(), drawnTile, round.CurrentTurn() }
-		);
-		break;
-	}
-	}
+	TransitionToTurn(
+		drawnTile,
+		TableEvent{ TableEvent::Tag<TableEventType::Draw>(), drawnTile, round.CurrentTurn() }
+	);
 }
 
 //------------------------------------------------------------------------------
@@ -565,31 +557,10 @@ void BetweenTurns::UserChi
 	RoundData& round = table.m_rounds.back();
 	Pair<Seat, Tile> const calledTile = round.Chi( i_user, i_option );
 
-	Player const& turnPlayer = round.GetPlayer( round.CurrentTurn(), table );
-
-	switch ( turnPlayer.Type() )
-	{
-	case PlayerType::User:
-	{
-		bool constexpr c_canTsumo = false;
-		bool constexpr c_canRiichi = false;
-		Vector<Hand::DrawKanResult> kanOptions = round.GetHand( round.CurrentTurn() ).DrawKanOptions( nullptr );
-
-		table.Transition(
-			TableStates::Turn_User{table, round.CurrentTurn(), c_canTsumo, c_canRiichi, std::move( kanOptions )},
-			TableEvent{ TableEvent::Tag<TableEventType::Call>(), TableEvents::CallType::Chi, calledTile.second, calledTile.first }
-		);
-		break;
-	}
-	case PlayerType::AI:
-	{
-		table.Transition(
-			TableStates::Turn_AI{table, round.CurrentTurn()},
-			TableEvent{ TableEvent::Tag<TableEventType::Call>(), TableEvents::CallType::Chi, calledTile.second, calledTile.first }
-		);
-		break;
-	}
-	}
+	TransitionToTurn(
+		std::nullopt,
+		TableEvent{ TableEvent::Tag<TableEventType::Call>(), TableEvents::CallType::Chi, calledTile.second, calledTile.first }
+	);
 }
 
 //------------------------------------------------------------------------------
@@ -603,31 +574,10 @@ void BetweenTurns::UserPon
 	RoundData& round = table.m_rounds.back();
 	Pair<Seat, Tile> const calledTile = round.Pon( i_user );
 
-	Player const& turnPlayer = round.GetPlayer( round.CurrentTurn(), table );
-
-	switch ( turnPlayer.Type() )
-	{
-	case PlayerType::User:
-	{
-		bool constexpr c_canTsumo = false;
-		bool constexpr c_canRiichi = false;
-		Vector<Hand::DrawKanResult> kanOptions = round.GetHand( round.CurrentTurn() ).DrawKanOptions( nullptr );
-
-		table.Transition(
-			TableStates::Turn_User{table, round.CurrentTurn(), c_canTsumo, c_canRiichi, std::move( kanOptions )},
-			TableEvent{ TableEvent::Tag<TableEventType::Call>(), TableEvents::CallType::Pon, calledTile.second, calledTile.first }
-		);
-		break;
-	}
-	case PlayerType::AI:
-	{
-		table.Transition(
-			TableStates::Turn_AI{table, round.CurrentTurn()},
-			TableEvent{ TableEvent::Tag<TableEventType::Call>(), TableEvents::CallType::Pon, calledTile.second, calledTile.first }
-		);
-		break;
-	}
-	}
+	TransitionToTurn(
+		std::nullopt,
+		TableEvent{ TableEvent::Tag<TableEventType::Call>(), TableEvents::CallType::Pon, calledTile.second, calledTile.first }
+	);
 }
 
 //------------------------------------------------------------------------------
@@ -641,31 +591,10 @@ void BetweenTurns::UserKan
 	RoundData& round = table.m_rounds.back();
 	Pair<Seat, Tile> const calledTile = round.DiscardKan( i_user );
 
-	Player const& turnPlayer = round.GetPlayer( round.CurrentTurn(), table );
-
-	switch ( turnPlayer.Type() )
-	{
-	case PlayerType::User:
-	{
-		bool constexpr c_canTsumo = false;
-		bool constexpr c_canRiichi = false;
-		Vector<Hand::DrawKanResult> kanOptions = round.GetHand( round.CurrentTurn() ).DrawKanOptions( nullptr );
-
-		table.Transition(
-			TableStates::Turn_User{table, round.CurrentTurn(), c_canTsumo, c_canRiichi, std::move( kanOptions )},
-			TableEvent{ TableEvent::Tag<TableEventType::Call>(), TableEvents::CallType::Kan, calledTile.second, calledTile.first }
-		);
-		break;
-	}
-	case PlayerType::AI:
-	{
-		table.Transition(
-			TableStates::Turn_AI{table, round.CurrentTurn()},
-			TableEvent{ TableEvent::Tag<TableEventType::Call>(), TableEvents::CallType::Kan, calledTile.second, calledTile.first }
-		);
-		break;
-	}
-	}
+	TransitionToTurn(
+		std::nullopt,
+		TableEvent{ TableEvent::Tag<TableEventType::Call>(), TableEvents::CallType::Kan, calledTile.second, calledTile.first }
+	);
 }
 
 //------------------------------------------------------------------------------
@@ -751,42 +680,10 @@ void RonAKanChance::Pass
 	RoundData& round = table.m_rounds.back();
 	TileDraw const deadWallDraw = round.HandKanRonPass();
 
-	// TODO-DEBT: we should pull this sort of player assessment -> Turn state stuff to its own function
-	Player const& turnPlayer = round.GetPlayer( round.CurrentTurn(), table );
-
-	switch ( turnPlayer.Type() )
-	{
-	case PlayerType::User:
-	{
-		Hand const& playerHand = round.GetHand( round.CurrentTurn() );
-
-		bool const allowedToRiichi = playerHand.Melds().empty() && !round.CalledRiichi( round.CurrentTurn() );
-		auto const [ validWaits, canRiichi ] = table.m_rules->WaitsWithYaku(
-			round,
-			round.CurrentTurn(),
-			playerHand,
-			deadWallDraw,
-			allowedToRiichi
-		);
-
-		bool const canTsumo = validWaits.contains( deadWallDraw.m_tile );
-
-		Vector<Hand::DrawKanResult> kanOptions = round.GetHand( round.CurrentTurn() ).DrawKanOptions( &deadWallDraw.m_tile );
-		table.Transition(
-			TableStates::Turn_User{table, round.CurrentTurn(), canTsumo, canRiichi, std::move( kanOptions )},
-			TableEvent{ TableEvent::Tag<TableEventType::Draw>(), deadWallDraw, round.CurrentTurn() }
-		);
-		break;
-	}
-	case PlayerType::AI:
-	{
-		table.Transition(
-			TableStates::Turn_AI{table, round.CurrentTurn()},
-			TableEvent{ TableEvent::Tag<TableEventType::Draw>(), deadWallDraw, round.CurrentTurn() }
-		);
-		break;
-	}
-	}
+	TransitionToTurn(
+		deadWallDraw,
+		TableEvent{ TableEvent::Tag<TableEventType::Draw>(), deadWallDraw, round.CurrentTurn() }
+	);
 }
 
 //------------------------------------------------------------------------------

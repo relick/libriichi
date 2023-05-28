@@ -5,6 +5,7 @@
 #include "NamedUnion.hpp"
 #include "PlayerCount.hpp"
 #include "Seat.hpp"
+#include "TableEvent.hpp"
 #include "Tile.hpp"
 
 namespace Riichi
@@ -91,6 +92,8 @@ struct Base
 	Base( Table& i_table ) : m_table{ i_table } {}
 protected:
 	std::reference_wrapper<Table> m_table;
+
+	void TransitionToTurn( Option<TileDraw> const& i_tileDraw, TableEvent&& i_tableEvent ) const;
 };
 
 //------------------------------------------------------------------------------
