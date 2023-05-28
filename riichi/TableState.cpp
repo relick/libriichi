@@ -119,11 +119,13 @@ void BetweenTurnsBase::HandleRon
 			TableEvents::Ron{ i_tileDraw.m_tile, i_winners, round.CurrentTurn() }
 		);
 	}
-
-	table.Transition(
-		TableStates::BetweenRounds{ table },
-		TableEvents::Ron{ i_tileDraw.m_tile, i_winners, round.CurrentTurn() }
-	);
+	else
+	{
+		table.Transition(
+			TableStates::BetweenRounds{ table },
+			TableEvents::Ron{ i_tileDraw.m_tile, i_winners, round.CurrentTurn() }
+		);
+	}
 }
 
 //------------------------------------------------------------------------------
@@ -380,11 +382,13 @@ void Turn_User::Tsumo
 			TableEvents::Tsumo{ winningTile, round.CurrentTurn() }
 		);
 	}
-
-	table.Transition(
-		TableStates::BetweenRounds( table ),
-		TableEvents::Tsumo{ winningTile, round.CurrentTurn() }
-	);
+	else
+	{
+		table.Transition(
+			TableStates::BetweenRounds( table ),
+			TableEvents::Tsumo{ winningTile, round.CurrentTurn() }
+		);
+	}
 }
 
 //------------------------------------------------------------------------------
@@ -548,11 +552,13 @@ void BetweenTurns::UserPass
 				TableEvents::WallDepleted{ std::move( inTenpai ) }
 			);
 		}
-
-		table.Transition(
-			TableStates::BetweenRounds{ table },
-			TableEvents::WallDepleted{ std::move( inTenpai ) }
-		);
+		else
+		{
+			table.Transition(
+				TableStates::BetweenRounds{ table },
+				TableEvents::WallDepleted{ std::move( inTenpai ) }
+			);
+		}
 		return;
 	}
 
