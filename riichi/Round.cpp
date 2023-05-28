@@ -258,6 +258,7 @@ Vector<Tile> Round::GatherDoraTiles
 
 	for ( size_t i = 0; i < m_doraCount; ++i )
 	{
+		// TODO-RULES: actually, some rulesets don't have all tiles, and they still need to work for indicated value.
 		Tile const& wallTile = m_wall[ firstDoraTileI + ( i * 2 ) ];
 		doraTiles.push_back( i_indicatedValue ? NextTile( wallTile ) : wallTile );
 	}
@@ -277,6 +278,7 @@ Vector<Tile> Round::GatherUradoraTiles
 
 	for ( size_t i = 0; i < m_doraCount; ++i )
 	{
+		// TODO-RULES: actually, some rulesets don't have all tiles, and they still need to work for indicated value.
 		Tile const& wallTile = m_wall[ firstUradoraTileI + ( i * 2 ) ];
 		doraTiles.push_back( i_indicatedValue ? NextTile( wallTile ) : wallTile );
 	}
