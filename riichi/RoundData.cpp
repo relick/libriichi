@@ -207,29 +207,6 @@ Seat RoundData::GetSeat
 }
 
 //------------------------------------------------------------------------------
-bool RoundData::NoMoreRounds
-(
-	Rules const& i_rules
-)	const
-{
-	// TODO-RULES: Should account for extension rounds
-	bool const roundWindWillIncrement = NextRoundRotateSeat( i_rules )
-		&& m_players[ ( size_t )NextPlayer( Seat::East, m_players.size() ) ].m_playerID == m_initialPlayerID;
-	return roundWindWillIncrement && i_rules.LastRound() == m_roundWind;
-}
-
-//------------------------------------------------------------------------------
-bool RoundData::NextRoundRotateSeat
-(
-	Rules const& i_rules
-)	const
-{
-	// TODO-RULES: This is a bit hardcoded and in principle could be controlled by rules
-	// We rotate if dealer did not win, or there was a draw and dealer was not in tenpai whilst others in tenpai
-	return !IsWinner( Seat::East ) || ( !AnyWinners() && !FinishedInTenpai( Seat::East ) && AnyFinishedInTenpai() );
-}
-
-//------------------------------------------------------------------------------
 bool RoundData::AnyWinners
 (
 )	const
@@ -271,42 +248,54 @@ RoundData::RoundData
 }
 
 //------------------------------------------------------------------------------
+bool RoundData::NextPlayerIsInitial
+(
+)	const
+{
+	return m_players.back().m_playerID == m_initialPlayerID;
+}
+
+//------------------------------------------------------------------------------
 RoundData::RoundData
 (
-	RoundData const& i_lastRound,
+	Table const& i_table,
+	RoundData const& i_previousRound,
 	Rules const& i_rules,
 	ShuffleRNG& i_shuffleRNG
 )
-	: m_initialPlayerID{ i_lastRound.m_initialPlayerID }
+	: m_initialPlayerID{ i_previousRound.m_initialPlayerID }
 	, m_deadWallSize{ i_rules.DeadWallSize() }
 	, m_deadWallDrawsRemaining{ i_rules.DeadWallDrawsAvailable() }
-	, m_roundWind{ i_lastRound.m_roundWind }
+	, m_roundWind{ i_previousRound.m_roundWind }
+	, m_honbaSticks{ i_previousRound.m_honbaSticks }
+	, m_riichiSticks{ i_previousRound.m_riichiSticks }
 {
-	Ensure( !i_lastRound.NoMoreRounds( i_rules ), "Tried to start a new round after last round declared game was over!" );
+	Ensure( !i_rules.NoMoreRounds( i_table, i_previousRound ), "Tried to start a new round after last round declared game was over!" );
 
 	// Copy players but then clear their data
-	m_players.reserve( i_lastRound.m_players.size() );
-	for ( RoundPlayerData const& player : i_lastRound.m_players )
+	m_players.reserve( i_previousRound.m_players.size() );
+	for ( RoundPlayerData const& player : i_previousRound.m_players )
 	{
 		m_players.emplace_back( player.m_playerID );
 	}
 
-	// TODO-RULES: honba
-	if ( i_lastRound.IsWinner( Seat::East ) || !i_lastRound.AnyWinners() )
+	bool const repeatRound = i_rules.RepeatRound( i_previousRound );
+	if ( repeatRound )
 	{
-		// Dealer won, or there was a draw
-		// TODO-MVP: honba
+		if ( i_rules.ShouldAddHonba( i_previousRound ) )
+		{
+			++m_honbaSticks;
+		}
 	}
-
-	bool rotated = false;
-	if ( i_lastRound.NextRoundRotateSeat( i_rules ) )
+	else
 	{
+		m_honbaSticks = 0;
+		m_riichiSticks = 0;
 		std::ranges::rotate( m_players, m_players.end() - 1 );
-		rotated = true;
 	}
 
 	// Increment round wind if we've done a full circuit
-	if ( rotated && m_players[ ( size_t )Seat::East ].m_playerID == m_initialPlayerID )
+	if ( !repeatRound && m_players.front().m_playerID == m_initialPlayerID )
 	{
 		m_roundWind = ( Seat )( ( EnumValueType )m_roundWind + 1 );
 	}
@@ -403,10 +392,14 @@ Tile RoundData::Riichi
 {
 	RoundPlayerData& player = m_players[ ( size_t )m_currentTurn ];
 	player.m_riichiDiscardTile = player.m_discards.size();
-	Tile const discarded = Discard( i_handTileToDiscard );
 
+	Tile const discarded = Discard( i_handTileToDiscard );
 	// Set ippatsu valid afterwards as Discard will reset it
 	player.m_riichiIppatsuValid = true;
+
+	// Add the stick
+	++m_riichiSticks;
+
 	return discarded;
 }
 

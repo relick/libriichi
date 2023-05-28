@@ -45,6 +45,9 @@ class RoundData
 	Seat m_roundWind{ Seat::East };
 	Seat m_currentTurn{ Seat::East };
 
+	size_t m_honbaSticks{ 0 };
+	size_t m_riichiSticks{ 0 };
+
 public:
 	// const interface
 
@@ -67,10 +70,9 @@ public:
 	Player const& GetPlayer( Seat i_player, Table const& i_table ) const;
 	PlayerID GetPlayerID( Seat i_player ) const;
 	Seat GetSeat( PlayerID i_playerID ) const;
-	bool NoMoreRounds( Rules const& i_rules ) const;
-	bool NextRoundRotateSeat( Rules const& i_rules ) const;
 	bool AnyWinners() const;
 	bool AnyFinishedInTenpai() const;
+	bool NextPlayerIsInitial() const;
 
 public:
 	// non-const interface, only accessible by table states
@@ -84,7 +86,8 @@ public:
 
 	RoundData
 	(
-		RoundData const& i_lastRound,
+		Table const& i_table,
+		RoundData const& i_previousRound,
 		Rules const& i_rules,
 		ShuffleRNG& i_shuffleRNG
 	);

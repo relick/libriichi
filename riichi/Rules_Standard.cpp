@@ -1,5 +1,8 @@
 #include "Rules_Standard.hpp"
 
+#include "RoundData.hpp"
+#include "Table.hpp"
+
 #include "HandInterpreter_Standard.hpp"
 #include "Yaku_Standard.hpp"
 
@@ -360,6 +363,56 @@ HandScore StandardYonma::CalculateBasicPoints
 	}();
 
 	return { basePoints, std::move( maxScore ) };
+}
+
+
+//------------------------------------------------------------------------------
+bool StandardYonma::NoMoreRounds
+(
+	Table const& i_table,
+	RoundData const& i_previousRound
+)	const
+{
+	// TODO-RULES: allow for negative points play
+
+	bool anyPlayersOutOfPoints = false;
+	i_table.VisitPlayers( [ &anyPlayersOutOfPoints ]( Pair<Player, Points> const& i_player ) { anyPlayersOutOfPoints |= i_player.second < 0; } );
+
+	if ( anyPlayersOutOfPoints )
+	{
+		return true;
+	}
+
+	// TODO-RULES: extension rounds if not enough points earned
+
+	bool const roundWindWillIncrement = !RepeatRound( i_previousRound ) && i_previousRound.NextPlayerIsInitial();
+	if ( roundWindWillIncrement && i_previousRound.Wind() == Seat::East )
+	{
+		return true;
+	}
+
+	return false;
+}
+
+//------------------------------------------------------------------------------
+bool StandardYonma::RepeatRound
+(
+	RoundData const& i_previousRound
+)	const
+{
+	// We rotate if dealer did not win, or there was a draw and dealer was not in tenpai whilst others in tenpai
+	return !i_previousRound.IsWinner( Seat::East )
+		|| ( !i_previousRound.AnyWinners() && !i_previousRound.FinishedInTenpai( Seat::East ) && i_previousRound.AnyFinishedInTenpai() );
+}
+
+//------------------------------------------------------------------------------
+bool StandardYonma::ShouldAddHonba
+(
+	RoundData const& i_previousRound
+)	const
+{
+	// Dealer won, or there was a draw
+	return i_previousRound.IsWinner( Seat::East ) || !i_previousRound.AnyWinners();
 }
 
 //------------------------------------------------------------------------------

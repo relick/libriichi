@@ -19,7 +19,6 @@ public:
 	Points RiichiBet() const override { return 1'000; }
 	Vector<Tile> const& Tileset() const override { return m_tileSet; }
 	size_t DeadWallDrawsAvailable() const override { return 4u; }
-	Seat LastRound() const override { return Seat::East; } // TODO-RULES: this would be nice on a template? I guess
 
 	Pair<Set<Tile>, bool> WaitsWithYaku
 	(
@@ -37,6 +36,10 @@ public:
 		Hand const& i_hand,
 		TileDraw const& i_lastTile
 	) const override;
+
+	bool NoMoreRounds( Table const& i_table, RoundData const& i_previousRound ) const override;
+	bool RepeatRound( RoundData const& i_previousRound ) const override;
+	bool ShouldAddHonba( RoundData const& i_previousRound ) const override;
 
 	Pair<Points, Points> PointsFromEachPlayerTsumo( Points i_basicPoints, bool i_isDealer ) const override;
 	Points PointsFromPlayerRon( Points i_basicPoints, bool i_isDealer ) const override;

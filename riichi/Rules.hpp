@@ -20,6 +20,7 @@ struct Rules
 {
 	virtual ~Rules() = default;
 
+	// Main settings
 	virtual PlayerCount GetPlayerCount() const = 0;
 	virtual Points InitialPoints() const = 0;
 	virtual Points RiichiBet() const = 0;
@@ -28,8 +29,8 @@ struct Rules
 	// Dead wall size derived from this, and kan call maximum is treated as equal
 	virtual size_t DeadWallDrawsAvailable() const = 0;
 	size_t DeadWallSize() const { return ( 1 + DeadWallDrawsAvailable() ) * 2 + DeadWallDrawsAvailable(); }
-	virtual Seat LastRound() const = 0;
 
+	// Hand evaluation
 	// Returns valid waits for a win, and a bool for whether a riichi is allowed
 	virtual Pair<Set<Tile>, bool> WaitsWithYaku
 	(
@@ -48,10 +49,18 @@ struct Rules
 		TileDraw const& i_lastTile
 	) const = 0;
 
+	// Round control
+	virtual bool NoMoreRounds( Table const& i_table, RoundData const& i_previousRound ) const = 0;
+	virtual bool RepeatRound( RoundData const& i_previousRound ) const = 0;
+	virtual bool ShouldAddHonba( RoundData const& i_previousRound ) const = 0;
+
+	// Scoring
 	virtual Pair<Points, Points> PointsFromEachPlayerTsumo( Points i_basicPoints, bool i_isDealer ) const = 0;
 	virtual Points PointsFromPlayerRon( Points i_basicPoints, bool i_isDealer ) const = 0;
 	virtual Pair<Points, Points> PointsEachPlayerInTenpaiDraw( size_t i_playersInTenpai ) const = 0;
 
+
+	// Common to all rulesets
 	template<typename T_Visitor>
 	void VisitInterpreters( T_Visitor&& i_visitor ) const;
 

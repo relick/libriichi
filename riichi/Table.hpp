@@ -61,6 +61,8 @@ public:
 	
 	// General data access
 	Player const& GetPlayer( PlayerID i_playerID ) const;
+	template<typename T_Visitor>
+	void VisitPlayers( T_Visitor&& i_visitor )  const;
 	Points GetPoints( PlayerID i_playerID ) const;
 	Points ModifyPoints( PlayerID i_playerID, Points i_amount );
 	std::ostream& PrintStandings( std::ostream& io_out ) const;
@@ -76,3 +78,5 @@ private:
 };
 
 }
+
+#include "Table.inl"

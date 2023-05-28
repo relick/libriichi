@@ -77,6 +77,8 @@ void BetweenTurnsBase::HandleRon
 	// TODO-AI: assess whether any AI should join in ron
 	// TODO-RULES: allow/disallow multiple ron
 
+	// TODO-MVP: honba/riichi sticks
+
 	for ( Seat seat : i_winners )
 	{
 		Hand const hand = round.GetHand( seat );
@@ -107,9 +109,7 @@ void BetweenTurnsBase::HandleRon
 		}
 	}
 
-	// TODO-RULES: allow for negative points play
-	if ( std::ranges::any_of( std::views::elements<1>( table.m_players ), []( Points i_points ) { return i_points < 0; } )
-		|| round.NoMoreRounds( *table.m_rules ) )
+	if ( table.m_rules->NoMoreRounds( table, round ) )
 	{
 		table.Transition(
 			TableStates::GameOver{ table },
@@ -160,9 +160,10 @@ void BetweenRounds::StartRound
 	else
 	{
 		// Follow from last round
-		RoundData const& lastRound = table.m_rounds.back();
+		RoundData const& previousRound = table.m_rounds.back();
 		table.m_rounds.emplace_back(
-			lastRound,
+			table,
+			previousRound,
 			*table.m_rules,
 			table.m_shuffleRNG
 		);
@@ -339,6 +340,8 @@ void Turn_User::Tsumo
 	bool const isDealer = round.IsDealer( round.CurrentTurn() );
 	Pair<Points, Points> const winnings = table.m_rules->PointsFromEachPlayerTsumo( score.first, isDealer );
 
+	// TODO-MVP: honba/riichi sticks
+
 	for ( size_t seatI = 0; seatI < table.m_players.size(); ++seatI )
 	{
 		Seat const seat = ( Seat )seatI;
@@ -361,9 +364,7 @@ void Turn_User::Tsumo
 		}
 	}
 
-	// TODO-RULES: allow for negative points play
-	if ( std::ranges::any_of( std::views::elements<1>( table.m_players ), []( Points i_points ) { return i_points < 0; } )
-		|| round.NoMoreRounds( *table.m_rules ) )
+	if ( table.m_rules->NoMoreRounds( table, round ) )
 	{
 		table.Transition(
 			TableStates::GameOver( table ),
@@ -524,9 +525,7 @@ void BetweenTurns::UserPass
 			}
 		}
 
-		// TODO-RULES: allow for negative points play
-		if ( std::ranges::any_of( std::views::elements<1>( table.m_players ), []( Points i_points ) { return i_points < 0; } )
-			|| round.NoMoreRounds( *table.m_rules ) )
+		if ( table.m_rules->NoMoreRounds( table, round ) )
 		{
 			table.Transition(
 				TableStates::GameOver{ table },
