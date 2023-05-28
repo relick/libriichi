@@ -449,9 +449,8 @@ bool StandardYonma::RepeatRound
 	Round const& i_previousRound
 )	const
 {
-	// We rotate if dealer did not win, or there was a draw and dealer was not in tenpai whilst others in tenpai
-	return !i_previousRound.IsWinner( Seat::East )
-		|| ( !i_previousRound.AnyWinners() && !i_previousRound.FinishedInTenpai( Seat::East ) && i_previousRound.AnyFinishedInTenpai() );
+	// We repeat if dealer won, or there was a draw and dealer was in tenpai whilst others in tenpai
+	return i_previousRound.IsWinner( Seat::East ) || i_previousRound.FinishedInTenpai( Seat::East ) || ( !i_previousRound.AnyWinners() && !i_previousRound.AnyFinishedInTenpai() );
 }
 
 //------------------------------------------------------------------------------
