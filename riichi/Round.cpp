@@ -1,4 +1,4 @@
-#include "RoundData.hpp"
+#include "Round.hpp"
 
 #include "Table.hpp"
 
@@ -9,7 +9,7 @@ namespace Riichi
 {
 
 //------------------------------------------------------------------------------
-void RoundData::RoundPlayerData::UpdateForTurn
+void Round::PlayerData::UpdateForTurn
 (
 )
 {
@@ -20,7 +20,7 @@ void RoundData::RoundPlayerData::UpdateForTurn
 }
 
 //------------------------------------------------------------------------------
-Seat RoundData::Wind
+Seat Round::Wind
 (
 )	const
 {
@@ -28,7 +28,7 @@ Seat RoundData::Wind
 }
 
 //------------------------------------------------------------------------------
-Seat RoundData::CurrentTurn
+Seat Round::CurrentTurn
 (
 )	const
 {
@@ -36,7 +36,7 @@ Seat RoundData::CurrentTurn
 }
 
 //------------------------------------------------------------------------------
-bool RoundData::IsDealer
+bool Round::IsDealer
 (
 	Seat i_player
 )	const
@@ -45,7 +45,7 @@ bool RoundData::IsDealer
 }
 
 //------------------------------------------------------------------------------
-bool RoundData::CalledRiichi
+bool Round::CalledRiichi
 (
 	Seat i_player
 )	const
@@ -54,7 +54,7 @@ bool RoundData::CalledRiichi
 }
 
 //------------------------------------------------------------------------------
-bool RoundData::CalledDoubleRiichi
+bool Round::CalledDoubleRiichi
 (
 	Seat i_player
 )	const
@@ -63,7 +63,7 @@ bool RoundData::CalledDoubleRiichi
 }
 
 //------------------------------------------------------------------------------
-bool RoundData::RiichiIppatsuValid
+bool Round::RiichiIppatsuValid
 (
 	Seat i_player
 )	const
@@ -73,19 +73,19 @@ bool RoundData::RiichiIppatsuValid
 }
 
 //------------------------------------------------------------------------------
-bool RoundData::Furiten
+bool Round::Furiten
 (
 	Seat i_player,
 	Set<Tile> const& i_waits
 )	const
 {
-	RoundPlayerData const& player = m_players[ ( size_t )i_player ];
+	PlayerData const& player = m_players[ ( size_t )i_player ];
 	return player.m_tempFuriten
 		|| std::ranges::any_of( player.m_discards, [ & ]( Tile const& i_tile ) { return i_waits.contains( i_tile ); } );
 }
 
 //------------------------------------------------------------------------------
-Vector<Tile> const& RoundData::Discards
+Vector<Tile> const& Round::Discards
 (
 	Seat i_player
 )	const
@@ -94,7 +94,7 @@ Vector<Tile> const& RoundData::Discards
 }
 
 //------------------------------------------------------------------------------
-Vector<Tile> const& RoundData::VisibleDiscards
+Vector<Tile> const& Round::VisibleDiscards
 (
 	Seat i_player
 )	const
@@ -103,7 +103,7 @@ Vector<Tile> const& RoundData::VisibleDiscards
 }
 
 //------------------------------------------------------------------------------
-Hand const& RoundData::GetHand
+Hand const& Round::GetHand
 (
 	Seat i_player
 )	const
@@ -112,7 +112,7 @@ Hand const& RoundData::GetHand
 }
 
 //------------------------------------------------------------------------------
-Option<TileDraw> const& RoundData::DrawnTile
+Option<TileDraw> const& Round::DrawnTile
 (
 	Seat i_player
 )	const
@@ -121,7 +121,7 @@ Option<TileDraw> const& RoundData::DrawnTile
 }
 
 //------------------------------------------------------------------------------
-bool RoundData::IsWinner
+bool Round::IsWinner
 (
 	Seat i_player
 )	const
@@ -130,7 +130,7 @@ bool RoundData::IsWinner
 }
 
 //------------------------------------------------------------------------------
-Option<HandScore> const& RoundData::WinnerScore
+Option<HandScore> const& Round::WinnerScore
 (
 	Seat i_player
 )	const
@@ -139,7 +139,7 @@ Option<HandScore> const& RoundData::WinnerScore
 }
 
 //------------------------------------------------------------------------------
-bool RoundData::FinishedInTenpai
+bool Round::FinishedInTenpai
 (
 	Seat i_player
 )	const
@@ -148,7 +148,7 @@ bool RoundData::FinishedInTenpai
 }
 
 //------------------------------------------------------------------------------
-size_t RoundData::WallTilesRemaining
+size_t Round::WallTilesRemaining
 (
 )	const
 {
@@ -157,12 +157,12 @@ size_t RoundData::WallTilesRemaining
 }
 
 //------------------------------------------------------------------------------
-bool RoundData::CallsMade
+bool Round::CallsMade
 (
 )	const
 {
 	return std::ranges::any_of( m_players,
-		[]( RoundPlayerData const& player )
+		[]( PlayerData const& player )
 		{
 			return !player.m_hand.Melds().empty();
 		}
@@ -170,7 +170,7 @@ bool RoundData::CallsMade
 }
 
 //------------------------------------------------------------------------------
-Player const& RoundData::GetPlayer
+Player const& Round::GetPlayer
 (
 	Seat i_player,
 	Table const& i_table
@@ -180,7 +180,7 @@ Player const& RoundData::GetPlayer
 }
 
 //------------------------------------------------------------------------------
-PlayerID RoundData::GetPlayerID
+PlayerID Round::GetPlayerID
 (
 	Seat i_player
 )	const
@@ -189,7 +189,7 @@ PlayerID RoundData::GetPlayerID
 }
 
 //------------------------------------------------------------------------------
-Seat RoundData::GetSeat
+Seat Round::GetSeat
 (
 	PlayerID i_playerID
 )	const
@@ -207,23 +207,23 @@ Seat RoundData::GetSeat
 }
 
 //------------------------------------------------------------------------------
-bool RoundData::AnyWinners
+bool Round::AnyWinners
 (
 )	const
 {
-	return std::ranges::any_of( m_players, []( RoundPlayerData const& i_player ) { return i_player.m_winningScore.has_value(); } );
+	return std::ranges::any_of( m_players, []( PlayerData const& i_player ) { return i_player.m_winningScore.has_value(); } );
 }
 
 //------------------------------------------------------------------------------
-bool RoundData::AnyFinishedInTenpai
+bool Round::AnyFinishedInTenpai
 (
 )	const
 {
-	return std::ranges::any_of( m_players, []( RoundPlayerData const& i_player ) { return i_player.m_finishedInTenpai; } );
+	return std::ranges::any_of( m_players, []( PlayerData const& i_player ) { return i_player.m_finishedInTenpai; } );
 }
 
 //------------------------------------------------------------------------------
-size_t RoundData::HonbaSticks
+size_t Round::HonbaSticks
 (
 )	const
 {
@@ -231,7 +231,7 @@ size_t RoundData::HonbaSticks
 }
 
 //------------------------------------------------------------------------------
-size_t RoundData::RiichiSticks
+size_t Round::RiichiSticks
 (
 )	const
 {
@@ -239,7 +239,7 @@ size_t RoundData::RiichiSticks
 }
 
 //------------------------------------------------------------------------------
-bool RoundData::NextPlayerIsInitial
+bool Round::NextPlayerIsInitial
 (
 )	const
 {
@@ -247,7 +247,7 @@ bool RoundData::NextPlayerIsInitial
 }
 
 //------------------------------------------------------------------------------
-Vector<Tile> RoundData::GatherDoraTiles
+Vector<Tile> Round::GatherDoraTiles
 (
 )	const
 {
@@ -264,7 +264,7 @@ Vector<Tile> RoundData::GatherDoraTiles
 }
 
 //------------------------------------------------------------------------------
-Vector<Tile> RoundData::GatherUradoraTiles
+Vector<Tile> Round::GatherUradoraTiles
 (
 )	const
 {
@@ -281,7 +281,7 @@ Vector<Tile> RoundData::GatherUradoraTiles
 }
 
 //------------------------------------------------------------------------------
-RoundData::RoundData
+Round::Round
 (
 	Seat i_roundWind,
 	Vector<PlayerID> const& i_playerIDs,
@@ -309,10 +309,10 @@ RoundData::RoundData
 }
 
 //------------------------------------------------------------------------------
-RoundData::RoundData
+Round::Round
 (
 	Table const& i_table,
-	RoundData const& i_previousRound,
+	Round const& i_previousRound,
 	Rules const& i_rules,
 	ShuffleRNG& i_shuffleRNG
 )
@@ -327,7 +327,7 @@ RoundData::RoundData
 
 	// Copy players but then clear their data
 	m_players.reserve( i_previousRound.m_players.size() );
-	for ( RoundPlayerData const& player : i_previousRound.m_players )
+	for ( PlayerData const& player : i_previousRound.m_players )
 	{
 		m_players.emplace_back( player.m_playerID );
 	}
@@ -362,7 +362,7 @@ RoundData::RoundData
 }
 
 //------------------------------------------------------------------------------
-void RoundData::BreakWall
+void Round::BreakWall
 (
 	ShuffleRNG& i_shuffleRNG
 )
@@ -393,14 +393,14 @@ void RoundData::BreakWall
 }
 
 //------------------------------------------------------------------------------
-TileDraw RoundData::DealHands
+TileDraw Round::DealHands
 (
 )
 {
 	// Deal 4 at a time to each player until they have 12, then 1 at a time but 2 to the dealer
 	for ( size_t i = 0; i < 3; ++i )
 	{
-		for ( RoundPlayerData& player : m_players )
+		for ( PlayerData& player : m_players )
 		{
 			player.m_hand.AddFreeTiles( DealTiles( 4 ) );
 		}
@@ -417,12 +417,12 @@ TileDraw RoundData::DealHands
 }
 
 //------------------------------------------------------------------------------
-Tile RoundData::Discard
+Tile Round::Discard
 (
 	Option<Tile> const& i_handTileToDiscard
 )
 {
-	RoundPlayerData& player = m_players[ ( size_t )m_currentTurn ];
+	PlayerData& player = m_players[ ( size_t )m_currentTurn ];
 	Tile discarded = [ & ]()
 	{
 		if ( i_handTileToDiscard.has_value() )
@@ -444,12 +444,12 @@ Tile RoundData::Discard
 }
 
 //------------------------------------------------------------------------------
-Tile RoundData::Riichi
+Tile Round::Riichi
 (
 	Option<Tile> const& i_handTileToDiscard
 )
 {
-	RoundPlayerData& player = m_players[ ( size_t )m_currentTurn ];
+	PlayerData& player = m_players[ ( size_t )m_currentTurn ];
 	player.m_riichiDiscardTile = player.m_discards.size();
 
 	Tile const discarded = Discard( i_handTileToDiscard );
@@ -463,7 +463,7 @@ Tile RoundData::Riichi
 }
 
 //------------------------------------------------------------------------------
-TileDraw RoundData::PassCalls
+TileDraw Round::PassCalls
 (
 	SeatSet const& i_couldRon
 )
@@ -475,7 +475,7 @@ TileDraw RoundData::PassCalls
 
 	m_currentTurn = NextPlayer( m_currentTurn, m_players.size() );
 
-	RoundPlayerData& newPlayer = m_players[ ( size_t )m_currentTurn ];
+	PlayerData& newPlayer = m_players[ ( size_t )m_currentTurn ];
 	newPlayer.UpdateForTurn();
 
 	newPlayer.m_draw = SelfDraw();
@@ -483,44 +483,44 @@ TileDraw RoundData::PassCalls
 }
 
 //------------------------------------------------------------------------------
-Hand::KanResult RoundData::HandKan
+Hand::KanResult Round::HandKan
 (
 	Tile const& i_tile
 )
 {
-	RoundPlayerData& player = m_players[ ( size_t )m_currentTurn ];
+	PlayerData& player = m_players[ ( size_t )m_currentTurn ];
 	return player.m_hand.MakeKan( i_tile, std::nullopt );
 }
 
 //------------------------------------------------------------------------------
-TileDraw RoundData::HandKanRonPass
+TileDraw Round::HandKanRonPass
 (
 )
 {
-	RoundPlayerData& player = m_players[ ( size_t )m_currentTurn ];
+	PlayerData& player = m_players[ ( size_t )m_currentTurn ];
 
 	player.m_draw = DeadWallDraw();
 	return player.m_draw.value();
 }
 
 //------------------------------------------------------------------------------
-Pair<Seat, Tile> RoundData::Chi
+Pair<Seat, Tile> Round::Chi
 (
 	Seat i_caller,
 	Pair<Tile, Tile> const& i_meldTiles
 )
 {
-	RoundPlayerData& current = m_players[ ( size_t )m_currentTurn ];
+	PlayerData& current = m_players[ ( size_t )m_currentTurn ];
 	Pair<Seat, Tile> const ret{ m_currentTurn, current.m_discards.back() };
 
 	// Disappear it from the visible discards in front of the player
 	current.m_visibleDiscards.pop_back();
 
-	RoundPlayerData& caller = m_players[ ( size_t )i_caller ];
+	PlayerData& caller = m_players[ ( size_t )i_caller ];
 	caller.m_hand.MakeMeld( ret, { i_meldTiles.first, i_meldTiles.second }, GroupType::Sequence );
 
 	// Invalidate riichi ippatsu as call made
-	for ( RoundPlayerData& player : m_players )
+	for ( PlayerData& player : m_players )
 	{
 		player.m_riichiIppatsuValid = false;
 	}
@@ -532,26 +532,26 @@ Pair<Seat, Tile> RoundData::Chi
 }
 
 //------------------------------------------------------------------------------
-Pair<Seat, Tile> RoundData::Pon
+Pair<Seat, Tile> Round::Pon
 (
 	Seat i_caller
 )
 {
 	// TODO-RULES: Uhhhh I guess I forgot that you might want to pon and have different options too like a chi
-	RoundPlayerData& current = m_players[ ( size_t )m_currentTurn ];
+	PlayerData& current = m_players[ ( size_t )m_currentTurn ];
 	Pair<Seat, Tile> const ret{ m_currentTurn, current.m_discards.back() };
 
 	// Disappear it from the visible discards in front of the player
 	current.m_visibleDiscards.pop_back();
 
-	RoundPlayerData& caller = m_players[ ( size_t )i_caller ];
+	PlayerData& caller = m_players[ ( size_t )i_caller ];
 	auto tile1 = std::find( caller.m_hand.FreeTiles().begin(), caller.m_hand.FreeTiles().end(), ret.second);
 	auto tile2 = std::find( tile1 + 1, caller.m_hand.FreeTiles().end(), ret.second );
 
 	caller.m_hand.MakeMeld( ret, { *tile1, *tile2 }, GroupType::Triplet );
 
 	// Invalidate riichi ippatsu as call made
-	for ( RoundPlayerData& player : m_players )
+	for ( PlayerData& player : m_players )
 	{
 		player.m_riichiIppatsuValid = false;
 	}
@@ -563,22 +563,22 @@ Pair<Seat, Tile> RoundData::Pon
 }
 
 //------------------------------------------------------------------------------
-Pair<Seat, Tile> RoundData::DiscardKan
+Pair<Seat, Tile> Round::DiscardKan
 (
 	Seat i_caller
 )
 {
-	RoundPlayerData& current = m_players[ ( size_t )m_currentTurn ];
+	PlayerData& current = m_players[ ( size_t )m_currentTurn ];
 	Pair<Seat, Tile> const ret{ m_currentTurn, current.m_discards.back() };
 
 	// Disappear it from the visible discards in front of the player
 	current.m_visibleDiscards.pop_back();
 
-	RoundPlayerData& caller = m_players[ ( size_t )i_caller ];
+	PlayerData& caller = m_players[ ( size_t )i_caller ];
 	caller.m_hand.MakeKan( ret.second, ret.first );
 
 	// Invalidate riichi ippatsu as call made
-	for ( RoundPlayerData& player : m_players )
+	for ( PlayerData& player : m_players )
 	{
 		player.m_riichiIppatsuValid = false;
 	}
@@ -590,13 +590,13 @@ Pair<Seat, Tile> RoundData::DiscardKan
 }
 
 //------------------------------------------------------------------------------
-Tile RoundData::AddWinner
+Tile Round::AddWinner
 (
 	Seat i_player,
 	HandScore const& i_score
 )
 {
-	RoundPlayerData& player = m_players[ ( size_t )i_player ];
+	PlayerData& player = m_players[ ( size_t )i_player ];
 	player.m_winningScore = i_score;
 
 	if ( player.m_draw.has_value() )
@@ -610,17 +610,17 @@ Tile RoundData::AddWinner
 }
 
 //------------------------------------------------------------------------------
-void RoundData::AddFinishedInTenpai
+void Round::AddFinishedInTenpai
 (
 	Seat i_player
 )
 {
-	RoundPlayerData& player = m_players[ ( size_t )i_player ];
+	PlayerData& player = m_players[ ( size_t )i_player ];
 	player.m_finishedInTenpai = true;
 }
 
 //------------------------------------------------------------------------------
-Vector<Tile> RoundData::DealTiles
+Vector<Tile> Round::DealTiles
 (
 	size_t i_num
 )
@@ -638,7 +638,7 @@ Vector<Tile> RoundData::DealTiles
 }
 
 //------------------------------------------------------------------------------
-TileDraw RoundData::SelfDraw
+TileDraw Round::SelfDraw
 (
 )
 {
@@ -650,7 +650,7 @@ TileDraw RoundData::SelfDraw
 }
 
 //------------------------------------------------------------------------------
-TileDraw RoundData::DeadWallDraw
+TileDraw Round::DeadWallDraw
 (
 )
 {

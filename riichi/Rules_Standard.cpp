@@ -1,6 +1,6 @@
 #include "Rules_Standard.hpp"
 
-#include "RoundData.hpp"
+#include "Round.hpp"
 #include "Table.hpp"
 
 #include "HandInterpreter_Standard.hpp"
@@ -91,7 +91,7 @@ StandardYonma::StandardYonma
 //------------------------------------------------------------------------------
 Pair<Set<Tile>, bool> StandardYonma::WaitsWithYaku
 (
-	RoundData const& i_round,
+	Round const& i_round,
 	Seat const& i_playerSeat,
 	Hand const& i_hand,
 	TileDraw const& i_lastTile,
@@ -147,7 +147,7 @@ Pair<Set<Tile>, bool> StandardYonma::WaitsWithYaku
 //------------------------------------------------------------------------------
 HandScore StandardYonma::CalculateBasicPoints
 (
-	RoundData const& i_round,
+	Round const& i_round,
 	Seat const& i_playerSeat,
 	Hand const& i_hand,
 	TileDraw const& i_lastTile
@@ -413,7 +413,7 @@ HandScore StandardYonma::CalculateBasicPoints
 bool StandardYonma::NoMoreRounds
 (
 	Table const& i_table,
-	RoundData const& i_previousRound
+	Round const& i_previousRound
 )	const
 {
 	// TODO-RULES: allow for negative points play
@@ -440,7 +440,7 @@ bool StandardYonma::NoMoreRounds
 //------------------------------------------------------------------------------
 bool StandardYonma::RepeatRound
 (
-	RoundData const& i_previousRound
+	Round const& i_previousRound
 )	const
 {
 	// We rotate if dealer did not win, or there was a draw and dealer was not in tenpai whilst others in tenpai
@@ -451,7 +451,7 @@ bool StandardYonma::RepeatRound
 //------------------------------------------------------------------------------
 bool StandardYonma::ShouldAddHonba
 (
-	RoundData const& i_previousRound
+	Round const& i_previousRound
 )	const
 {
 	// Dealer won, or there was a draw

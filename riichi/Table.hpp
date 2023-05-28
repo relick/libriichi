@@ -3,7 +3,7 @@
 #include "Containers.hpp"
 #include "Player.hpp"
 #include "Random.hpp"
-#include "RoundData.hpp"
+#include "Round.hpp"
 #include "TableState.hpp"
 #include "TableEvent.hpp"
 
@@ -35,7 +35,7 @@ private:
 	std::unique_ptr<Rules> m_rules;
 	Vector<PlayerID> m_playerIDs;
 	Vector<Pair<Player, Points>> m_players;
-	Vector<RoundData> m_rounds;
+	Vector<Round> m_rounds;
 	TableState m_state;
 	TableEvent m_mostRecentEvent;
 	ShuffleRNG m_shuffleRNG;
@@ -70,7 +70,7 @@ public:
 	// Simulation
 	bool Playing() const;
 	TableState const& GetState() { return m_state; }
-	RoundData const& GetRoundData( size_t i_roundIndex = SIZE_MAX ) { return i_roundIndex >= m_rounds.size() ? m_rounds.back() : m_rounds[ i_roundIndex ]; }
+	Round const& GetRound( size_t i_roundIndex = SIZE_MAX ) { return i_roundIndex >= m_rounds.size() ? m_rounds.back() : m_rounds[ i_roundIndex ]; }
 	TableEvent const& GetEvent() const { return m_mostRecentEvent; }
 
 private:

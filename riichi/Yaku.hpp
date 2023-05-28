@@ -49,7 +49,7 @@ struct Yaku
 	// NB do not need to check whether i_lastTile is in the interp's waits - it will be
 	virtual HanValue CalculateValue
 	(
-		RoundData const& i_round,
+		Round const& i_round,
 		Seat const& i_playerSeat,
 		Hand const& i_hand,
 		HandAssessment const& i_assessment,
@@ -90,7 +90,7 @@ struct NamedYaku
 // Finally, use YAKU_CALCULATEVALUE_PARAMS() to cut all the parameter boilerplate
 //------------------------------------------------------------------------------
 #define YAKU_CALCULATEVALUE_PARAMS()		\
-RoundData const& i_round,					\
+Round const& i_round,					\
 Seat const& i_playerSeat,					\
 Hand const& i_hand,							\
 HandAssessment const& i_assessment,			\

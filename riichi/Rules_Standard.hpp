@@ -22,7 +22,7 @@ public:
 
 	Pair<Set<Tile>, bool> WaitsWithYaku
 	(
-		RoundData const& i_round,
+		Round const& i_round,
 		Seat const& i_playerSeat,
 		Hand const& i_hand,
 		TileDraw const& i_lastTile,
@@ -31,15 +31,15 @@ public:
 
 	HandScore CalculateBasicPoints
 	(
-		RoundData const& i_round,
+		Round const& i_round,
 		Seat const& i_playerSeat,
 		Hand const& i_hand,
 		TileDraw const& i_lastTile
 	) const override;
 
-	bool NoMoreRounds( Table const& i_table, RoundData const& i_previousRound ) const override;
-	bool RepeatRound( RoundData const& i_previousRound ) const override;
-	bool ShouldAddHonba( RoundData const& i_previousRound ) const override;
+	bool NoMoreRounds( Table const& i_table, Round const& i_previousRound ) const override;
+	bool RepeatRound( Round const& i_previousRound ) const override;
+	bool ShouldAddHonba( Round const& i_previousRound ) const override;
 
 	Pair<Points, Points> PotPoints( size_t i_honbaSticks, size_t i_riichiSticks, bool i_isTsumo, size_t i_winners ) const override;
 	Pair<Points, Points> PointsFromEachPlayerTsumo( Points i_basicPoints, bool i_isDealer ) const override;

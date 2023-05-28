@@ -12,9 +12,9 @@ namespace Riichi
 {
 
 //------------------------------------------------------------------------------
-class RoundData
+class Round
 {
-	struct RoundPlayerData
+	struct PlayerData
 	{
 		PlayerID m_playerID; // index to Table's player list
 		Option<size_t> m_riichiDiscardTile;
@@ -27,12 +27,12 @@ class RoundData
 		Option<HandScore> m_winningScore;
 		bool m_finishedInTenpai{ false };
 
-		explicit RoundPlayerData( PlayerID i_playerID ) : m_playerID( i_playerID ) {}
+		explicit PlayerData( PlayerID i_playerID ) : m_playerID( i_playerID ) {}
 
 		void UpdateForTurn();
 	};
 	PlayerID m_initialPlayerID;
-	Vector<RoundPlayerData> m_players; // Sorted in seat order
+	Vector<PlayerData> m_players; // Sorted in seat order
 
 	// Wall is ordered in columns, clockwise from the dealer's right corner (initially), and reversed
 	// i.e. drawing is pop_back and dead wall is the 14 tiles at the start of the vector
@@ -81,7 +81,7 @@ public:
 
 public:
 	// non-const interface, only accessible by table states
-	RoundData
+	Round
 	(
 		Seat i_roundWind,
 		Vector<PlayerID> const& i_playerIDs,
@@ -89,10 +89,10 @@ public:
 		ShuffleRNG& i_shuffleRNG
 	);
 
-	RoundData
+	Round
 	(
 		Table const& i_table,
-		RoundData const& i_previousRound,
+		Round const& i_previousRound,
 		Rules const& i_rules,
 		ShuffleRNG& i_shuffleRNG
 	);

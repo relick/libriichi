@@ -10,7 +10,7 @@ set (CMAKE_TRY_COMPILE_TARGET_TYPE "STATIC_LIBRARY")
 set(LIBRIICHI_SOURCE
  "riichi/Hand.cpp"
  "riichi/HandInterpreter.cpp"
- "riichi/RoundData.cpp"
+ "riichi/Round.cpp"
  "riichi/Table.cpp"
  "riichi/TableState.cpp"
  "riichi/Tile.cpp"

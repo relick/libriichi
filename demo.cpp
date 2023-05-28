@@ -108,7 +108,7 @@ int main()
 			std::cout << "Initial Hands: \n";
 			for ( Riichi::Seat seat : Riichi::Seats{} )
 			{
-				std::cout << Riichi::ToString( seat ) << ": " << table.GetRoundData().GetHand( seat ) << '\n';
+				std::cout << Riichi::ToString( seat ) << ": " << table.GetRound().GetHand( seat ) << '\n';
 			}
 			std::cout << std::endl;
 			break;
@@ -212,7 +212,7 @@ int main()
 		case BetweenTurns:
 		{
 			Riichi::TableStates::BetweenTurns const& betweenTurns = state.Get<BetweenTurns>();
-			Riichi::Seat const playerSeat = table.GetRoundData().GetSeat( player1 );
+			Riichi::Seat const playerSeat = table.GetRound().GetSeat( player1 );
 			bool passStraightAway = true;
 			if ( betweenTurns.CanChi().first == playerSeat && !betweenTurns.CanChi().second.empty() )
 			{
@@ -283,7 +283,7 @@ int main()
 		case RonAKanChance:
 		{
 			Riichi::TableStates::RonAKanChance const& ronAKanChance = state.Get<RonAKanChance>();
-			Riichi::Seat const playerSeat = table.GetRoundData().GetSeat( player1 );
+			Riichi::Seat const playerSeat = table.GetRound().GetSeat( player1 );
 			bool passStraightAway = true;
 			if ( ronAKanChance.CanRon().Contains( playerSeat ) )
 			{
@@ -365,7 +365,7 @@ int main()
 		case Tsumo:
 		{
 			Riichi::TableEvents::Tsumo const& tsumo = event.Get<Tsumo>();
-			auto const& score = table.GetRoundData().WinnerScore( tsumo.Winner() ).value();
+			auto const& score = table.GetRound().WinnerScore( tsumo.Winner() ).value();
 			std::cout << Riichi::ToString( tsumo.Winner() ) << " won with tsumo! Score:\n";
 			Riichi::Han total = 0;
 			for ( auto const& yaku : score.second )
@@ -393,7 +393,7 @@ int main()
 			Riichi::TableEvents::Ron const& ron = event.Get<Ron>();
 			for ( auto const& winner : ron.Winners() )
 			{
-				auto const& score = table.GetRoundData().WinnerScore( winner ).value();
+				auto const& score = table.GetRound().WinnerScore( winner ).value();
 				std::cout << Riichi::ToString( winner ) << " won with ron! Score:\n";
 				Riichi::Han total = 0;
 				for ( auto const& yaku : score.second )

@@ -15,7 +15,7 @@ void BetweenTurnsBase::TransitionToTurn
 {
 	Table& table = m_table.get();
 
-	RoundData& round = table.m_rounds.back();
+	Round& round = table.m_rounds.back();
 
 	Player const& turnPlayer = round.GetPlayer( round.CurrentTurn(), table );
 
@@ -72,7 +72,7 @@ void BetweenTurnsBase::HandleRon
 {
 	Table& table = m_table.get();
 
-	RoundData& round = table.m_rounds.back();
+	Round& round = table.m_rounds.back();
 
 	// TODO-AI: assess whether any AI should join in ron
 	// TODO-RULES: allow/disallow multiple ron
@@ -161,7 +161,7 @@ void BetweenRounds::StartRound
 	else
 	{
 		// Follow from last round
-		RoundData const& previousRound = table.m_rounds.back();
+		Round const& previousRound = table.m_rounds.back();
 		table.m_rounds.emplace_back(
 			table,
 			previousRound,
@@ -170,7 +170,7 @@ void BetweenRounds::StartRound
 		);
 	}
 
-	RoundData& round = table.m_rounds.back();
+	Round& round = table.m_rounds.back();
 
 	TileDraw const firstDrawnTile = round.DealHands();
 
@@ -196,7 +196,7 @@ Hand const& BaseTurn::GetHand
 )	const
 {
 	Table& table = m_table.get();
-	return table.GetRoundData().GetHand( m_seat );
+	return table.GetRound().GetHand( m_seat );
 }
 
 //------------------------------------------------------------------------------
@@ -205,7 +205,7 @@ Option<Tile> BaseTurn::GetDrawnTile
 )	const
 {
 	Table& table = m_table.get();
-	Option<TileDraw> const& drawnTile = table.GetRoundData().DrawnTile( m_seat );
+	Option<TileDraw> const& drawnTile = table.GetRound().DrawnTile( m_seat );
 	if ( drawnTile.has_value() )
 	{
 		return drawnTile.value().m_tile;
@@ -222,7 +222,7 @@ void BaseTurn::TransitionToBetweenTurns
 {
 	Table& table = m_table.get();
 
-	RoundData& round = table.m_rounds.back();
+	Round& round = table.m_rounds.back();
 
 	// TODO-RULES: call options (particularly chi) should be controllable by rules
 	Seat const nextPlayer = NextPlayer( round.CurrentTurn(), table.m_players.size() );
@@ -286,7 +286,7 @@ void Turn_AI::MakeDecision
 
 	// TODO-AI: Super good AI goes here
 	// For now, we just discard the drawn tile
-	RoundData& round = table.m_rounds.back();
+	Round& round = table.m_rounds.back();
 	Tile const discardedTile = round.Discard( std::nullopt );
 
 	TransitionToBetweenTurns(
@@ -319,7 +319,7 @@ void Turn_User::Tsumo
 
 	Ensure( m_canTsumo, "This user cannot tsumo" );
 
-	RoundData& round = table.m_rounds.back();
+	Round& round = table.m_rounds.back();
 
 	Ensure( round.DrawnTile( round.CurrentTurn() ).has_value(), "Cannot tsumo without drawn tile" );
 	TileDraw const& tileDraw = round.DrawnTile( round.CurrentTurn() ).value();
@@ -384,7 +384,7 @@ void Turn_User::Discard
 {
 	Table& table = m_table.get();
 
-	RoundData& round = table.m_rounds.back();
+	Round& round = table.m_rounds.back();
 	Tile const discardedTile = round.Discard( i_handTileToDiscard );
 
 	TransitionToBetweenTurns(
@@ -403,7 +403,7 @@ void Turn_User::Riichi
 
 	Ensure( m_canRiichi, "This user cannot riichi" );
 
-	RoundData& round = table.m_rounds.back();
+	Round& round = table.m_rounds.back();
 	
 	// Pay the bet
 	table.ModifyPoints( round.GetPlayerID( round.CurrentTurn() ), -table.m_rules->RiichiBet() );
@@ -430,7 +430,7 @@ void Turn_User::Kan
 			return i_option.kanTile == i_tile;
 		}), "This user cannot kan with provided tile");
 
-	RoundData& round = table.m_rounds.back();
+	Round& round = table.m_rounds.back();
 	Hand::KanResult const kanResult = round.HandKan( i_tile );
 
 	SeatSet canRon;
@@ -489,7 +489,7 @@ void BetweenTurns::UserPass
 {
 	Table& table = m_table.get();
 
-	RoundData& round = table.m_rounds.back();
+	Round& round = table.m_rounds.back();
 
 	// TODO-AI: Process AI call/wins
 
@@ -556,7 +556,7 @@ void BetweenTurns::UserChi
 {
 	Table& table = m_table.get();
 
-	RoundData& round = table.m_rounds.back();
+	Round& round = table.m_rounds.back();
 	Pair<Seat, Tile> const calledTile = round.Chi( i_user, i_option );
 
 	TransitionToTurn(
@@ -573,7 +573,7 @@ void BetweenTurns::UserPon
 {
 	Table& table = m_table.get();
 
-	RoundData& round = table.m_rounds.back();
+	Round& round = table.m_rounds.back();
 	Pair<Seat, Tile> const calledTile = round.Pon( i_user );
 
 	TransitionToTurn(
@@ -590,7 +590,7 @@ void BetweenTurns::UserKan
 {
 	Table& table = m_table.get();
 
-	RoundData& round = table.m_rounds.back();
+	Round& round = table.m_rounds.back();
 	Pair<Seat, Tile> const calledTile = round.DiscardKan( i_user );
 
 	TransitionToTurn(
@@ -629,7 +629,7 @@ void RonAKanChance::Pass
 {
 	Table& table = m_table.get();
 
-	RoundData& round = table.m_rounds.back();
+	Round& round = table.m_rounds.back();
 	TileDraw const deadWallDraw = round.HandKanRonPass();
 
 	TransitionToTurn(

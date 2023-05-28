@@ -34,7 +34,7 @@ struct Rules
 	// Returns valid waits for a win, and a bool for whether a riichi is allowed
 	virtual Pair<Set<Tile>, bool> WaitsWithYaku
 	(
-		RoundData const& i_round,
+		Round const& i_round,
 		Seat const& i_playerSeat,
 		Hand const& i_hand,
 		TileDraw const& i_lastTile,
@@ -43,16 +43,16 @@ struct Rules
 
 	virtual HandScore CalculateBasicPoints
 	(
-		RoundData const& i_round,
+		Round const& i_round,
 		Seat const& i_playerSeat,
 		Hand const& i_hand,
 		TileDraw const& i_lastTile
 	) const = 0;
 
 	// Round control
-	virtual bool NoMoreRounds( Table const& i_table, RoundData const& i_previousRound ) const = 0;
-	virtual bool RepeatRound( RoundData const& i_previousRound ) const = 0;
-	virtual bool ShouldAddHonba( RoundData const& i_previousRound ) const = 0;
+	virtual bool NoMoreRounds( Table const& i_table, Round const& i_previousRound ) const = 0;
+	virtual bool RepeatRound( Round const& i_previousRound ) const = 0;
+	virtual bool ShouldAddHonba( Round const& i_previousRound ) const = 0;
 	// TODO-RULES: special draw actions (9-honor hand, 4 discarded winds, 5 kantsu)
 
 	// Scoring

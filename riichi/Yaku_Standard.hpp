@@ -75,7 +75,7 @@ struct DragonYakuhai
 {
 	HanValue CalculateValue
 	(
-		RoundData const& i_round,
+		Round const& i_round,
 		Seat const& i_playerSeat,
 		Hand const& i_hand,
 		HandAssessment const& i_assessment,
