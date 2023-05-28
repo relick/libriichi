@@ -17,6 +17,7 @@ class RoundData
 	{
 		size_t m_playerIndex; // index to Table's player list
 		Option<size_t> m_riichiDiscardTile;
+		bool m_riichiIppatsuValid{ false };
 		Vector<Tile> m_discards;
 		Vector<Tile> m_visibleDiscards; // Called tiles removed from this list
 		bool m_tempFuriten{ false }; // Passing up on a ron sets this true until next turn, or until the end of the game if riichi'd

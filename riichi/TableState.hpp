@@ -177,6 +177,7 @@ struct BetweenTurns
 
 	// TODO-AI indication about AI intent (to allow AI to jump in before user, depending on game implementation)
 
+	// TODO-DEBT: chi option data structure sucks
 	Pair<Seat, Vector<Pair<Tile, Tile>>> const& CanChi() const { return m_canChi; }
 	SeatSet const& CanPon() const { return m_canPon; }
 	SeatSet const& CanKan() const { return m_canKan; }

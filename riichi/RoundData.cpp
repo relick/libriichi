@@ -70,8 +70,8 @@ bool RoundData::RiichiIppatsuValid
 	Seat i_player
 )	const
 {
-	// TODO-MVP
-	return false;
+	// Ippatsu is valid if there have been no calls or further discards since the riichi of the player
+	return m_players[ ( size_t )i_player ].m_riichiIppatsuValid;
 }
 
 //------------------------------------------------------------------------------
@@ -397,6 +397,7 @@ Tile RoundData::Discard
 		player.m_hand.Discard( discarded, player.m_draw );
 	}
 	player.m_draw.reset();
+	player.m_riichiIppatsuValid = false;
 	return discarded;
 }
 
@@ -408,7 +409,11 @@ Tile RoundData::Riichi
 {
 	RoundPlayerData& player = m_players[ ( size_t )m_currentTurn ];
 	player.m_riichiDiscardTile = player.m_discards.size();
-	return Discard( i_handTileToDiscard );
+	Tile const discarded = Discard( i_handTileToDiscard );
+
+	// Set ippatsu valid afterwards as Discard will reset it
+	player.m_riichiIppatsuValid = true;
+	return discarded;
 }
 
 //------------------------------------------------------------------------------
@@ -468,6 +473,12 @@ Pair<Seat, Tile> RoundData::Chi
 	RoundPlayerData& caller = m_players[ ( size_t )i_caller ];
 	caller.m_hand.MakeMeld( ret, { i_meldTiles.first, i_meldTiles.second }, GroupType::Sequence );
 
+	// Invalidate riichi ippatsu as call made
+	for ( RoundPlayerData& player : m_players )
+	{
+		player.m_riichiIppatsuValid = false;
+	}
+
 	m_currentTurn = i_caller;
 	caller.UpdateForTurn();
 
@@ -493,6 +504,12 @@ Pair<Seat, Tile> RoundData::Pon
 
 	caller.m_hand.MakeMeld( ret, { *tile1, *tile2 }, GroupType::Triplet );
 
+	// Invalidate riichi ippatsu as call made
+	for ( RoundPlayerData& player : m_players )
+	{
+		player.m_riichiIppatsuValid = false;
+	}
+
 	m_currentTurn = i_caller;
 	caller.UpdateForTurn();
 
@@ -513,6 +530,12 @@ Pair<Seat, Tile> RoundData::DiscardKan
 
 	RoundPlayerData& caller = m_players[ ( size_t )i_caller ];
 	caller.m_hand.MakeKan( ret.second, ret.first );
+
+	// Invalidate riichi ippatsu as call made
+	for ( RoundPlayerData& player : m_players )
+	{
+		player.m_riichiIppatsuValid = false;
+	}
 
 	m_currentTurn = i_caller;
 	caller.UpdateForTurn();
