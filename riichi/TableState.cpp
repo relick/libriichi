@@ -493,7 +493,7 @@ void BetweenTurns::UserPass
 			}
 			else
 			{
-				table.m_standings.m_points[ round.GetPlayerID( seat, table ) ] -= pointsForEachPlayer;
+				table.m_standings.m_points[ round.GetPlayerID( seat, table ) ] -= pointsFromEachPlayer;
 			}
 		}
 

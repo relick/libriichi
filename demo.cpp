@@ -384,7 +384,7 @@ int main()
 			}
 			std::cout << "Total: " << static_cast< int >( total ) << " (" << score.first << ")\n\n";
 
-			std::cout << "Standings before next round:\n" << table.Standings() << std::endl;
+			std::cout << table.Standings() << "\n" << std::endl;
 			break;
 		}
 
@@ -413,7 +413,14 @@ int main()
 				std::cout << "Total: " << static_cast< int >( total ) << " (" << score.first << ")\n\n";
 			}
 
-			std::cout << "Standings before next round:\n" << table.Standings() << std::endl;
+			std::cout << table.Standings() << "\n" << std::endl;
+			break;
+		}
+
+		case WallDepleted:
+		{
+			std::cout << "Draw\n\n";
+			std::cout << table.Standings() << "\n" << std::endl;
 			break;
 		}
 
