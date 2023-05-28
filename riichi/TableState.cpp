@@ -172,10 +172,6 @@ void BetweenRounds::StartRound
 
 	RoundData& round = table.m_rounds.back();
 
-	// TODO-DEBT: we call these here, they could technically be part of RoundData construction
-	// They could also be exposed as their own states.
-	// In other words, they're fine here for now, but maybe this decision needs revisiting later
-	round.BreakWall( table.m_shuffleRNG );
 	TileDraw const firstDrawnTile = round.DealHands();
 
 	TransitionToTurn(

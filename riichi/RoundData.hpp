@@ -97,7 +97,6 @@ public:
 		ShuffleRNG& i_shuffleRNG
 	);
 
-	void BreakWall( ShuffleRNG& i_shuffleRNG );
 	TileDraw DealHands();
 
 	// Player turn actions
@@ -114,6 +113,7 @@ public:
 	void AddFinishedInTenpai( Seat i_player );
 
 private:
+	void BreakWall( ShuffleRNG& i_shuffleRNG );
 	Vector<Tile> DealTiles( size_t i_num );
 	TileDraw SelfDraw();
 	TileDraw DeadWallDraw();

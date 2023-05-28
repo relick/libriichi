@@ -223,31 +223,6 @@ bool RoundData::AnyFinishedInTenpai
 }
 
 //------------------------------------------------------------------------------
-RoundData::RoundData
-(
-	Seat i_roundWind,
-	Vector<PlayerID> const& i_playerIDs,
-	Rules const& i_rules,
-	ShuffleRNG& i_shuffleRNG
-)
-	: m_deadWallSize{ i_rules.DeadWallSize() }
-	, m_deadWallDrawsRemaining{ i_rules.DeadWallDrawsAvailable() }
-{
-	// Randomly determine initial seats
-	m_players.reserve( i_playerIDs.size() );
-	for ( PlayerID playerID : i_playerIDs )
-	{
-		m_players.emplace_back( playerID );
-	}
-	std::ranges::shuffle( m_players, i_shuffleRNG );
-	m_initialPlayerID = m_players.front().m_playerID;
-
-	// Shuffle the tiles to build the wall
-	m_wall = i_rules.Tileset();
-	std::ranges::shuffle( m_wall, i_shuffleRNG );
-}
-
-//------------------------------------------------------------------------------
 size_t RoundData::HonbaSticks
 (
 )	const
@@ -308,6 +283,34 @@ Vector<Tile> RoundData::GatherUradoraTiles
 //------------------------------------------------------------------------------
 RoundData::RoundData
 (
+	Seat i_roundWind,
+	Vector<PlayerID> const& i_playerIDs,
+	Rules const& i_rules,
+	ShuffleRNG& i_shuffleRNG
+)
+	: m_deadWallSize{ i_rules.DeadWallSize() }
+	, m_deadWallDrawsRemaining{ i_rules.DeadWallDrawsAvailable() }
+{
+	// Randomly determine initial seats
+	m_players.reserve( i_playerIDs.size() );
+	for ( PlayerID playerID : i_playerIDs )
+	{
+		m_players.emplace_back( playerID );
+	}
+	std::ranges::shuffle( m_players, i_shuffleRNG );
+	m_initialPlayerID = m_players.front().m_playerID;
+
+	// Shuffle the tiles to build the wall
+	m_wall = i_rules.Tileset();
+	std::ranges::shuffle( m_wall, i_shuffleRNG );
+
+	// Then break the wall
+	BreakWall( i_shuffleRNG );
+}
+
+//------------------------------------------------------------------------------
+RoundData::RoundData
+(
 	Table const& i_table,
 	RoundData const& i_previousRound,
 	Rules const& i_rules,
@@ -353,6 +356,9 @@ RoundData::RoundData
 	// Shuffle the tiles to build the wall
 	m_wall = i_rules.Tileset();
 	std::ranges::shuffle( m_wall, i_shuffleRNG );
+
+	// Then break the wall
+	BreakWall( i_shuffleRNG );
 }
 
 //------------------------------------------------------------------------------
@@ -365,6 +371,9 @@ void RoundData::BreakWall
 	size_t const d1 = dice( i_shuffleRNG );
 	size_t const d2 = dice( i_shuffleRNG );
 	size_t const dTotal = d1 + d2;
+
+	// TODO-RULES: store this dice somewhere, needed for wareme
+	// TODO-RULES: actually, do we also want rules to control the dice roll itself?
 
 	// Tiles are currently ordered clockwise from dealer's right, starting at the back of the vector
 	// We have to count down tiles, e.g. for yonma starting from 136 for (1)/5/9, 34 for 2/6/10, 68 for 3/7/11, 102 for 4/8/12
