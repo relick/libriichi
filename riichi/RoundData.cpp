@@ -216,8 +216,9 @@ bool RoundData::NoMoreRounds
 	Rules const& i_rules
 )	const
 {
+	// TODO-RULES: Should account for extension rounds
 	bool const roundWindWillIncrement = NextRoundRotateSeat( i_rules )
-		&& m_players[ ( size_t )NextPlayer( m_currentTurn, m_players.size() ) ].m_playerIndex == m_initialPlayerIndex;
+		&& m_players[ ( size_t )NextPlayer( Seat::East, m_players.size() ) ].m_playerIndex == m_initialPlayerIndex;
 	return roundWindWillIncrement && i_rules.LastRound() == m_roundWind;
 }
 
