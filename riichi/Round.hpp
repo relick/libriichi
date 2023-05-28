@@ -74,8 +74,9 @@ public:
 	bool AnyWinners() const;
 	bool AnyFinishedInTenpai() const;
 	bool NextPlayerIsInitial() const;
-	Vector<Tile> GatherDoraTiles() const;
-	Vector<Tile> GatherUradoraTiles() const;
+	// If indicated value true -> returns the tiles that would score points, false -> returns the actual tiles of the wall
+	Vector<Tile> GatherDoraTiles( bool i_indicatedValue ) const;
+	Vector<Tile> GatherUradoraTiles( bool i_indicatedValue ) const;
 	size_t HonbaSticks() const;
 	size_t RiichiSticks() const;
 

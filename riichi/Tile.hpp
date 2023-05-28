@@ -38,6 +38,7 @@ struct SuitTile
 	SuitTileValue m_value;
 
 	friend bool operator==( SuitTile const&, SuitTile const& ) = default;
+	friend SuitTile NextTile( SuitTile const& i_tile );
 	friend bool StrictEqualTo( SuitTile const&, SuitTile const& );
 	friend std::strong_ordering operator<=>( SuitTile const&, SuitTile const& ) = default;
 };
@@ -53,6 +54,9 @@ inline constexpr size_t c_dragonTileTypeCount = 3;
 using DragonTileTypes = Utils::EnumRange<DragonTileType, c_dragonTileTypeCount>;
 
 //------------------------------------------------------------------------------
+DragonTileType NextTile( DragonTileType i_tile );
+
+//------------------------------------------------------------------------------
 enum class WindTileType : EnumValueType
 {
 	East,
@@ -64,6 +68,9 @@ inline constexpr size_t c_windTileTypeCount = 4;
 using WindTileTypes = Utils::EnumRange<WindTileType, c_windTileTypeCount>;
 
 //------------------------------------------------------------------------------
+WindTileType NextTile( WindTileType i_tile );
+
+//------------------------------------------------------------------------------
 using Tile = NamedUnion<
 	TileType,
 
@@ -71,6 +78,9 @@ using Tile = NamedUnion<
 	DragonTileType,
 	WindTileType
 >;
+
+//------------------------------------------------------------------------------
+Tile NextTile( Tile const& i_tile );
 
 //------------------------------------------------------------------------------
 bool StrictEqualTo( Tile const&, Tile const& );

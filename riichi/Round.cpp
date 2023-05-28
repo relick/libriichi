@@ -249,6 +249,7 @@ bool Round::NextPlayerIsInitial
 //------------------------------------------------------------------------------
 Vector<Tile> Round::GatherDoraTiles
 (
+	bool i_indicatedValue
 )	const
 {
 	Vector<Tile> doraTiles;
@@ -257,7 +258,8 @@ Vector<Tile> Round::GatherDoraTiles
 
 	for ( size_t i = 0; i < m_doraCount; ++i )
 	{
-		doraTiles.push_back( m_wall[ firstDoraTileI + ( i * 2 ) ] );
+		Tile const& wallTile = m_wall[ firstDoraTileI + ( i * 2 ) ];
+		doraTiles.push_back( i_indicatedValue ? NextTile( wallTile ) : wallTile );
 	}
 
 	return doraTiles;
@@ -266,6 +268,7 @@ Vector<Tile> Round::GatherDoraTiles
 //------------------------------------------------------------------------------
 Vector<Tile> Round::GatherUradoraTiles
 (
+	bool i_indicatedValue
 )	const
 {
 	Vector<Tile> doraTiles;
@@ -274,7 +277,8 @@ Vector<Tile> Round::GatherUradoraTiles
 
 	for ( size_t i = 0; i < m_doraCount; ++i )
 	{
-		doraTiles.push_back( m_wall[ firstUradoraTileI + ( i * 2 ) ] );
+		Tile const& wallTile = m_wall[ firstUradoraTileI + ( i * 2 ) ];
+		doraTiles.push_back( i_indicatedValue ? NextTile( wallTile ) : wallTile );
 	}
 
 	return doraTiles;

@@ -105,19 +105,20 @@ int main()
 			std::cout << "Starting next round\n";
 			state.Get<BetweenRounds>().StartRound();
 
-			std::cout << "Initial Hands: \n";
+			std::cout << "\nInitial Hands: \n";
 			for ( Riichi::Seat seat : Riichi::Seats{} )
 			{
 				std::cout << Riichi::ToString( seat ) << ": " << table.GetRound().GetHand( seat ) << '\n';
 			}
 
-			std::cout << "Dora: \n";
-			for ( Riichi::Tile const& tile : table.GetRound().GatherDoraTiles() )
+			bool constexpr c_indicatedValue = false;
+			std::cout << "\nDora: \n";
+			for ( Riichi::Tile const& tile : table.GetRound().GatherDoraTiles( c_indicatedValue ) )
 			{
 				std::cout << tile;
 			}
 
-			std::cout << std::endl;
+			std::cout << "\n" << std::endl;
 			break;
 		}
 		case GameOver:

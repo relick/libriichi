@@ -4,6 +4,19 @@ namespace Riichi
 {
 
 //------------------------------------------------------------------------------
+SuitTile NextTile
+(
+	SuitTile const& i_tile
+)
+{
+	if ( i_tile.m_value == SuitTileValue::Max )
+	{
+		return { i_tile.m_suit, SuitTileValue::Min };
+	}
+	return { i_tile.m_suit, i_tile.m_value + SuitTileValue::Set<1>() };
+}
+
+//------------------------------------------------------------------------------
 // Include specialness of the tile
 //------------------------------------------------------------------------------
 bool StrictEqualTo
@@ -13,6 +26,54 @@ bool StrictEqualTo
 )
 {
 	return i_a.m_suit == i_b.m_suit && i_a.m_value == i_b.m_value;
+}
+
+//------------------------------------------------------------------------------
+DragonTileType NextTile
+(
+	DragonTileType i_tile
+)
+{
+	size_t index = ( size_t )i_tile;
+	++index;
+	if ( index == c_dragonTileTypeCount )
+	{
+		index = 0;
+	}
+	return ( DragonTileType )index;
+}
+
+//------------------------------------------------------------------------------
+WindTileType NextTile
+(
+	WindTileType i_tile
+)
+{
+	size_t index = ( size_t )i_tile;
+	++index;
+	if ( index == c_windTileTypeCount )
+	{
+		index = 0;
+	}
+	return ( WindTileType )index;
+}
+
+//------------------------------------------------------------------------------
+Tile NextTile
+(
+	Tile const& i_tile
+)
+{
+	switch ( i_tile.Type() )
+	{
+	using enum TileType;
+	case Suit: return NextTile( i_tile.Get<Suit>() );
+	case Dragon: return NextTile( i_tile.Get<Dragon>() );
+	case Wind: return NextTile( i_tile.Get<Wind>() );
+	}
+
+	Error( "Invalid tile type" );
+	return i_tile;
 }
 
 //------------------------------------------------------------------------------

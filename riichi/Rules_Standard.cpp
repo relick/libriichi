@@ -215,9 +215,10 @@ HandScore StandardYonma::CalculateBasicPoints
 
 	// Handle Dora
 	{
+		bool constexpr c_indicatedValue = true;
 		bool const includeUradora = fnHandHasYaku( "Riichi" ) || fnHandHasYaku( "DoubleRiichi" );
-		Vector<Tile> const doraTiles = i_round.GatherDoraTiles();
-		Vector<Tile> const uraDoraTiles = includeUradora ? i_round.GatherUradoraTiles() : Vector<Tile>{};
+		Vector<Tile> const doraTiles = i_round.GatherDoraTiles( c_indicatedValue );
+		Vector<Tile> const uraDoraTiles = includeUradora ? i_round.GatherUradoraTiles( c_indicatedValue ) : Vector<Tile>{};
 
 		Han doraValue{ 0 };
 		Han uradoraValue{ 0 };
