@@ -178,6 +178,7 @@ template<typename T_Enum, size_t t_EnumCount>
 class EnumSet
 {
 	Utils::EnumIndexedArray<bool, T_Enum, t_EnumCount> m_enumVals{};
+	size_t m_size{ 0 }; // TODO-OPT: could also not have this member and instead do a count when Size() is called.
 
 public:
 	struct Iter
@@ -199,11 +200,12 @@ public:
 		for ( T_Enum val : i_vals )
 		{
 			m_enumVals[ val ] = true;
+			++m_size;
 		}
 	}
 
-	void Insert( T_Enum i_val ) { m_enumVals[ i_val ] = true; }
-	void Erase( T_Enum i_val ) { m_enumVals[ i_val ] = false; }
+	void Insert( T_Enum i_val ) { if ( !m_enumVals[ i_val ] ) { ++m_size; } m_enumVals[ i_val ] = true; }
+	void Erase( T_Enum i_val ) { if ( m_enumVals[ i_val ] ) { --m_size; } m_enumVals[ i_val ] = false; }
 	bool Contains( T_Enum i_val ) const { return m_enumVals[ i_val ]; }
 	bool ContainsAllOf( EnumSet const& i_o ) const
 	{
@@ -216,6 +218,7 @@ public:
 		}
 		return true;
 	}
+	size_t Size() const { return m_size; }
 };
 
 //------------------------------------------------------------------------------

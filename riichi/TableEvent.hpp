@@ -152,22 +152,28 @@ class Ron
 {
 	Tile m_winningTile;
 	SeatSet m_winners;
+	Seat m_loser;
 public:
-	explicit Ron( Tile const& i_winningTile, SeatSet i_winners )
+	explicit Ron( Tile const& i_winningTile, SeatSet i_winners, Seat i_loser )
 		: m_winningTile{ i_winningTile }
 		, m_winners{ std::move( i_winners ) }
 	{}
 
 	Tile const& WinningTile() const { return m_winningTile; }
 	SeatSet const& Winners() const { return m_winners; }
+	Seat Loser() const { return m_loser; }
 };
 
 //------------------------------------------------------------------------------
 class WallDepleted
 {
+	SeatSet m_inTenpai;
 public:
-	explicit WallDepleted()
+	explicit WallDepleted( SeatSet i_inTenpai )
+		: m_inTenpai{ i_inTenpai }
 	{}
+
+	SeatSet const& InTenpai() const { return m_inTenpai; }
 };
 
 }

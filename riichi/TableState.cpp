@@ -429,20 +429,21 @@ void BetweenTurns::UserPass
 
 	if ( round.WallTilesRemaining() == 0u )
 	{
+		// Ryuukyoku/draw has occurred
 		// TODO-MVP: nagashi mangan
 
-		size_t totalInTenpai = 0;
+		SeatSet inTenpai;
 		for ( size_t seatI = 0; seatI < table.m_players.size(); ++seatI )
 		{
 			Seat const seat = ( Seat )seatI;
 			if ( !HandAssessment( round.GetHand( seat ), *table.m_rules ).Waits().empty() )
 			{
 				round.AddFinishedInTenpai( seat );
-				++totalInTenpai;
+				inTenpai.Insert( seat );
 			}
 		}
 
-		auto const [ pointsForEachPlayer, pointsFromEachPlayer ] = table.m_rules->PointsEachPlayerInTenpaiDraw( totalInTenpai );
+		auto const [ pointsForEachPlayer, pointsFromEachPlayer ] = table.m_rules->PointsEachPlayerInTenpaiDraw( inTenpai.Size() );
 		for ( size_t seatI = 0; seatI < table.m_players.size(); ++seatI )
 		{
 			Seat const seat = ( Seat )seatI;
@@ -462,17 +463,18 @@ void BetweenTurns::UserPass
 		{
 			table.Transition(
 				TableStates::GameOver{ table },
-				TableEvents::WallDepleted{}
+				TableEvents::WallDepleted{ std::move( inTenpai ) }
 			);
 		}
 
 		table.Transition(
 			TableStates::BetweenRounds{ table },
-			TableEvents::WallDepleted{}
+			TableEvents::WallDepleted{ std::move( inTenpai ) }
 		);
 		return;
 	}
 
+	// Round continues, advance to next player and draw from wall
 	TileDraw const drawnTile = round.PassCalls( m_canRon );
 
 	TransitionToTurn(
@@ -545,6 +547,7 @@ void BetweenTurns::UserRon
 
 	RoundData& round = table.m_rounds.back();
 
+	// TODO-DEBT: don't repeat ron code
 	// TODO-AI: assess whether any AI should join in ron
 	// TODO-RULES: allow/disallow multiple ron
 
@@ -584,13 +587,13 @@ void BetweenTurns::UserRon
 	{
 		table.Transition(
 			TableStates::GameOver{ table },
-			TableEvents::Ron{ m_discardedTile.m_tile, i_users }
+			TableEvents::Ron{ m_discardedTile.m_tile, i_users, round.CurrentTurn() }
 		);
 	}
 
 	table.Transition(
 		TableStates::BetweenRounds{ table },
-		TableEvents::Ron{ m_discardedTile.m_tile, i_users }
+		TableEvents::Ron{ m_discardedTile.m_tile, i_users, round.CurrentTurn() }
 	);
 }
 
@@ -634,6 +637,7 @@ void RonAKanChance::Ron
 
 	RoundData& round = table.m_rounds.back();
 
+	// TODO-DEBT: don't repeat ron code
 	// TODO-AI: assess whether any AI should join in ron
 	// TODO-RULES: allow/disallow multiple ron
 
@@ -673,13 +677,13 @@ void RonAKanChance::Ron
 	{
 		table.Transition(
 			TableStates::GameOver{ table },
-			TableEvents::Ron{ m_kanTile.m_tile, i_players }
+			TableEvents::Ron{ m_kanTile.m_tile, i_players, round.CurrentTurn() }
 		);
 	}
 
 	table.Transition(
 		TableStates::BetweenRounds{ table },
-		TableEvents::Ron{ m_kanTile.m_tile, i_players }
+		TableEvents::Ron{ m_kanTile.m_tile, i_players, round.CurrentTurn() }
 	);
 }
 

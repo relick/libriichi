@@ -11,44 +11,6 @@
 namespace Riichi
 {
 
-/*
-
-Rough notes on game flow:
-// TODO-MVP remove this
-
-- Start
-+ Draw (dealer)
-
-- Draw
-+ NoMoreTiles -> GameOver (draw)
-+ Tsumo (if hand would win) -> GameOver (tsumo)
-+ RiichiDiscard (if hand is 1 away) -> BetweenTurns
-+ DoubleRiichiDiscard (if hand is 1 away and double riichi valid) -> BetweenTurns
-+ Kan (upgrade) -> RobKanChance
-+ Kan (closed) -> DeadWallDraw
-+ Discard -> BetweenTurns
-
-- BetweenTurns
-+ Pon (other players) -> Draw options
-+ Chi (next player) -> Draw options
-+ Ron (other players) -> GameOver (ron)
-+ Pass -> Draw (next player)
-
-- RobKanChance
-+ Ron (other players)
-+ Pass -> DeadWallDraw
-
-- DeadWallDraw -> Draw options
-
-- GameOver
-
-State is any of the -
-An event is any transition, i.e. any +
-
-In other words! Game FSM is quite Simple!!
-
-*/
-
 //------------------------------------------------------------------------------
 enum class TableStateType : EnumValueType
 {
