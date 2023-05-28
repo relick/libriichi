@@ -5,6 +5,7 @@
 #include <iostream>
 #include <random>
 #include <ranges>
+#include <string>
 
 int main()
 {
@@ -171,7 +172,7 @@ int main()
 			while ( true )
 			{
 				std::string input;
-				std::cin >> input;
+				std::getline( std::cin, input );
 				if ( input.starts_with( "kan" ) )
 				{
 					if ( input.size() > 4 && turn.CanKan() )
@@ -277,7 +278,7 @@ int main()
 			while ( true )
 			{
 				std::string input;
-				std::cin >> input;
+				std::getline( std::cin, input );
 				if ( input == "chi" )
 				{
 					if ( betweenTurns.CanChi().first == playerSeat && !betweenTurns.CanChi().second.empty() )
@@ -345,7 +346,7 @@ int main()
 			while ( true )
 			{
 				std::string input;
-				std::cin >> input;
+				std::getline( std::cin, input );
 				if ( input.starts_with( "ron" ) && ronAKanChance.CanRon().Contains( playerSeat ) )
 				{
 					ronAKanChance.Ron( Riichi::SeatSet{ playerSeat } );
