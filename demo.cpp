@@ -21,9 +21,21 @@ int main()
 		std::random_device()()
 	);
 
-	Riichi::PlayerID const player1 = table.AddPlayer( Riichi::Player{
-		Riichi::PlayerType::User
-	} );
+	Riichi::Option<Riichi::PlayerID> player1;
+	std::string input;
+	std::cin >> input;
+	if ( input == "ai" )
+	{
+		table.AddPlayer( Riichi::Player{
+			Riichi::PlayerType::AI
+		} );
+	}
+	else
+	{
+		player1 = table.AddPlayer( Riichi::Player{
+			Riichi::PlayerType::User
+		} );
+	}
 	table.AddPlayer( Riichi::Player{
 		Riichi::PlayerType::AI
 	} );
@@ -240,27 +252,30 @@ int main()
 		case BetweenTurns:
 		{
 			Riichi::TableStates::BetweenTurns const& betweenTurns = state.Get<BetweenTurns>();
-			Riichi::Seat const playerSeat = table.GetRound().GetSeat( player1 );
 			bool passStraightAway = true;
-			if ( betweenTurns.CanChi().first == playerSeat && !betweenTurns.CanChi().second.empty() )
+			if ( player1.has_value() )
 			{
-				std::cout << "/Chi ";
-				passStraightAway = false;
-			}
-			if ( betweenTurns.CanPon().Contains( playerSeat ) )
-			{
-				std::cout << "/Pon ";
-				passStraightAway = false;
-			}
-			if ( betweenTurns.CanKan().Contains( playerSeat ) )
-			{
-				std::cout << "/Kan ";
-				passStraightAway = false;
-			}
-			if ( betweenTurns.CanRon().Contains( playerSeat ) )
-			{
-				std::cout << "/Ron ";
-				passStraightAway = false;
+				Riichi::Seat const playerSeat = table.GetRound().GetSeat( player1.value() );
+				if ( betweenTurns.CanChi().first == playerSeat && !betweenTurns.CanChi().second.empty() )
+				{
+					std::cout << "/Chi ";
+					passStraightAway = false;
+				}
+				if ( betweenTurns.CanPon().Contains( playerSeat ) )
+				{
+					std::cout << "/Pon ";
+					passStraightAway = false;
+				}
+				if ( betweenTurns.CanKan().Contains( playerSeat ) )
+				{
+					std::cout << "/Kan ";
+					passStraightAway = false;
+				}
+				if ( betweenTurns.CanRon().Contains( playerSeat ) )
+				{
+					std::cout << "/Ron ";
+					passStraightAway = false;
+				}
 			}
 
 			if ( passStraightAway )
@@ -275,6 +290,7 @@ int main()
 				std::cout << std::endl;
 			}
 
+			Riichi::Seat const playerSeat = table.GetRound().GetSeat( player1.value() );
 			while ( true )
 			{
 				std::string input;
@@ -323,12 +339,15 @@ int main()
 		case RonAKanChance:
 		{
 			Riichi::TableStates::RonAKanChance const& ronAKanChance = state.Get<RonAKanChance>();
-			Riichi::Seat const playerSeat = table.GetRound().GetSeat( player1 );
 			bool passStraightAway = true;
-			if ( ronAKanChance.CanRon().Contains( playerSeat ) )
+			if ( player1.has_value() )
 			{
-				std::cout << "/Ron ";
-				passStraightAway = false;
+				Riichi::Seat const playerSeat = table.GetRound().GetSeat( player1.value() );
+				if ( ronAKanChance.CanRon().Contains( playerSeat ) )
+				{
+					std::cout << "/Ron ";
+					passStraightAway = false;
+				}
 			}
 
 			if ( passStraightAway )
@@ -343,6 +362,7 @@ int main()
 				std::cout << std::endl;
 			}
 
+			Riichi::Seat const playerSeat = table.GetRound().GetSeat( player1.value() );
 			while ( true )
 			{
 				std::string input;
