@@ -33,3 +33,5 @@ target_link_libraries (libriichi_hand_tests PRIVATE libriichi)
 # Tests
 add_executable (libriichi_tests "tests.cpp")
 target_link_libraries (libriichi_tests PRIVATE libriichi)
+
+add_test(NAME tests COMMAND libriichi_tests)
