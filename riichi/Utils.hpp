@@ -140,6 +140,7 @@ public:
 	}
 
 	friend constexpr bool operator==( RestrictedType const&, RestrictedType const& ) = default;
+	friend constexpr bool operator<( RestrictedType const& i_a, RestrictedType const& i_b ) { return i_a.m_val < i_b.m_val; }
 };
 
 //------------------------------------------------------------------------------

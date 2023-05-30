@@ -5,7 +5,9 @@
 #include "Utils.hpp"
 
 #include <algorithm>
-#include <ranges>
+#include "range/v3/action.hpp"
+#include "range/v3/algorithm.hpp"
+#include "range/v3/view.hpp"
 
 namespace Riichi
 {
@@ -16,8 +18,8 @@ void Hand::AddFreeTiles
 	Vector<Tile> const& i_newTiles
 )
 {
-	m_freeTiles.insert_range( m_freeTiles.end(), i_newTiles );
-	std::ranges::sort( m_freeTiles ); // TODO-QOL: players may not always want their hand sorted
+	m_freeTiles.insert( m_freeTiles.end(), i_newTiles.begin(), i_newTiles.end() );
+	std::sort( m_freeTiles.begin(), m_freeTiles.end() ); // TODO-QOL: players may not always want their hand sorted
 }
 
 //------------------------------------------------------------------------------
@@ -38,7 +40,7 @@ void Hand::Discard
 	if ( i_drawToAdd.has_value() )
 	{
 		m_freeTiles.push_back( i_drawToAdd.value().m_tile );
-		std::ranges::sort( m_freeTiles ); // TODO-QOL: players may not always want their hand sorted
+		std::sort( m_freeTiles.begin(), m_freeTiles.end() ); // TODO-QOL: players may not always want their hand sorted
 	}
 }
 
@@ -212,7 +214,7 @@ bool Hand::CanPon
 	Tile const& i_tile
 )	const
 {
-	size_t const othersCount = std::ranges::count( m_freeTiles, i_tile );
+	size_t const othersCount = ranges::count( m_freeTiles, i_tile );
 	return othersCount >= 2;
 }
 
@@ -222,7 +224,7 @@ bool Hand::CanCallKan
 	Tile const& i_tile
 )	const
 {
-	size_t const othersCount = std::ranges::count( m_freeTiles, i_tile );
+	size_t const othersCount = ranges::count( m_freeTiles, i_tile );
 	return othersCount >= 3;
 }
 
@@ -247,7 +249,7 @@ Vector<Hand::DrawKanResult> Hand::DrawKanOptions
 
 		if ( results.empty() )
 		{
-			size_t const othersCount = std::ranges::count( m_freeTiles, i_drawnTile.value() );
+			size_t const othersCount = ranges::count( m_freeTiles, i_drawnTile.value() );
 			if ( othersCount >= 3 )
 			{
 				results.push_back( { i_drawnTile.value(), true } );
@@ -313,14 +315,14 @@ std::ostream& operator<<( std::ostream& io_out, Hand const& i_hand )
 	};
 
 	Vector<Tile> sortedTiles = i_hand.m_freeTiles;
-	std::ranges::sort( sortedTiles );
+	std::sort( sortedTiles.begin(), sortedTiles.end() );
 
 	fnPrintTiles( sortedTiles );
 
 	for ( Meld const& meld : i_hand.m_melds )
 	{
 		io_out << ' ';
-		fnPrintTiles( std::views::elements<0>( meld.m_tiles ) );
+		fnPrintTiles( ranges::views::keys( meld.m_tiles ) );
 	}
 
 	return io_out;
@@ -345,26 +347,26 @@ HandGroup::HandGroup
 	case Pair:
 	{
 		Ensure( m_tiles.size() == 2, "Pair group didn't have 2 tiles" );
-		Ensure( std::ranges::adjacent_find( m_tiles, std::not_equal_to{} ) == m_tiles.end(), "Pair group didn't have matching tiles" );
+		Ensure( ranges::adjacent_find( m_tiles, std::not_equal_to{} ) == m_tiles.end(), "Pair group didn't have matching tiles" );
 		break;
 	}
 	case Sequence:
 	{
 		Ensure( m_tiles.size() == 3, "Sequence group didn't have 3 tiles" );
-		Ensure( std::ranges::all_of( m_tiles, []( Tile const& i_t ) { return i_t.Type() == TileType::Suit; } ), "Sequence group has a non-suit tile" );
-		Ensure( std::ranges::adjacent_find( m_tiles, std::not_equal_to{}, []( Tile const& i_t ) { return i_t.Get<TileType::Suit>().m_suit; } ) == m_tiles.end(), "Sequence group didn't have matching suits" );
+		Ensure( ranges::all_of( m_tiles, []( Tile const& i_t ) { return i_t.Type() == TileType::Suit; } ), "Sequence group has a non-suit tile" );
+		Ensure( ranges::adjacent_find( m_tiles, std::not_equal_to{}, []( Tile const& i_t ) { return i_t.Get<TileType::Suit>().m_suit; } ) == m_tiles.end(), "Sequence group didn't have matching suits" );
 		break;
 	}
 	case Triplet:
 	{
 		Ensure( m_tiles.size() == 3, "Triplet group didn't have 3 tiles" );
-		Ensure( std::ranges::adjacent_find( m_tiles, std::not_equal_to{} ) == m_tiles.end(), "Triplet group didn't have matching tiles" );
+		Ensure( ranges::adjacent_find( m_tiles, std::not_equal_to{} ) == m_tiles.end(), "Triplet group didn't have matching tiles" );
 		break;
 	}
 	case Quad:
 	{
 		Ensure( m_tiles.size() == 4, "Quad group didn't have 4 tiles" );
-		Ensure( std::ranges::adjacent_find( m_tiles, std::not_equal_to{} ) == m_tiles.end(), "Quad group didn't have matching tiles" );
+		Ensure( ranges::adjacent_find( m_tiles, std::not_equal_to{} ) == m_tiles.end(), "Quad group didn't have matching tiles" );
 		break;
 	}
 	}
@@ -373,7 +375,7 @@ HandGroup::HandGroup
 	// Do a quick sort, though only need to for sequences
 	if ( m_type == GroupType::Sequence )
 	{
-		std::ranges::sort( m_tiles );
+		std::sort( m_tiles.begin(), m_tiles.end() );
 	}
 }
 
@@ -455,7 +457,7 @@ HandAssessment::HandAssessment
 	for ( Meld const& meld : i_hand.Melds() )
 	{
 		fixedPart.m_groups.emplace_back(
-			std::ranges::to<Vector<Tile>>( std::views::elements<0>( meld.m_tiles ) ),
+			ranges::to<Vector<Tile>>( ranges::views::keys( meld.m_tiles ) ),
 			meld.m_type,
 			meld.m_open
 		);
@@ -463,7 +465,7 @@ HandAssessment::HandAssessment
 
 	// Then sort the remaining free tiles
 	Vector<Tile> sortedFreeTiles = i_hand.FreeTiles();
-	std::ranges::sort( sortedFreeTiles );
+	std::sort( sortedFreeTiles.begin(), sortedFreeTiles.end() );
 
 	// And visit all the interpreters
 	i_rules.VisitInterpreters(
@@ -476,7 +478,7 @@ HandAssessment::HandAssessment
 
 	for ( HandInterpretation const& interpretation : m_interpretations )
 	{
-		m_overallWaits.insert_range( interpretation.m_waits );
+		ranges::actions::insert( m_overallWaits, interpretation.m_waits );
 	}
 }
 

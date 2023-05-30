@@ -6,6 +6,9 @@
 #include "HandInterpreter_Standard.hpp"
 #include "Yaku_Standard.hpp"
 
+#include "range/v3/action.hpp"
+#include "range/v3/algorithm.hpp"
+
 namespace Riichi
 {
 
@@ -186,7 +189,7 @@ Pair<Set<Tile>, Vector<Tile>> StandardYonmaCore::WaitsWithYaku
 					i_lastTile
 				).IsValid() )
 				{
-					waits.insert_range( interp.m_waits );
+					ranges::actions::insert( waits, interp.m_waits );
 				}
 			}
 		}
@@ -258,7 +261,7 @@ HandScore StandardYonmaCore::CalculateBasicPoints
 
 	auto fnHandHasYaku = [ & ]( char const* i_yakuName )
 	{
-		return std::ranges::any_of( maxScore, [ & ]( auto const& yaku ) { return std::strcmp( yaku.first, i_yakuName ) == 0; } );
+		return ranges::any_of( maxScore, [ & ]( auto const& yaku ) { return std::strcmp( yaku.first, i_yakuName ) == 0; } );
 	};
 
 	// Handle Dora

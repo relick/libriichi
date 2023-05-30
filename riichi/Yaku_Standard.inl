@@ -7,6 +7,7 @@
 #include "Tile.hpp"
 
 #include <numeric>
+#include "range/v3/algorithm.hpp"
 
 namespace Riichi::StandardYaku
 {
@@ -27,7 +28,7 @@ HanValue Tanyao<t_KuitanEnabled>::CalculateValue
 		}
 	}
 
-	if ( InvalidTile( i_lastTile.m_tile ) || std::ranges::any_of( i_interp.m_ungrouped, InvalidTile ) )
+	if ( InvalidTile( i_lastTile.m_tile ) || ranges::any_of( i_interp.m_ungrouped, InvalidTile ) )
 	{
 		return NoYaku;
 	}
@@ -54,7 +55,7 @@ template<bool t_KuitanEnabled>
 		return true;
 	}
 
-	SuitTile const& suitTile = i_tile.Get<TileType::Suit>();
+	SuitTile const& suitTile = i_tile.template Get<TileType::Suit>();
 	if ( suitTile.m_value == 1 || suitTile.m_value == 9 )
 	{
 		return true;
@@ -92,7 +93,7 @@ HanValue DragonYakuhai<t_YakuhaiName, t_DragonType>::CalculateValue
 template<NameString t_YakuhaiName, DragonTileType t_DragonType>
 /*static*/ bool DragonYakuhai<t_YakuhaiName, t_DragonType>::ValidTile( Tile const& i_tile )
 {
-	return i_tile.Type() == TileType::Dragon && i_tile.Get<TileType::Dragon>() == t_DragonType;
+	return i_tile.Type() == TileType::Dragon && i_tile.template Get<TileType::Dragon>() == t_DragonType;
 }
 
 }

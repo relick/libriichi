@@ -29,6 +29,16 @@ bool StrictEqualTo
 }
 
 //------------------------------------------------------------------------------
+bool operator<
+(
+	SuitTile const& i_a,
+	SuitTile const& i_b
+)
+{
+	return i_a.m_suit < i_b.m_suit || i_a.m_value < i_b.m_value;
+}
+
+//------------------------------------------------------------------------------
 DragonTileType NextTile
 (
 	DragonTileType i_tile
@@ -104,10 +114,9 @@ std::ostream& operator<<( std::ostream& io_out, Tile const& i_tile )
 {
 	switch ( i_tile.Type() )
 	{
-		using enum TileType;
-	case Suit:
+	case TileType::Suit:
 	{
-		SuitTile const& tile = i_tile.Get<Suit>();
+		SuitTile const& tile = i_tile.Get<TileType::Suit>();
 		switch ( tile.m_suit )
 		{
 			using enum Suit;
@@ -117,9 +126,9 @@ std::ostream& operator<<( std::ostream& io_out, Tile const& i_tile )
 		}
 		break;
 	}
-	case Dragon:
+	case TileType::Dragon:
 	{
-		DragonTileType const& tile = i_tile.Get<Dragon>();
+		DragonTileType const& tile = i_tile.Get<TileType::Dragon>();
 		switch ( tile )
 		{
 			using enum DragonTileType;
@@ -129,9 +138,9 @@ std::ostream& operator<<( std::ostream& io_out, Tile const& i_tile )
 		}
 		break;
 	}
-	case Wind:
+	case TileType::Wind:
 	{
-		WindTileType const& tile = i_tile.Get<Wind>();
+		WindTileType const& tile = i_tile.Get<TileType::Wind>();
 		switch ( tile )
 		{
 			using enum WindTileType;

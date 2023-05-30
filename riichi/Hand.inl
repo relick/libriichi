@@ -2,7 +2,7 @@
 
 #include "Hand.hpp"
 
-#include <ranges>
+#include "range/v3/view.hpp"
 
 namespace Riichi
 {
@@ -16,7 +16,7 @@ void Hand::VisitTiles
 {
 	for ( Meld const& meld : m_melds )
 	{
-		for ( Tile const& tile : std::views::elements<0>( meld.m_tiles ) )
+		for ( Tile const& tile : ranges::views::keys( meld.m_tiles ) )
 		{
 			i_visitor( tile );
 		}

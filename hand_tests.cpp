@@ -4,6 +4,7 @@
 
 #include <iostream>
 #include <random>
+#include "range/v3/algorithm.hpp"
 
 int main()
 {
@@ -125,20 +126,20 @@ int main()
 	while ( true )
 	{
 		Riichi::Vector<Riichi::Tile> tileSet = yonma.Tileset();
-		std::ranges::shuffle( tileSet, shuffleRNG );
+		ranges::shuffle( tileSet, shuffleRNG );
 		tileSet.erase( tileSet.begin() + 13, tileSet.end() );
 
 		Riichi::Hand hand;
 		hand.AddFreeTiles( tileSet );
 
 		Riichi::HandAssessment ass( hand, yonma );
-		bool const unequalGroups = std::ranges::adjacent_find( ass.Interpretations(),
+		bool const unequalGroups = ranges::adjacent_find( ass.Interpretations(),
 			[]( Riichi::HandInterpretation const& i_a, Riichi::HandInterpretation const& i_b ) -> bool
 			{
 				return i_a.m_groups.size() != i_b.m_groups.size() && i_b.m_groups.size() >= 3 && i_a.m_groups.size() >= 3;
 			}
 		) != ass.Interpretations().end();
-		bool const hasWaits = std::ranges::find_if( ass.Interpretations(),
+		bool const hasWaits = ranges::find_if( ass.Interpretations(),
 			[]( Riichi::HandInterpretation const& i_i ) -> bool
 			{
 				return !i_i.m_waits.empty();

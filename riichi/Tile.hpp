@@ -40,7 +40,7 @@ struct SuitTile
 	friend bool operator==( SuitTile const&, SuitTile const& ) = default;
 	friend SuitTile NextTile( SuitTile const& i_tile );
 	friend bool StrictEqualTo( SuitTile const&, SuitTile const& );
-	friend std::strong_ordering operator<=>( SuitTile const&, SuitTile const& ) = default;
+	friend bool operator<( SuitTile const&, SuitTile const& );
 
 	template<Suit t_Suit, SuitTileValue::CoreType t_Value>
 	static SuitTile Make()
@@ -60,6 +60,7 @@ enum class DragonTileType : EnumValueType
 };
 inline constexpr size_t c_dragonTileTypeCount = 3;
 using DragonTileTypes = Utils::EnumRange<DragonTileType, c_dragonTileTypeCount>;
+
 
 //------------------------------------------------------------------------------
 DragonTileType NextTile( DragonTileType i_tile );

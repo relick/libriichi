@@ -3,6 +3,7 @@
 #include "Containers.hpp"
 
 #include <concepts>
+#include <compare>
 #include <type_traits>
 
 namespace Riichi
@@ -68,7 +69,7 @@ public:
 	TypeAt<t_Tag> const& Get() const { return std::get<( size_t )t_Tag>( m_data ); }
 
 	friend bool operator==( NamedUnion const&, NamedUnion const& ) = default;
-	friend auto operator<=>( NamedUnion const&, NamedUnion const& ) = default;
+	friend bool operator<( NamedUnion const& i_a, NamedUnion const& i_b ) { return i_a.m_data < i_b.m_data; }
 };
 
 }

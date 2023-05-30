@@ -4,8 +4,8 @@
 
 #include <iostream>
 #include <random>
-#include <ranges>
 #include <string>
+#include "range/v3/algorithm.hpp"
 
 int main()
 {
@@ -190,7 +190,7 @@ int main()
 					if ( input.size() > 4 && turn.CanKan() )
 					{
 						Riichi::Option<Riichi::Tile> const tile = fnParseTile( input.substr( 4 ) );
-						if ( tile.has_value() && std::ranges::any_of( turn.KanOptions(), [ & ]( auto const& i_option ) -> bool
+						if ( tile.has_value() && ranges::any_of( turn.KanOptions(), [ & ]( auto const& i_option ) -> bool
 							{
 								return i_option.kanTile == tile.value();
 							} ) )
@@ -213,14 +213,14 @@ int main()
 					if ( input.size() > 7 && turn.CanRiichi() )
 					{
 						Riichi::Option<Riichi::Tile> const tile = fnParseTile( input.substr( 7 ) );
-						if ( tile.has_value() && std::ranges::contains( turn.RiichiOptions(), tile.value() ) )
+						if ( tile.has_value() && ranges::contains( turn.RiichiOptions(), tile.value() ) )
 						{
 							if ( tile == turn.GetDrawnTile() )
 							{
 								turn.Riichi( std::nullopt );
 								break;
 							}
-							else if ( std::ranges::contains( turn.GetHand().FreeTiles(), tile.value() ) )
+							else if ( ranges::contains( turn.GetHand().FreeTiles(), tile.value() ) )
 							{
 								turn.Riichi( tile );
 								break;
@@ -238,7 +238,7 @@ int main()
 							turn.Discard( std::nullopt );
 							break;
 						}
-						else if ( std::ranges::contains( turn.GetHand().FreeTiles(), tile.value() ) )
+						else if ( ranges::contains( turn.GetHand().FreeTiles(), tile.value() ) )
 						{
 							turn.Discard( tile );
 							break;

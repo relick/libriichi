@@ -7,7 +7,8 @@
 #include "Utils.hpp"
 
 #include <numeric>
-#include <ranges>
+#include "range/v3/algorithm.hpp"
+#include "range/v3/view.hpp"
 
 namespace Riichi::StandardYaku
 {
@@ -297,7 +298,7 @@ HanValue Chantaiyao::CalculateValue
 {
 	for ( HandGroup const& group : i_interp.m_groups )
 	{
-		if ( !std::ranges::any_of( group.Tiles(), RequiredTile ) )
+		if ( !ranges::any_of( group.Tiles(), RequiredTile ) )
 		{
 			return NoYaku;
 		}
@@ -305,7 +306,7 @@ HanValue Chantaiyao::CalculateValue
 
 	// Check final group too
 	if ( !RequiredTile( i_lastTile.m_tile )
-		&& !std::ranges::any_of( i_interp.m_ungrouped, RequiredTile ) )
+		&& !ranges::any_of( i_interp.m_ungrouped, RequiredTile ) )
 	{
 		return NoYaku;
 	}
@@ -333,7 +334,7 @@ HanValue SanshokuDoujun::CalculateValue
 	// Note 1: Unfortunately, the fourth group and pair are totally unrelated, so we can't make quick rule-outs without checking all combos
 	// Note 2: We can also stop when we find a match or when we are sure we don't have a match, so it's not too bad of a search at least.
 
-	if ( !std::ranges::all_of( i_assessment.m_containsSuit, std::identity{} ) )
+	if ( !ranges::all_of( i_assessment.m_containsSuit, std::identity{} ) )
 	{
 		return NoYaku;
 	}
@@ -388,13 +389,13 @@ HanValue SanshokuDoujun::CalculateValue
 		return false;
 	}
 
-	return std::ranges::all_of(
-		std::views::zip( i_a.Tiles(), i_b.Tiles(), i_c.Tiles() ),
+	return ranges::all_of(
+		ranges::views::zip( i_a.Tiles(), i_b.Tiles(), i_c.Tiles() ),
 		[]( auto const& i_tileSet )
 		{
 			auto const& [tileA, tileB, tileC] = i_tileSet;
-			return tileA.Get<TileType::Suit>().m_value == tileB.Get<TileType::Suit>().m_value
-				&& tileB.Get<TileType::Suit>().m_value == tileC.Get<TileType::Suit>().m_value;
+			return tileA.template Get<TileType::Suit>().m_value == tileB.template Get<TileType::Suit>().m_value
+				&& tileB.template Get<TileType::Suit>().m_value == tileC.template Get<TileType::Suit>().m_value;
 		}
 	);
 }
@@ -441,7 +442,7 @@ HanValue Ikkitsuukan::CalculateValue
 		fnEvalGroup( group );
 	}
 
-	if ( std::ranges::any_of( groupsPerSuit, []( auto const& arr ) { return std::ranges::all_of( arr, std::identity{} ); } ) )
+	if ( ranges::any_of( groupsPerSuit, []( auto const& arr ) { return ranges::all_of( arr, std::identity{} ); } ) )
 	{
 		return i_assessment.m_open ? 1 : 2;
 	}
@@ -512,7 +513,7 @@ HanValue SanshokuDoukou::CalculateValue
 	// Note 1: Unfortunately, the fourth group and pair are totally unrelated, so we can't make quick rule-outs without checking all combos
 	// Note 2: We can also stop when we find a match or when we are sure we don't have a match, so it's not too bad of a search at least.
 
-	if ( !std::ranges::all_of( i_assessment.m_containsSuit, std::identity{} ) )
+	if ( !ranges::all_of( i_assessment.m_containsSuit, std::identity{} ) )
 	{
 		return NoYaku;
 	}
@@ -636,7 +637,7 @@ HanValue Honroutou::CalculateValue
 {
 	for ( HandGroup const& group : i_interp.m_groups )
 	{
-		if ( !std::ranges::all_of( group.Tiles(), ValidTile ) )
+		if ( !ranges::all_of( group.Tiles(), ValidTile ) )
 		{
 			return NoYaku;
 		}
@@ -644,7 +645,7 @@ HanValue Honroutou::CalculateValue
 
 	// Check final group too
 	if ( !ValidTile( i_lastTile.m_tile )
-		|| !std::ranges::all_of( i_interp.m_ungrouped, ValidTile ) )
+		|| !ranges::all_of( i_interp.m_ungrouped, ValidTile ) )
 	{
 		return NoYaku;
 	}
@@ -750,7 +751,7 @@ HanValue JunchanTaiyao::CalculateValue
 
 	for ( HandGroup const& group : i_interp.m_groups )
 	{
-		if ( !std::ranges::any_of( group.Tiles(), RequiredTile ) )
+		if ( !ranges::any_of( group.Tiles(), RequiredTile ) )
 		{
 			return NoYaku;
 		}
@@ -758,7 +759,7 @@ HanValue JunchanTaiyao::CalculateValue
 
 	// Check final group too
 	if ( !RequiredTile( i_lastTile.m_tile )
-		&& !std::ranges::any_of( i_interp.m_ungrouped, RequiredTile ) )
+		&& !ranges::any_of( i_interp.m_ungrouped, RequiredTile ) )
 	{
 		return NoYaku;
 	}
@@ -1119,14 +1120,14 @@ HanValue Chinroutou::CalculateValue
 
 	for ( HandGroup const& group : i_interp.m_groups )
 	{
-		if ( !std::ranges::all_of( group.Tiles(), RequiredTile ) )
+		if ( !ranges::all_of( group.Tiles(), RequiredTile ) )
 		{
 			return NoYaku;
 		}
 	}
 
 	if ( !RequiredTile( i_lastTile.m_tile )
-		|| !std::ranges::all_of( i_interp.m_ungrouped, RequiredTile ) )
+		|| !ranges::all_of( i_interp.m_ungrouped, RequiredTile ) )
 	{
 		return NoYaku;
 	}
@@ -1159,14 +1160,14 @@ HanValue Ryuuiisou::CalculateValue
 
 	for ( HandGroup const& group : i_interp.m_groups )
 	{
-		if ( !std::ranges::all_of( group.Tiles(), RequiredTile ) )
+		if ( !ranges::all_of( group.Tiles(), RequiredTile ) )
 		{
 			return NoYaku;
 		}
 	}
 
 	if ( !RequiredTile( i_lastTile.m_tile )
-		|| !std::ranges::all_of( i_interp.m_ungrouped, RequiredTile ) )
+		|| !ranges::all_of( i_interp.m_ungrouped, RequiredTile ) )
 	{
 		return NoYaku;
 	}
@@ -1245,7 +1246,7 @@ HanValue ChuurenPoutou::CalculateValue
 
 	// If every value is 0 or less (technically, there should be exactly one value with -1, the others all 0)
 	// then we have the yakuman
-	if ( std::ranges::all_of( requiredOfEachValue, []( int n ) { return n <= 0; } ) )
+	if ( ranges::all_of( requiredOfEachValue, []( int n ) { return n <= 0; } ) )
 	{
 		return Yakuman;
 	}

@@ -3,7 +3,8 @@
 #include "Hand.hpp"
 
 #include <algorithm>
-#include <ranges>
+#include "range/v3/action.hpp"
+#include "range/v3/algorithm.hpp"
 
 namespace Riichi
 {
@@ -179,7 +180,7 @@ namespace Riichi
 		return;
 	}
 
-	bool const needPair = !std::ranges::any_of( i_soFar.m_groups, []( HandGroup const& group ) { return group.Type() == GroupType::Pair; } );
+	bool const needPair = !ranges::any_of( i_soFar.m_groups, []( HandGroup const& group ) { return group.Type() == GroupType::Pair; } );
 
 	bool madeGroups = false;
 	// TODO-DEBT: This code needs tidying up, and in general the recursive nature could be optimised to avoid copying vectors
@@ -337,7 +338,7 @@ void SevenPairsInterpreter::AddInterpretations
 		Tile const& tile2 = i_sortedFreeTiles[ tileI + 1 ];
 
 		// Matching and unique
-		if ( tile1 == tile2 && !std::ranges::any_of( interp.m_groups, [ & ]( HandGroup const& group ) { return group[ 0 ] == tile1; } ) )
+		if ( tile1 == tile2 && !ranges::any_of( interp.m_groups, [ & ]( HandGroup const& group ) { return group[ 0 ] == tile1; } ) )
 		{
 			interp.m_groups.push_back( HandGroup{ {tile1, tile2}, GroupType::Pair, false } );
 			tileI++;
@@ -348,7 +349,7 @@ void SevenPairsInterpreter::AddInterpretations
 		}
 	}
 	
-	if ( interp.m_ungrouped.size() == 1 && !std::ranges::any_of( interp.m_groups, [ & ]( HandGroup const& group ) { return group[ 0 ] == interp.m_ungrouped[ 0 ]; } ) )
+	if ( interp.m_ungrouped.size() == 1 && !ranges::any_of( interp.m_groups, [ & ]( HandGroup const& group ) { return group[ 0 ] == interp.m_ungrouped[ 0 ]; } ) )
 	{
 		interp.m_waits.insert( interp.m_ungrouped[ 0 ] );
 		interp.m_waitType = WaitType::Tanki;
@@ -438,7 +439,7 @@ void ThirteenOrphansInterpreter::AddInterpretations
 	{
 		Ensure( requiredTiles.size() == 0, "Did not have a valid number of unique tiles when assessing 13 orphans" );
 		// We have 1 of every tile, so this is a 13 tile wait. Luckily we have a full set of 13 tiles in our ungrouped list! :)
-		interp.m_waits.insert_range( interp.m_ungrouped );
+		ranges::actions::insert( interp.m_waits, interp.m_ungrouped );
 	}
 
 	io_interps.push_back( std::move( interp ) );

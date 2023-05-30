@@ -3,7 +3,7 @@
 #include "Table.hpp"
 
 #include <numeric>
-#include <ranges>
+#include "range/v3/algorithm.hpp"
 
 namespace Riichi
 {
@@ -81,7 +81,7 @@ bool Round::Furiten
 {
 	PlayerData const& player = m_players[ ( size_t )i_player ];
 	return player.m_tempFuriten
-		|| std::ranges::any_of( player.m_discards, [ & ]( Tile const& i_tile ) { return i_waits.contains( i_tile ); } );
+		|| ranges::any_of( player.m_discards, [ & ]( Tile const& i_tile ) { return i_waits.contains( i_tile ); } );
 }
 
 //------------------------------------------------------------------------------
@@ -161,7 +161,7 @@ bool Round::CallsMade
 (
 )	const
 {
-	return std::ranges::any_of( m_players,
+	return ranges::any_of( m_players,
 		[]( PlayerData const& player )
 		{
 			return !player.m_hand.Melds().empty();
@@ -211,7 +211,7 @@ bool Round::AnyWinners
 (
 )	const
 {
-	return std::ranges::any_of( m_players, []( PlayerData const& i_player ) { return i_player.m_winningScore.has_value(); } );
+	return ranges::any_of( m_players, []( PlayerData const& i_player ) { return i_player.m_winningScore.has_value(); } );
 }
 
 //------------------------------------------------------------------------------
@@ -219,7 +219,7 @@ bool Round::AnyFinishedInTenpai
 (
 )	const
 {
-	return std::ranges::any_of( m_players, []( PlayerData const& i_player ) { return i_player.m_finishedInTenpai; } );
+	return ranges::any_of( m_players, []( PlayerData const& i_player ) { return i_player.m_finishedInTenpai; } );
 }
 
 //------------------------------------------------------------------------------
@@ -309,12 +309,12 @@ Round::Round
 	{
 		m_players.emplace_back( playerID );
 	}
-	std::ranges::shuffle( m_players, i_shuffleRNG );
+	ranges::shuffle( m_players, i_shuffleRNG );
 	m_initialPlayerID = m_players.front().m_playerID;
 
 	// Shuffle the tiles to build the wall
 	m_wall = i_rules.Tileset();
-	std::ranges::shuffle( m_wall, i_shuffleRNG );
+	ranges::shuffle( m_wall, i_shuffleRNG );
 
 	// Then break the wall
 	BreakWall( i_shuffleRNG );
@@ -347,7 +347,7 @@ Round::Round
 	bool const repeatRound = i_rules.RepeatRound( i_previousRound );
 	if ( !repeatRound )
 	{
-		std::ranges::rotate( m_players, m_players.begin() + 1 );
+		ranges::rotate( m_players, m_players.begin() + 1 );
 	}
 
 	// Increment round wind if we've done a full circuit
@@ -373,7 +373,7 @@ Round::Round
 
 	// Shuffle the tiles to build the wall
 	m_wall = i_rules.Tileset();
-	std::ranges::shuffle( m_wall, i_shuffleRNG );
+	ranges::shuffle( m_wall, i_shuffleRNG );
 
 	// Then break the wall
 	BreakWall( i_shuffleRNG );
@@ -407,7 +407,7 @@ void Round::BreakWall
 	m_breakPointFromDealerRight = m_wall.size() - breakingWallStartTile;
 
 	// Tada! Put into position ready for draws
-	std::ranges::rotate( m_wall, m_wall.begin() + m_breakPointFromDealerRight );
+	ranges::rotate( m_wall, m_wall.begin() + m_breakPointFromDealerRight );
 }
 
 //------------------------------------------------------------------------------
