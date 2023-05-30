@@ -21,6 +21,7 @@ set(LIBRIICHI_SOURCE
 add_library(libriichi STATIC ${LIBRIICHI_SOURCE})
 target_compile_options(libriichi PUBLIC "$<$<CXX_COMPILER_ID:MSVC>:/utf-8>")
 target_include_directories(libriichi PUBLIC ".")
+target_include_directories(libriichi PUBLIC "range-v3/include")
 
 # Demo
 add_executable (libriichi_demo "demo.cpp")
