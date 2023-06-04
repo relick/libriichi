@@ -3,6 +3,8 @@
 #include "Rules.hpp"
 #include "Table.hpp"
 
+#include "range/v3/algorithm.hpp"
+
 namespace Riichi::TableStates
 {
 
@@ -422,8 +424,8 @@ void Turn_User::Riichi
 
 	Ensure(
 		i_handTileToDiscard.has_value()
-		? std::ranges::contains( m_riichiDiscards, i_handTileToDiscard.value() )
-		: std::ranges::contains( m_riichiDiscards, round.DrawnTile( round.CurrentTurn() ).value().m_tile )
+		? ranges::contains( m_riichiDiscards, i_handTileToDiscard.value() )
+		: ranges::contains( m_riichiDiscards, round.DrawnTile( round.CurrentTurn() ).value().m_tile )
 		, "Invalid tile to riichi with"
 	);
 
@@ -447,7 +449,7 @@ void Turn_User::Kan
 {
 	Table& table = m_table.get();
 
-	Ensure( std::ranges::any_of( m_kanOptions, [ & ]( Hand::DrawKanResult const& i_option ) -> bool
+	Ensure( ranges::any_of( m_kanOptions, [ & ]( Hand::DrawKanResult const& i_option ) -> bool
 		{
 			return i_option.kanTile == i_tile;
 		}), "This user cannot kan with provided tile");
