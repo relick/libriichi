@@ -1,5 +1,5 @@
 # libriichi
- C++23 backend library for Riichi Mahjong games.
+ C++20 backend library for Riichi Mahjong games.
 
 Aims:
 - Nice to use

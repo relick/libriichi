@@ -22,8 +22,6 @@ target_compile_options(libriichi PUBLIC "$<$<CXX_COMPILER_ID:MSVC>:/utf-8>")
 target_include_directories(libriichi PUBLIC ".")
 target_include_directories(libriichi PUBLIC "range-v3/include")
 
-set_property(TARGET libriichi PROPERTY CXX_STANDARD 23)
-
 # Demo
 add_executable (libriichi_demo "demo.cpp")
 target_link_libraries (libriichi_demo PRIVATE libriichi)
@@ -37,3 +35,5 @@ add_executable (libriichi_tests "tests.cpp")
 target_link_libraries (libriichi_tests PRIVATE libriichi)
 
 add_test(NAME tests COMMAND libriichi_tests)
+
+set_property(TARGET libriichi libriichi_demo libriichi_hand_tests libriichi_tests PROPERTY CXX_STANDARD 20)
