@@ -1,9 +1,8 @@
-﻿cmake_minimum_required (VERSION 3.8)
+﻿cmake_minimum_required (VERSION 3.20)
 
 project ("libriichi_demo")
 
 # General settings
-set (CMAKE_CXX_STANDARD 23)
 set (CMAKE_TRY_COMPILE_TARGET_TYPE "STATIC_LIBRARY")
 
 # Library
@@ -22,6 +21,8 @@ add_library(libriichi STATIC ${LIBRIICHI_SOURCE})
 target_compile_options(libriichi PUBLIC "$<$<CXX_COMPILER_ID:MSVC>:/utf-8>")
 target_include_directories(libriichi PUBLIC ".")
 target_include_directories(libriichi PUBLIC "range-v3/include")
+
+set_property(TARGET libriichi PROPERTY CXX_STANDARD 23)
 
 # Demo
 add_executable (libriichi_demo "demo.cpp")
