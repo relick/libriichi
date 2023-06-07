@@ -147,7 +147,7 @@ int main()
 		) != ass.Interpretations().end();
 		if ( unequalGroups && hasWaits )
 		{
-			Error( "found one" );
+			riError( "found one" );
 		}
 	}
 

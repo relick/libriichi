@@ -139,7 +139,7 @@ void Setup::StartGame
 
 	if ( table.m_players.size() < table.m_rules->GetPlayerCount() )
 	{
-		Error( "Cannot start game with fewer players than required!" );
+		riError( "Cannot start game with fewer players than required!" );
 		return;
 	}
 
@@ -332,11 +332,11 @@ void Turn_User::Tsumo
 {
 	Table& table = m_table.get();
 
-	Ensure( m_canTsumo, "This user cannot tsumo" );
+	riEnsure( m_canTsumo, "This user cannot tsumo" );
 
 	Round& round = table.m_rounds.back();
 
-	Ensure( round.DrawnTile( round.CurrentTurn() ).has_value(), "Cannot tsumo without drawn tile" );
+	riEnsure( round.DrawnTile( round.CurrentTurn() ).has_value(), "Cannot tsumo without drawn tile" );
 	TileDraw const& tileDraw = round.DrawnTile( round.CurrentTurn() ).value();
 	Hand const hand = round.GetHand( round.CurrentTurn() );
 
@@ -418,11 +418,11 @@ void Turn_User::Riichi
 {
 	Table& table = m_table.get();
 
-	Ensure( CanRiichi(), "This user cannot riichi" );
+	riEnsure( CanRiichi(), "This user cannot riichi" );
 
 	Round& round = table.m_rounds.back();
 
-	Ensure(
+	riEnsure(
 		i_handTileToDiscard.has_value()
 		? ranges::contains( m_riichiDiscards, i_handTileToDiscard.value() )
 		: ranges::contains( m_riichiDiscards, round.DrawnTile( round.CurrentTurn() ).value().m_tile )
@@ -449,7 +449,7 @@ void Turn_User::Kan
 {
 	Table& table = m_table.get();
 
-	Ensure( ranges::any_of( m_kanOptions, [ & ]( Hand::DrawKanResult const& i_option ) -> bool
+	riEnsure( ranges::any_of( m_kanOptions, [ & ]( Hand::DrawKanResult const& i_option ) -> bool
 		{
 			return i_option.kanTile == i_tile;
 		}), "This user cannot kan with provided tile");
@@ -631,7 +631,7 @@ void BetweenTurns::UserRon
 	SeatSet const& i_users
 )	const
 {
-	Ensure( m_canRon.ContainsAllOf( i_users ), "Players tried to ron when not allowed." );
+	riEnsure( m_canRon.ContainsAllOf( i_users ), "Players tried to ron when not allowed." );
 
 	HandleRon( i_users, m_discardedTile );
 }
@@ -670,7 +670,7 @@ void RonAKanChance::Ron
 	SeatSet const& i_players
 )	const
 {
-	Ensure( m_canRon.ContainsAllOf( i_players ), "Players tried to ron a kan when not allowed." );
+	riEnsure( m_canRon.ContainsAllOf( i_players ), "Players tried to ron a kan when not allowed." );
 
 	HandleRon( i_players, m_kanTile );
 }

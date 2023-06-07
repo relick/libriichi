@@ -68,7 +68,7 @@ namespace Riichi
 		return;
 	}
 
-	Ensure( io_interpToSet.m_ungrouped.size() == 2, "Wasn't a tanki wait but didn't have 2 tiles remaining" );
+	riEnsure( io_interpToSet.m_ungrouped.size() == 2, "Wasn't a tanki wait but didn't have 2 tiles remaining" );
 
 	// Check for shanpon second
 	if ( io_interpToSet.m_ungrouped.front() == io_interpToSet.m_ungrouped.back() )
@@ -437,7 +437,7 @@ void ThirteenOrphansInterpreter::AddInterpretations
 	}
 	else
 	{
-		Ensure( requiredTiles.size() == 0, "Did not have a valid number of unique tiles when assessing 13 orphans" );
+		riEnsure( requiredTiles.size() == 0, "Did not have a valid number of unique tiles when assessing 13 orphans" );
 		// We have 1 of every tile, so this is a 13 tile wait. Luckily we have a full set of 13 tiles in our ungrouped list! :)
 		ranges::actions::insert( interp.m_waits, interp.m_ungrouped );
 	}

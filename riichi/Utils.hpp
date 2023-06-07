@@ -16,11 +16,11 @@ namespace Riichi::Utils
 
 //------------------------------------------------------------------------------
 #if NDEBUG
-#define Ensure(...)
-#define Error(MSG)
+#define riEnsure(...)
+#define riError(MSG)
 #else
-#define Ensure(TEST, ...) assert((__VA_ARGS__, TEST))
-#define Error(MSG) Ensure(false, MSG)
+#define riEnsure(TEST, ...) assert((__VA_ARGS__, TEST))
+#define riError(MSG) riEnsure(false, MSG)
 #endif
 
 //------------------------------------------------------------------------------
@@ -81,13 +81,13 @@ public:
 
 	static constexpr RestrictedTypeRange ExclusiveRange( RestrictedType i_l, RestrictedType i_u )
 	{
-		Ensure( i_l.m_val <= i_u.m_val, "Lower bound must be <= upper bound in range" );
+		riEnsure( i_l.m_val <= i_u.m_val, "Lower bound must be <= upper bound in range" );
 		return RestrictedTypeRange( i_l.m_val, i_u.m_val, false );
 	}
 
 	static constexpr RestrictedTypeRange InclusiveRange( RestrictedType i_l, RestrictedType i_u )
 	{
-		Ensure( i_l.m_val <= i_u.m_val, "Lower bound must be <= upper bound in range" );
+		riEnsure( i_l.m_val <= i_u.m_val, "Lower bound must be <= upper bound in range" );
 		return RestrictedTypeRange( i_l.m_val, i_u.m_val, true );
 	}
 
@@ -101,14 +101,14 @@ public:
 
 	constexpr RestrictedType& operator++()
 	{
-		Ensure( m_val < t_Max, "Can not increment value past max" );
+		riEnsure( m_val < t_Max, "Can not increment value past max" );
 		++m_val;
 		return *this;
 	}
 
 	constexpr RestrictedType& operator--()
 	{
-		Ensure( m_val > t_Min, "Can not decrement value past min" );
+		riEnsure( m_val > t_Min, "Can not decrement value past min" );
 		--m_val;
 		return *this;
 	}
@@ -117,11 +117,11 @@ public:
 	{
 		if ( i_b.m_val < 0 )
 		{
-			Ensure( i_a.m_val >= t_Min - i_b.m_val, "Can not add value past min" );
+			riEnsure( i_a.m_val >= t_Min - i_b.m_val, "Can not add value past min" );
 		}
 		else
 		{
-			Ensure( i_a.m_val <= t_Max - i_b.m_val, "Can not add value past max" );
+			riEnsure( i_a.m_val <= t_Max - i_b.m_val, "Can not add value past max" );
 		}
 		return RestrictedType{ ( T_Integral )( i_a.m_val + i_b.m_val ) };
 	}
@@ -130,11 +130,11 @@ public:
 	{
 		if ( i_b.m_val >= 0 )
 		{
-			Ensure( i_a.m_val >= t_Min + i_b.m_val, "Can not sub value past min" );
+			riEnsure( i_a.m_val >= t_Min + i_b.m_val, "Can not sub value past min" );
 		}
 		else
 		{
-			Ensure( i_a.m_val <= t_Max + i_b.m_val, "Can not sub value past max" );
+			riEnsure( i_a.m_val <= t_Max + i_b.m_val, "Can not sub value past max" );
 		}
 		return RestrictedType{ ( T_Integral )( i_a.m_val - i_b.m_val ) };
 	}

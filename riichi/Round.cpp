@@ -152,7 +152,7 @@ size_t Round::WallTilesRemaining
 (
 )	const
 {
-	Ensure( m_wall.size() >= m_deadWallSize, "Wall decremented into dead wall! Oh no!" );
+	riEnsure( m_wall.size() >= m_deadWallSize, "Wall decremented into dead wall! Oh no!" );
 	return m_wall.size() - m_deadWallSize;
 }
 
@@ -202,7 +202,7 @@ Seat Round::GetSeat
 		}
 	}
 
-	Error( "Did not find player in this round" );
+	riError( "Did not find player in this round" );
 	return Seat::East;
 }
 
@@ -301,7 +301,7 @@ Round::Round
 	: m_deadWallSize{ i_rules.DeadWallSize() }
 	, m_deadWallDrawsRemaining{ i_rules.DeadWallDrawsAvailable() }
 {
-	Ensure( i_playerIDs.size() == i_rules.GetPlayerCount().Get(), "Did not provide enough players to start round" );
+	riEnsure( i_playerIDs.size() == i_rules.GetPlayerCount().Get(), "Did not provide enough players to start round" );
 
 	// Randomly determine initial seats
 	m_players.reserve( i_playerIDs.size() );
@@ -335,7 +335,7 @@ Round::Round
 	, m_honbaSticks{ i_previousRound.m_honbaSticks }
 	, m_riichiSticks{ i_previousRound.m_riichiSticks }
 {
-	Ensure( !i_rules.NoMoreRounds( i_table, i_previousRound ), "Tried to start a new round after last round declared game was over!" );
+	riEnsure( !i_rules.NoMoreRounds( i_table, i_previousRound ), "Tried to start a new round after last round declared game was over!" );
 
 	// Copy players but then clear their data
 	m_players.reserve( i_previousRound.m_players.size() );
@@ -447,7 +447,7 @@ Tile Round::Discard
 		{
 			return i_handTileToDiscard.value();
 		}
-		Ensure( player.m_draw.has_value(), "Tried to discard drawn tile but didn't have one" );
+		riEnsure( player.m_draw.has_value(), "Tried to discard drawn tile but didn't have one" );
 		return player.m_draw.value().m_tile;
 	}();
 	player.m_discards.emplace_back( discarded );
@@ -643,7 +643,7 @@ Vector<Tile> Round::DealTiles
 	size_t i_num
 )
 {
-	Ensure( WallTilesRemaining() >= i_num, "Tried to draw more tiles than in wall" );
+	riEnsure( WallTilesRemaining() >= i_num, "Tried to draw more tiles than in wall" );
 
 	Vector<Tile> tiles;
 	tiles.reserve( i_num );
@@ -660,7 +660,7 @@ TileDraw Round::SelfDraw
 (
 )
 {
-	Ensure( WallTilesRemaining() >= 1, "Tried to draw more tiles than in wall" );
+	riEnsure( WallTilesRemaining() >= 1, "Tried to draw more tiles than in wall" );
 
 	Tile drawn = std::move( m_wall.back() );
 	m_wall.pop_back();
@@ -672,8 +672,8 @@ TileDraw Round::DeadWallDraw
 (
 )
 {
-	Ensure( WallTilesRemaining() >= 1, "Tried to draw more tiles than in wall" );
-	Ensure( m_deadWallDrawsRemaining >= 1, "Tried to draw more tiles than in dead wall pool" );
+	riEnsure( WallTilesRemaining() >= 1, "Tried to draw more tiles than in wall" );
+	riEnsure( m_deadWallDrawsRemaining >= 1, "Tried to draw more tiles than in dead wall pool" );
 
 	--m_deadWallDrawsRemaining;
 	++m_doraCount;

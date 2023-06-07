@@ -57,7 +57,7 @@ void TestYaku()
 			failHand,
 			{ SuitTile::Make<Suit::Pinzu, 4>(), TileDrawType::DiscardDraw }
 		);
-		Ensure( !fail, "MenzenchinTsumohou failed!" );
+		riEnsure( !fail, "MenzenchinTsumohou failed!" );
 
 		Hand successHand;
 		successHand.AddFreeTiles( {
@@ -81,7 +81,7 @@ void TestYaku()
 			successHand,
 			{ SuitTile::Make<Suit::Pinzu, 5>(), TileDrawType::SelfDraw }
 		);
-		Ensure( success, "MenzenchinTsumohou failed!" );
+		riEnsure( success, "MenzenchinTsumohou failed!" );
 	}
 
 	// Riichi
@@ -108,7 +108,7 @@ void TestYaku()
 			failHand,
 			{ SuitTile::Make<Suit::Pinzu, 4>(), TileDrawType::SelfDraw }
 		);
-		Ensure( !fail, "Riichi failed!" );
+		riEnsure( !fail, "Riichi failed!" );
 
 		Round riichiMockRound( mockSeat, mockPlayers, mockRules, mockRNG );
 		riichiMockRound.DealHands();
@@ -137,7 +137,7 @@ void TestYaku()
 			{ SuitTile::Make<Suit::Pinzu, 5>(), TileDrawType::SelfDraw },
 			&riichiMockRound
 		);
-		Ensure( success, "Riichi failed!" );
+		riEnsure( success, "Riichi failed!" );
 	}
 
 	// Ippatsu
@@ -178,7 +178,7 @@ void TestYaku()
 				{ SuitTile::Make<Suit::Pinzu, 4>(), TileDrawType::SelfDraw },
 				&riichiMockRound
 			);
-			Ensure( !fail, "Ippatsu failed!" );
+			riEnsure( !fail, "Ippatsu failed!" );
 		}
 
 		{
@@ -209,7 +209,7 @@ void TestYaku()
 				{ SuitTile::Make<Suit::Pinzu, 5>(), TileDrawType::SelfDraw },
 				&riichiMockRound
 			);
-			Ensure( success, "Ippatsu failed!" );
+			riEnsure( success, "Ippatsu failed!" );
 		}
 	}
 
@@ -239,7 +239,7 @@ void TestYaku()
 			failHand,
 			{ SuitTile::Make<Suit::Pinzu, 5>(), TileDrawType::SelfDraw }
 		);
-		Ensure( !fail, "Pinfu failed!" );
+		riEnsure( !fail, "Pinfu failed!" );
 
 		Hand successHand;
 		successHand.AddFreeTiles( {
@@ -263,7 +263,7 @@ void TestYaku()
 			successHand,
 			{ SuitTile::Make<Suit::Pinzu, 5>(), TileDrawType::SelfDraw }
 		);
-		Ensure( success, "Pinfu failed!" );
+		riEnsure( success, "Pinfu failed!" );
 	}
 
 	// Iipeikou
@@ -290,7 +290,7 @@ void TestYaku()
 			failHand,
 			{ SuitTile::Make<Suit::Manzu, 4>(), TileDrawType::DiscardDraw }
 		);
-		Ensure( !fail, "Iipeikou failed!" );
+		riEnsure( !fail, "Iipeikou failed!" );
 
 		Hand successHand;
 		successHand.AddFreeTiles( {
@@ -314,7 +314,7 @@ void TestYaku()
 			successHand,
 			{ SuitTile::Make<Suit::Manzu, 1>(), TileDrawType::DiscardDraw }
 		);
-		Ensure( success, "Iipeikou failed!" );
+		riEnsure( success, "Iipeikou failed!" );
 	}
 
 	// TODO-TEST: HaiteiRaoyue
@@ -355,7 +355,7 @@ void TestYaku()
 			failHand,
 			{ SuitTile::Make<Suit::Pinzu, 4>(), TileDrawType::SelfDraw }
 		);
-		Ensure( !fail, "Ikkitsuukan failed!" );
+		riEnsure( !fail, "Ikkitsuukan failed!" );
 
 		Hand successHand;
 		successHand.AddFreeTiles( {
@@ -379,7 +379,7 @@ void TestYaku()
 			successHand,
 			{ SuitTile::Make<Suit::Pinzu, 5>(), TileDrawType::SelfDraw }
 		);
-		Ensure( success, "Ikkitsuukan failed!" );
+		riEnsure( success, "Ikkitsuukan failed!" );
 	}
 
 	// TODO-TEST: Toitoi

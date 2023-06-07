@@ -88,7 +88,7 @@ StandardYonmaCore::StandardYonmaCore
 		}
 	}
 
-	Ensure( m_tileSet.size() == 4 * (3 * 9 + 3 + 4), "Tileset filled incorrectly" );
+	riEnsure( m_tileSet.size() == 4 * (3 * 9 + 3 + 4), "Tileset filled incorrectly" );
 }
 
 //------------------------------------------------------------------------------
@@ -257,7 +257,7 @@ HandScore StandardYonmaCore::CalculateBasicPoints
 		return { 0, {} };
 	}
 
-	Ensure( maxInterp, "Had max points more than 0 but no valid interpretation" );
+	riEnsure( maxInterp, "Had max points more than 0 but no valid interpretation" );
 
 	auto fnHandHasYaku = [ & ]( char const* i_yakuName )
 	{
@@ -356,7 +356,7 @@ HandScore StandardYonmaCore::CalculateBasicPoints
 	using enum WaitType;
 	case None:
 	{
-		Error( "No wait type on winning interp" );
+		riError( "No wait type on winning interp" );
 		break;
 	}
 
@@ -526,7 +526,7 @@ Pair<Points, Points> StandardYonmaCore::PotPoints
 	if ( i_isTsumo )
 	{
 		// Honba paid by all non-winners
-		Ensure( i_winners == 1, "Only 1 tsumo" );
+		riEnsure( i_winners == 1, "Only 1 tsumo" );
 		return { static_cast< Points >( i_honbaSticks * 100 ), static_cast< Points >( i_riichiSticks * RiichiBet() ) };
 	}
 

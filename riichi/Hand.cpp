@@ -35,7 +35,7 @@ void Hand::Discard
 			return StrictEqualTo( i_tile, i_toDiscard );
 		}
 	);
-	Ensure( success, "Failed to discard tile - invalid?" );
+	riEnsure( success, "Failed to discard tile - invalid?" );
 
 	if ( i_drawToAdd.has_value() )
 	{
@@ -52,7 +52,7 @@ void Hand::MakeMeld
 	GroupType i_meldType
 )
 {
-	Ensure( i_meldType != GroupType::Quad, "Must call MakeKan instead of MakeMeld for quads" );
+	riEnsure( i_meldType != GroupType::Quad, "Must call MakeKan instead of MakeMeld for quads" );
 
 	Utils::EraseOne(
 		m_freeTiles,
@@ -93,7 +93,7 @@ Hand::KanResult Hand::MakeKan
 		if ( meld.m_type == GroupType::Triplet && meld.m_tiles.front().first == i_meldTile )
 		{
 			// Meld comes from our own hand
-			Ensure( !i_calledFrom.has_value(), "Cannot call kan on already open meld" );
+			riEnsure( !i_calledFrom.has_value(), "Cannot call kan on already open meld" );
 
 			meld.m_tiles.push_back( { i_meldTile, std::nullopt } );
 			meld.m_type = GroupType::Quad;
@@ -121,7 +121,7 @@ Hand::KanResult Hand::MakeKan
 		}
 	);
 
-	Ensure( newMeld.m_tiles.size() == 4, "Did not find 4 tiles for kan" );
+	riEnsure( newMeld.m_tiles.size() == 4, "Did not find 4 tiles for kan" );
 
 	newMeld.m_type = GroupType::Quad;
 	newMeld.m_open = i_calledFrom.has_value();
@@ -346,27 +346,27 @@ HandGroup::HandGroup
 		using enum GroupType;
 	case Pair:
 	{
-		Ensure( m_tiles.size() == 2, "Pair group didn't have 2 tiles" );
-		Ensure( ranges::adjacent_find( m_tiles, std::not_equal_to{} ) == m_tiles.end(), "Pair group didn't have matching tiles" );
+		riEnsure( m_tiles.size() == 2, "Pair group didn't have 2 tiles" );
+		riEnsure( ranges::adjacent_find( m_tiles, std::not_equal_to{} ) == m_tiles.end(), "Pair group didn't have matching tiles" );
 		break;
 	}
 	case Sequence:
 	{
-		Ensure( m_tiles.size() == 3, "Sequence group didn't have 3 tiles" );
-		Ensure( ranges::all_of( m_tiles, []( Tile const& i_t ) { return i_t.Type() == TileType::Suit; } ), "Sequence group has a non-suit tile" );
-		Ensure( ranges::adjacent_find( m_tiles, std::not_equal_to{}, []( Tile const& i_t ) { return i_t.Get<TileType::Suit>().m_suit; } ) == m_tiles.end(), "Sequence group didn't have matching suits" );
+		riEnsure( m_tiles.size() == 3, "Sequence group didn't have 3 tiles" );
+		riEnsure( ranges::all_of( m_tiles, []( Tile const& i_t ) { return i_t.Type() == TileType::Suit; } ), "Sequence group has a non-suit tile" );
+		riEnsure( ranges::adjacent_find( m_tiles, std::not_equal_to{}, []( Tile const& i_t ) { return i_t.Get<TileType::Suit>().m_suit; } ) == m_tiles.end(), "Sequence group didn't have matching suits" );
 		break;
 	}
 	case Triplet:
 	{
-		Ensure( m_tiles.size() == 3, "Triplet group didn't have 3 tiles" );
-		Ensure( ranges::adjacent_find( m_tiles, std::not_equal_to{} ) == m_tiles.end(), "Triplet group didn't have matching tiles" );
+		riEnsure( m_tiles.size() == 3, "Triplet group didn't have 3 tiles" );
+		riEnsure( ranges::adjacent_find( m_tiles, std::not_equal_to{} ) == m_tiles.end(), "Triplet group didn't have matching tiles" );
 		break;
 	}
 	case Quad:
 	{
-		Ensure( m_tiles.size() == 4, "Quad group didn't have 4 tiles" );
-		Ensure( ranges::adjacent_find( m_tiles, std::not_equal_to{} ) == m_tiles.end(), "Quad group didn't have matching tiles" );
+		riEnsure( m_tiles.size() == 4, "Quad group didn't have 4 tiles" );
+		riEnsure( ranges::adjacent_find( m_tiles, std::not_equal_to{} ) == m_tiles.end(), "Quad group didn't have matching tiles" );
 		break;
 	}
 	}
@@ -405,7 +405,7 @@ Suit HandGroup::CommonSuit
 (
 )	const
 {
-	Ensure( TilesType() == TileType::Suit, "Cannot call CommonSuit when not a suit group" );
+	riEnsure( TilesType() == TileType::Suit, "Cannot call CommonSuit when not a suit group" );
 	return m_tiles.front().Get<TileType::Suit>().m_suit;
 }
 
@@ -414,7 +414,7 @@ SuitTileValue HandGroup::CommonSuitTileValue
 (
 )	const
 {
-	Ensure( TilesType() == TileType::Suit, "Cannot call CommonSuitTileValue when not a suit group" );
+	riEnsure( TilesType() == TileType::Suit, "Cannot call CommonSuitTileValue when not a suit group" );
 	return m_tiles.front().Get<TileType::Suit>().m_value;
 }
 

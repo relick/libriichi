@@ -82,7 +82,7 @@ Tile NextTile
 	case Wind: return NextTile( i_tile.Get<Wind>() );
 	}
 
-	Error( "Invalid tile type" );
+	riError( "Invalid tile type" );
 	return i_tile;
 }
 

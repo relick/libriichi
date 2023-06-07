@@ -29,14 +29,14 @@ PlayerID Table::AddPlayer
 {
 	if ( m_state.Type() == TableStateType::Setup )
 	{
-		Ensure( m_players.size() < m_rules->GetPlayerCount(), "Too many players added" );
+		riEnsure( m_players.size() < m_rules->GetPlayerCount(), "Too many players added" );
 		m_players.push_back( { std::move( i_player ), m_rules->InitialPoints() } );
 		m_playerIDs.push_back( PlayerID{ m_players.size() - 1, m_ident } );
 
 		return m_playerIDs.back();
 	}
 
-	Error( "Cannot change players past setup" );
+	riError( "Cannot change players past setup" );
 	return {};
 }
 
@@ -46,7 +46,7 @@ Player const& Table::GetPlayer
 	PlayerID i_playerID
 )	const
 {
-	Ensure( i_playerID.m_tableIdent == m_ident, "Player ID not for this table" );
+	riEnsure( i_playerID.m_tableIdent == m_ident, "Player ID not for this table" );
 	return m_players[ i_playerID.m_index ].first;
 }
 
@@ -56,7 +56,7 @@ Points Table::GetPoints
 	PlayerID i_playerID
 )	const
 {
-	Ensure( i_playerID.m_tableIdent == m_ident, "Player ID not for this table" );
+	riEnsure( i_playerID.m_tableIdent == m_ident, "Player ID not for this table" );
 	return m_players[ i_playerID.m_index ].second;
 }
 
@@ -67,7 +67,7 @@ Points Table::ModifyPoints
 	Points i_amount
 )
 {
-	Ensure( i_playerID.m_tableIdent == m_ident, "Player ID not for this table" );
+	riEnsure( i_playerID.m_tableIdent == m_ident, "Player ID not for this table" );
 	m_players[ i_playerID.m_index ].second += i_amount;
 
 	return m_players[ i_playerID.m_index ].second;
