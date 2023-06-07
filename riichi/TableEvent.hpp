@@ -157,6 +157,7 @@ public:
 	explicit Ron( Tile const& i_winningTile, SeatSet i_winners, Seat i_loser )
 		: m_winningTile{ i_winningTile }
 		, m_winners{ std::move( i_winners ) }
+		, m_loser{ i_loser }
 	{}
 
 	Tile const& WinningTile() const { return m_winningTile; }
