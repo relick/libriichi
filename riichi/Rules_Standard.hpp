@@ -37,7 +37,7 @@ public:
 		TileDraw const& i_lastTile
 	) const override;
 
-	bool NoMoreRounds( Table const& i_table, Round const& i_previousRound, Seat i_gameLength ) const;
+	bool NoMoreRoundsCore( Table const& i_table, Round const& i_previousRound, Seat i_gameLength ) const;
 	bool RepeatRound( Round const& i_previousRound ) const override;
 	bool ShouldAddHonba( Round const& i_previousRound ) const override;
 

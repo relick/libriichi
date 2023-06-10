@@ -13,7 +13,7 @@ bool StandardYonma<t_GameLength>::NoMoreRounds
 	Round const& i_previousRound
 )	const
 {
-	return StandardYonmaCore::NoMoreRounds( i_table, i_previousRound, t_GameLength );
+	return StandardYonmaCore::NoMoreRoundsCore( i_table, i_previousRound, t_GameLength );
 }
 
 }

@@ -467,7 +467,7 @@ HandScore StandardYonmaCore::CalculateBasicPoints
 }
 
 //------------------------------------------------------------------------------
-bool StandardYonmaCore::NoMoreRounds
+bool StandardYonmaCore::NoMoreRoundsCore
 (
 	Table const& i_table,
 	Round const& i_previousRound,
