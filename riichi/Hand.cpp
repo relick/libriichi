@@ -32,7 +32,7 @@ void Hand::Discard
 	bool const success = Utils::EraseOne( m_freeTiles,
 		[ & ]( Tile const& i_tile )
 		{
-			return StrictEqualTo( i_tile, i_toDiscard );
+			return i_tile.Is( i_toDiscard );
 		}
 	);
 	riEnsure( success, "Failed to discard tile - invalid?" );
@@ -58,7 +58,7 @@ void Hand::MakeMeld
 		m_freeTiles,
 		[ & ]( Tile const& i_tile )
 		{
-			return StrictEqualTo( i_tile, i_otherTiles.first );
+			return i_tile.Is( i_otherTiles.first );
 		}
 	);
 
@@ -66,7 +66,7 @@ void Hand::MakeMeld
 		m_freeTiles,
 		[ & ]( Tile const& i_tile )
 		{
-			return StrictEqualTo( i_tile, i_otherTiles.second );
+			return i_tile.Is( i_otherTiles.second );
 		}
 	);
 
@@ -151,8 +151,8 @@ Vector<Pair<Tile, Tile>> Hand::ChiOptions
 	// It works quite well then to reuse a pair of sets and search for the tiles we need in each shape, then fill out options from that as a cartesian product
 
 	Vector<Pair<Tile, Tile>> options;
-	Set<Tile, StrictEqualToTile> tiles1;
-	Set<Tile, StrictEqualToTile> tiles2;
+	Set<Tile, EquivalentTile> tiles1;
+	Set<Tile, EquivalentTile> tiles2;
 
 	auto fnSearchForTiles = [ & ]( Tile const& i_search1, Tile const& i_search2 )
 	{

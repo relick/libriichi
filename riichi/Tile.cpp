@@ -19,13 +19,12 @@ SuitTile NextTile
 //------------------------------------------------------------------------------
 // Include specialness of the tile
 //------------------------------------------------------------------------------
-bool StrictEqualTo
+bool SuitTile::Equivalent
 (
-	SuitTile const& i_a,
-	SuitTile const& i_b
+	SuitTile const& i_o
 )
 {
-	return i_a.m_suit == i_b.m_suit && i_a.m_value == i_b.m_value;
+	return m_suit == i_o.m_suit && m_value == i_o.m_value;
 }
 
 //------------------------------------------------------------------------------
@@ -87,26 +86,39 @@ Tile NextTile
 }
 
 //------------------------------------------------------------------------------
-bool StrictEqualTo
+bool Tile::Equivalent
 (
-	Tile const& i_a,
-	Tile const& i_b
-)
+	Tile const& i_o
+)	const
 {
-	if ( i_a.Type() != i_b.Type() )
+	if ( Type() != i_o.Type() )
 	{
 		return false;
 	}
 
-	switch ( i_a.Type() )
+	switch ( Type() )
 	{
 		using enum TileType;
-	case Suit: return StrictEqualTo( i_a.Get<Suit>(), i_b.Get<Suit>() );
-	case Dragon: return i_a.Get<Dragon>() == i_b.Get<Dragon>();
-	case Wind: return i_a.Get<Wind>() == i_b.Get<Wind>();
+	case Suit: return Get<Suit>().Equivalent( i_o.Get<Suit>() );
+	case Dragon: return Get<Dragon>() == i_o.Get<Dragon>();
+	case Wind: return Get<Wind>() == i_o.Get<Wind>();
 	}
 
 	return false;
+}
+
+//------------------------------------------------------------------------------
+bool Tile::Is
+(
+	Tile const& i_o
+)	const
+{
+	if ( HasID() || i_o.HasID() )
+	{
+		return ID() == i_o.ID();
+	}
+
+	return Equivalent( i_o );
 }
 
 //------------------------------------------------------------------------------

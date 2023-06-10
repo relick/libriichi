@@ -67,24 +67,25 @@ StandardYonmaCore::StandardYonmaCore
 
 	// Yonma uses all tiles
 	// TODO-RULES: red dora
+	uint32_t tileID = 0;
 	for ( int tileTypeCount = 0; tileTypeCount < 4; ++tileTypeCount )
 	{
 		for ( Suit suit : Suits{} )
 		{
 			for ( SuitTileValue val : SuitTileValue::InclusiveRange( SuitTileValue::Min, SuitTileValue::Max ) )
 			{
-				m_tileSet.emplace_back( SuitTile{ suit, val } );
+				m_tileSet.emplace_back( SuitTile{ suit, val }, tileID++ );
 			}
 		}
 
 		for ( DragonTileType dragon : DragonTileTypes{} )
 		{
-			m_tileSet.emplace_back( dragon );
+			m_tileSet.emplace_back( dragon, tileID++ );
 		}
 
 		for ( WindTileType wind : WindTileTypes{} )
 		{
-			m_tileSet.emplace_back( wind );
+			m_tileSet.emplace_back( wind, tileID++ );
 		}
 	}
 

@@ -314,6 +314,7 @@ Round::Round
 
 	// Shuffle the tiles to build the wall
 	m_wall = i_rules.Tileset();
+	riEnsure( ranges::all_of( m_wall, []( Tile const& i_tile ) { return i_tile.HasID(); } ), "Not all tiles were assigned IDs in ruleset" );
 	ranges::shuffle( m_wall, i_shuffleRNG );
 
 	// Then break the wall
