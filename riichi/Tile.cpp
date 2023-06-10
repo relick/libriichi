@@ -34,7 +34,9 @@ bool operator<
 	SuitTile const& i_b
 )
 {
-	return i_a.m_suit < i_b.m_suit || i_a.m_value < i_b.m_value;
+	return ( i_a.m_suit == i_b.m_suit )
+		? ( i_a.m_value < i_b.m_value )
+		: ( i_a.m_suit < i_b.m_suit );
 }
 
 //------------------------------------------------------------------------------
