@@ -56,6 +56,7 @@ public:
 	Seat CurrentTurn() const;
 	bool IsDealer( Seat i_player ) const;
 	bool CalledRiichi( Seat i_player ) const;
+	Option<size_t> RiichiTileIndex( Seat i_player ) const;
 	bool CalledDoubleRiichi( Seat i_player ) const;
 	bool RiichiIppatsuValid( Seat i_player ) const;
 	bool Furiten( Seat i_player, Set<Tile> const& i_waits ) const;

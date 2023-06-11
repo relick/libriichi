@@ -54,6 +54,15 @@ bool Round::CalledRiichi
 }
 
 //------------------------------------------------------------------------------
+Option<size_t> Round::RiichiTileIndex
+(
+	Seat i_player
+)	const
+{
+	return m_players[ ( size_t )i_player ].m_riichiDiscardTile;
+}
+
+//------------------------------------------------------------------------------
 bool Round::CalledDoubleRiichi
 (
 	Seat i_player
