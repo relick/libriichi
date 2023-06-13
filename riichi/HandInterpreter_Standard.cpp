@@ -32,6 +32,7 @@ namespace Riichi
 		}
 		case GroupType::Triplet:
 		case GroupType::Quad:
+		case GroupType::UpgradedQuad:
 		{
 			rank |= 1 << tripleCount++;
 			break;

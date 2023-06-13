@@ -52,7 +52,7 @@ void Hand::MakeMeld
 	GroupType i_meldType
 )
 {
-	riEnsure( i_meldType != GroupType::Quad, "Must call MakeKan instead of MakeMeld for quads" );
+	riEnsure( i_meldType < GroupType::Quad, "Must call MakeKan instead of MakeMeld for quads" );
 
 	Utils::EraseOne(
 		m_freeTiles,
@@ -96,7 +96,7 @@ Hand::KanResult Hand::MakeKan
 			riEnsure( !i_calledFrom.has_value(), "Cannot call kan on already open meld" );
 
 			meld.m_tiles.push_back( { i_meldTile, std::nullopt } );
-			meld.m_type = GroupType::Quad;
+			meld.m_type = GroupType::UpgradedQuad;
 			return { true, true, };
 		}
 	}
@@ -364,6 +364,7 @@ HandGroup::HandGroup
 		break;
 	}
 	case Quad:
+	case UpgradedQuad:
 	{
 		riEnsure( m_tiles.size() == 4, "Quad group didn't have 4 tiles" );
 		riEnsure( ranges::adjacent_find( m_tiles, std::not_equal_to{} ) == m_tiles.end(), "Quad group didn't have matching tiles" );

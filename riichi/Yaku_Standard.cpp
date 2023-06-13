@@ -82,6 +82,7 @@ HanValue Pinfu::CalculateValue
 			using enum GroupType;
 		case Triplet:
 		case Quad:
+		case UpgradedQuad:
 		{
 			return NoYaku;
 		}
@@ -583,7 +584,7 @@ HanValue Sankantsu::CalculateValue
 	int quadCount = 0;
 	for ( HandGroup const& group : i_interp.m_groups )
 	{
-		if ( group.Type() == GroupType::Quad )
+		if ( group.Type() == GroupType::Quad || group.Type() == GroupType::UpgradedQuad )
 		{
 			++quadCount;
 		}
@@ -1263,7 +1264,7 @@ HanValue Suukantsu::CalculateValue
 	int kanCount = 0;
 	for ( HandGroup const& group : i_interp.m_groups )
 	{
-		if ( group.Type() == GroupType::Quad )
+		if ( group.Type() == GroupType::Quad || group.Type() == GroupType::UpgradedQuad )
 		{
 			++kanCount;
 		}

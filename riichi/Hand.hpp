@@ -15,10 +15,14 @@ enum class GroupType : EnumValueType
 	Pair,
 	Sequence,
 	Triplet,
-	Quad, // Kan only - we never assess a quad inside a hand interpretation (other than to offer the option to the player)
+
+	// Kan only:
+	// We never assess a quad inside a hand interpretation (other than to offer the option to the player)
+	Quad,
+	UpgradedQuad, // Pon -> Kan
 };
 //------------------------------------------------------------------------------
-inline bool TripletCompatible( GroupType i_type ) { return i_type == GroupType::Triplet || i_type == GroupType::Quad; }
+inline bool TripletCompatible( GroupType i_type ) { return i_type == GroupType::Triplet || i_type == GroupType::Quad || i_type == GroupType::UpgradedQuad; }
 
 //------------------------------------------------------------------------------
 // Meld is made up of tiles that may have come from a different seat to the owner of the meld

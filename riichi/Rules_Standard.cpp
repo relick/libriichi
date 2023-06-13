@@ -345,7 +345,7 @@ HandScore StandardYonmaCore::CalculateBasicPoints
 		{
 			fu += ( fnIsHonorOrTerminal( group[ 0 ] ) ? 4 : 2 ) * ( group.Open() ? 2 : 1 );
 		}
-		else if ( group.Type() == GroupType::Quad )
+		else if ( group.Type() == GroupType::Quad || group.Type() == GroupType::UpgradedQuad )
 		{
 			fu += ( fnIsHonorOrTerminal( group[ 0 ] ) ? 16 : 8 ) * ( group.Open() ? 2 : 1 );
 		}

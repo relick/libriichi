@@ -617,10 +617,10 @@ void BetweenTurns::UserKan
 	Table& table = m_table.get();
 
 	Round& round = table.m_rounds.back();
-	Pair<Seat, Tile> const calledTile = round.DiscardKan( i_user );
+	auto const [ deadWallDraw, calledTile ] = round.DiscardKan( i_user );
 
 	TransitionToTurn(
-		std::nullopt,
+		deadWallDraw,
 		TableEvent{ TableEvent::Tag<TableEventType::Call>(), TableEvents::CallType::Kan, calledTile.second, calledTile.first }
 	);
 }

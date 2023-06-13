@@ -81,6 +81,9 @@ public:
 	size_t HonbaSticks() const;
 	size_t RiichiSticks() const;
 
+	size_t BreakPointFromDealerRight() const;
+	size_t DeadWallDrawsRemaining() const;
+
 public:
 	// non-const interface, only accessible by table states
 	Round
@@ -109,7 +112,7 @@ public:
 	TileDraw HandKanRonPass(); // returns dead wall draw ☠
 	Pair<Seat, Tile> Chi( Seat i_caller, Pair<Tile, Tile> const& i_meldTiles ); // returns called tile and called from
 	Pair<Seat, Tile> Pon( Seat i_caller ); // returns called tile and called from
-	Pair<Seat, Tile> DiscardKan( Seat i_caller ); // returns called tile and called from
+	Pair<TileDraw, Pair<Seat, Tile>> DiscardKan( Seat i_caller ); // returns dead wall draw ☠, called tile and called from
 
 	Tile AddWinner( Seat i_player, HandScore const& i_score ); // returns winning tile
 	void AddFinishedInTenpai( Seat i_player );

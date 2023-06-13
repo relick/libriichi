@@ -248,6 +248,22 @@ size_t Round::RiichiSticks
 }
 
 //------------------------------------------------------------------------------
+size_t Round::BreakPointFromDealerRight
+(
+)	const
+{
+	return m_breakPointFromDealerRight;
+}
+
+//------------------------------------------------------------------------------
+size_t Round::DeadWallDrawsRemaining
+(
+)	const
+{
+	return m_deadWallDrawsRemaining;
+}
+
+//------------------------------------------------------------------------------
 bool Round::NextPlayerIsInitial
 (
 )	const
@@ -591,7 +607,7 @@ Pair<Seat, Tile> Round::Pon
 }
 
 //------------------------------------------------------------------------------
-Pair<Seat, Tile> Round::DiscardKan
+Pair<TileDraw, Pair<Seat, Tile>> Round::DiscardKan
 (
 	Seat i_caller
 )
@@ -614,7 +630,9 @@ Pair<Seat, Tile> Round::DiscardKan
 	m_currentTurn = i_caller;
 	caller.UpdateForTurn();
 
-	return ret;
+	caller.m_draw = DeadWallDraw();
+
+	return { caller.m_draw.value(), ret };
 }
 
 //------------------------------------------------------------------------------
