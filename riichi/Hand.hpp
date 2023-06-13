@@ -57,7 +57,7 @@ public:
 		bool m_upgradedFromPon{ false };
 		bool m_open{ false };
 	};
-	KanResult MakeKan( Tile const& i_meldTile, Option<Seat> i_calledFrom );
+	KanResult MakeKan( Tile const& i_meldTile, bool i_drawnTile, Option<Seat> i_calledFrom );
 
 	// These questions only consider the hand's tiles and not the actual validity of the call in the round
 	Vector<Pair<Tile, Tile>> ChiOptions( Tile const& i_tile ) const;

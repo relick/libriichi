@@ -84,6 +84,7 @@ void Hand::MakeMeld
 Hand::KanResult Hand::MakeKan
 (
 	Tile const& i_meldTile,
+	bool i_drawnTile,
 	Option<Seat> i_calledFrom
 )
 {
@@ -103,11 +104,21 @@ Hand::KanResult Hand::MakeKan
 
 	// Then check hand
 
+	riEnsure( i_calledFrom.has_value() != i_drawnTile, "Kan tile cannot be drawn tile and called from at the same time" );
+
 	Meld newMeld;
 	if ( i_calledFrom.has_value() )
 	{
+		// Called from another player, add it in now
 		newMeld.m_tiles.push_back( { i_meldTile, i_calledFrom } );
 	}
+	else if ( i_drawnTile )
+	{
+		// It is our drawn tile, add it in now
+		newMeld.m_tiles.push_back( { i_meldTile, std::nullopt } );
+	}
+
+	// Find the remaining 3
 	std::erase_if(
 		m_freeTiles,
 		[ & ]( Tile const& i_tile )

@@ -529,11 +529,13 @@ TileDraw Round::PassCalls
 //------------------------------------------------------------------------------
 Hand::KanResult Round::HandKan
 (
-	Tile const& i_tile
+	Option<Tile> const& i_handTileToKan
 )
 {
 	PlayerData& player = m_players[ ( size_t )m_currentTurn ];
-	return player.m_hand.MakeKan( i_tile, std::nullopt );
+	Hand::KanResult res = player.m_hand.MakeKan( i_handTileToKan.value_or( player.m_draw.value().m_tile ), i_handTileToKan.has_value(), std::nullopt );
+	player.m_draw.reset();
+	return res;
 }
 
 //------------------------------------------------------------------------------
@@ -619,7 +621,7 @@ Pair<TileDraw, Pair<Seat, Tile>> Round::DiscardKan
 	current.m_visibleDiscards.pop_back();
 
 	PlayerData& caller = m_players[ ( size_t )i_caller ];
-	caller.m_hand.MakeKan( ret.second, ret.first );
+	caller.m_hand.MakeKan( ret.second, false, ret.first );
 
 	// Invalidate riichi ippatsu as call made
 	for ( PlayerData& player : m_players )
