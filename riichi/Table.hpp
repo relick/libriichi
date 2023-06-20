@@ -69,9 +69,9 @@ public:
 
 	// Simulation
 	bool Playing() const;
-	TableState const& GetState() { return m_state; }
+	TableState const& GetState() const { return m_state; }
 	bool HasRounds() const { return !m_rounds.empty(); }
-	Round const& GetRound( size_t i_roundIndex = SIZE_MAX ) { return i_roundIndex >= m_rounds.size() ? m_rounds.back() : m_rounds[ i_roundIndex ]; }
+	Round const& GetRound( size_t i_roundIndex = SIZE_MAX ) const { return i_roundIndex >= m_rounds.size() ? m_rounds.back() : m_rounds[ i_roundIndex ]; }
 	TableEvent const& GetEvent() const { return m_mostRecentEvent; }
 
 private:
