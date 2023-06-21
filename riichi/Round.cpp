@@ -20,6 +20,19 @@ void Round::PlayerData::UpdateForTurn
 }
 
 //------------------------------------------------------------------------------
+SeatSet Round::Seats
+(
+)	const
+{
+	SeatSet seats;
+	for ( size_t i = 0; i < m_players.size(); ++i )
+	{
+		seats.Insert( static_cast< Seat >( i ) );
+	}
+	return seats;
+}
+
+//------------------------------------------------------------------------------
 Seat Round::Wind
 (
 )	const

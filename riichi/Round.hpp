@@ -52,6 +52,7 @@ class Round
 public:
 	// const interface
 
+	SeatSet Seats() const;
 	Seat Wind() const;
 	Seat CurrentTurn() const;
 	bool IsDealer( Seat i_player ) const;
