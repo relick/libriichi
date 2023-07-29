@@ -386,7 +386,7 @@ int main()
 
 		// Then, get resulting event, and process into output. This part is technically optional,
 		// but required if you want meaningful output
-		Riichi::TableEvent const& event = table.GetEvent();
+		Riichi::TableEvent const event = table.RetrieveEvent();
 		switch ( event.Type() )
 		{
 		using enum Riichi::TableEventType;

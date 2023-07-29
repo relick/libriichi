@@ -72,7 +72,12 @@ public:
 	TableState const& GetState() const { return m_state; }
 	bool HasRounds() const { return !m_rounds.empty(); }
 	Round const& GetRound( size_t i_roundIndex = SIZE_MAX ) const { return i_roundIndex >= m_rounds.size() ? m_rounds.back() : m_rounds[ i_roundIndex ]; }
-	TableEvent const& GetEvent() const { return m_mostRecentEvent; }
+	TableEvent RetrieveEvent()
+	{
+		TableEvent event = std::move( m_mostRecentEvent );
+		m_mostRecentEvent = Utils::NullType{};
+		return event;
+	}
 
 private:
 	void Transition( TableState&& i_nextState, TableEvent&& i_nextEvent );
