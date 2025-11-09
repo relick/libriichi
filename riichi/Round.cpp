@@ -339,7 +339,7 @@ Round::Round
 	: m_deadWallSize{ i_rules.DeadWallSize() }
 	, m_deadWallDrawsRemaining{ i_rules.DeadWallDrawsAvailable() }
 {
-	riEnsure( i_playerIDs.size() == i_rules.GetPlayerCount().Get(), "Did not provide enough players to start round" );
+	riEnsure( i_playerIDs.size() == i_rules.GetPlayerCount(), "Did not provide enough players to start round" );
 
 	// Randomly determine initial seats
 	m_players.reserve( i_playerIDs.size() );

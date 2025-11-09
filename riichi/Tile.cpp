@@ -9,11 +9,7 @@ SuitTile NextTile
 	SuitTile const& i_tile
 )
 {
-	if ( i_tile.m_value == SuitTileValue::Max )
-	{
-		return { i_tile.m_suit, SuitTileValue::Min };
-	}
-	return { i_tile.m_suit, i_tile.m_value + SuitTileValue::Set<1>() };
+	return { i_tile.m_suit, i_tile.m_number + 1 };
 }
 
 //------------------------------------------------------------------------------
@@ -22,9 +18,17 @@ SuitTile NextTile
 bool SuitTile::Equivalent
 (
 	SuitTile const& i_o
-)
+) const
 {
-	return m_suit == i_o.m_suit && m_value == i_o.m_value;
+	return m_suit == i_o.m_suit && m_number == i_o.m_number;
+}
+
+//------------------------------------------------------------------------------
+bool SuitTile::IsTerminal
+(
+) const
+{
+	return m_number == Number::One || m_number == Number::Nine;
 }
 
 //------------------------------------------------------------------------------
@@ -35,7 +39,7 @@ bool operator<
 )
 {
 	return ( i_a.m_suit == i_b.m_suit )
-		? ( i_a.m_value < i_b.m_value )
+		? ( i_a.m_number < i_b.m_number )
 		: ( i_a.m_suit < i_b.m_suit );
 }
 
@@ -115,7 +119,7 @@ bool Tile::Is
 	Tile const& i_o
 )	const
 {
-	if ( HasID() || i_o.HasID() )
+	if ( HasID() && i_o.HasID() )
 	{
 		return ID() == i_o.ID();
 	}
@@ -134,9 +138,9 @@ std::ostream& operator<<( std::ostream& io_out, Tile const& i_tile )
 		switch ( tile.m_suit )
 		{
 			using enum Suit;
-		case Manzu: io_out << static_cast< int >( tile.m_value.m_val ) << "m"; return io_out;
-		case Pinzu: io_out << static_cast< int >( tile.m_value.m_val ) << "p"; return io_out;
-		case Souzu: io_out << static_cast< int >( tile.m_value.m_val ) << "s"; return io_out;
+		case Manzu: io_out << static_cast< int >( ValueOf( tile.m_number ) ) << "m"; return io_out;
+		case Pinzu: io_out << static_cast< int >( ValueOf( tile.m_number ) ) << "p"; return io_out;
+		case Souzu: io_out << static_cast< int >( ValueOf( tile.m_number ) ) << "s"; return io_out;
 		}
 		break;
 	}

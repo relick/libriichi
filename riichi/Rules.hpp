@@ -21,7 +21,7 @@ struct Rules
 	virtual ~Rules() = default;
 
 	// Main settings
-	virtual PlayerCount GetPlayerCount() const = 0;
+	virtual size_t GetPlayerCount() const = 0;
 	virtual Points InitialPoints() const = 0;
 	virtual Points RiichiBet() const = 0;
 	virtual Vector<Tile> const& Tileset() const = 0;
@@ -54,7 +54,7 @@ struct Rules
 	virtual bool NoMoreRounds( Table const& i_table, Round const& i_previousRound ) const = 0;
 	virtual bool RepeatRound( Round const& i_previousRound ) const = 0;
 	virtual bool ShouldAddHonba( Round const& i_previousRound ) const = 0;
-	// TODO-RULES: special draw actions (9-honor hand, 4 discarded winds, 5 kantsu)
+	// TODO-RULES: special draw actions (9-honour hand, 4 discarded winds, 5 kantsu)
 
 	// Scoring
 	virtual Pair<Points, Points> PotPoints( size_t i_honbaSticks, size_t i_riichiSticks, bool i_isTsumo, size_t i_winners ) const = 0; // 1: paid by losers, 2: gained by winners

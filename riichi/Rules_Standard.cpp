@@ -72,9 +72,9 @@ StandardYonmaCore::StandardYonmaCore
 	{
 		for ( Suit suit : Suits{} )
 		{
-			for ( SuitTileValue val : SuitTileValue::InclusiveRange( SuitTileValue::Min, SuitTileValue::Max ) )
+			for ( Number num : Numbers{} )
 			{
-				m_tileSet.emplace_back( SuitTile{ suit, val }, tileID++ );
+				m_tileSet.emplace_back( SuitTile{ suit, num }, tileID++ );
 			}
 		}
 
@@ -332,22 +332,21 @@ HandScore StandardYonmaCore::CalculateBasicPoints
 	Points fu = 20;
 
 	// Koutsu/kantsu
-	auto fnIsHonorOrTerminal = []( Tile const& i_tile )
-	{
-		return i_tile.Type() != TileType::Suit
-			|| i_tile.Get<TileType::Suit>().m_value == SuitTileValue::Min
-			|| i_tile.Get<TileType::Suit>().m_value == SuitTileValue::Max;
-	};
-
 	for ( HandGroup const& group : maxInterp->m_groups )
 	{
-		if ( group.Type() == GroupType::Triplet )
+		if ( TripletCompatible( group.Type() ) )
 		{
-			fu += ( fnIsHonorOrTerminal( group[ 0 ] ) ? 4 : 2 ) * ( group.Open() ? 2 : 1 );
-		}
-		else if ( group.Type() == GroupType::Quad || group.Type() == GroupType::UpgradedQuad )
-		{
-			fu += ( fnIsHonorOrTerminal( group[ 0 ] ) ? 16 : 8 ) * ( group.Open() ? 2 : 1 );
+			fu += 2 // all triplet/quad groups get at least 2 fu
+				* ( group.Open() ? 1 : 2 ) // doubled if closed
+				* ( group.Type() == GroupType::Triplet ? 1 : 4 ) // quadrupled if a quad
+				* ( group[ 0 ].IsHonourOrTerminal() ? 2 : 1 ) // doubled if honour or terminal
+			;
+			// i.e.
+			//                 simples  terminals/honours
+			// open triplet          2                  4
+			// closed triplet        4                  8
+			// open quad             8                 16
+			// closed quad          16                 32
 		}
 	}
 
@@ -375,7 +374,7 @@ HandScore StandardYonmaCore::CalculateBasicPoints
 	}
 	case Shanpon:
 	{
-		fu += fnIsHonorOrTerminal( i_lastTile.m_tile ) ? 8 : 4;
+		fu += i_lastTile.m_tile.IsHonourOrTerminal() ? 8 : 4;
 		break;
 	}
 	}
@@ -576,7 +575,7 @@ Pair<Points, Points> StandardYonmaCore::PointsEachPlayerInTenpaiDraw
 		return { 0, 0 };
 	}
 
-	size_t const playerCount = GetPlayerCount().Get();
+	size_t const playerCount = GetPlayerCount();
 	size_t const playersNotInTenpai = playerCount - i_playersInTenpai;
 	size_t const pointsAvailable = playersNotInTenpai * 1000;
 	Points const pointsGainedPerTenpaiPlayer = static_cast< Points >( pointsAvailable / i_playersInTenpai );

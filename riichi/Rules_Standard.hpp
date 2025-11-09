@@ -14,7 +14,7 @@ class StandardYonmaCore
 public:
 	StandardYonmaCore();
 
-	PlayerCount GetPlayerCount() const override { return 4_Players; }
+	size_t GetPlayerCount() const override { return 4_Players; }
 	Points InitialPoints() const override { return 25'000; }
 	Points RiichiBet() const override { return 1'000; }
 	Vector<Tile> const& Tileset() const override { return m_tileSet; }

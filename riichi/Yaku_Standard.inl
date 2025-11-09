@@ -50,18 +50,7 @@ HanValue Tanyao<t_KuitanEnabled>::CalculateValue
 template<bool t_KuitanEnabled>
 /*static*/ bool Tanyao<t_KuitanEnabled>::InvalidTile( Tile const& i_tile )
 {
-	if ( i_tile.Type() != TileType::Suit )
-	{
-		return true;
-	}
-
-	SuitTile const& suitTile = i_tile.template Get<TileType::Suit>();
-	if ( suitTile.m_value == 1 || suitTile.m_value == 9 )
-	{
-		return true;
-	}
-
-	return false;
+	return i_tile.IsHonourOrTerminal();
 }
 
 //------------------------------------------------------------------------------

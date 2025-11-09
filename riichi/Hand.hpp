@@ -117,7 +117,7 @@ public:
 	bool Open() const { return m_open; }
 	TileType TilesType() const;
 	Suit CommonSuit() const;
-	SuitTileValue CommonSuitTileValue() const;
+	Number CommonNumber() const;
 };
 
 //------------------------------------------------------------------------------

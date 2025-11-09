@@ -80,9 +80,9 @@ namespace Riichi
 	}
 
 	// If not shanpon then work out the type of sequence wait, if there is one
-	if ( io_interpToSet.m_ungrouped.front().Type() != TileType::Suit || io_interpToSet.m_ungrouped.back().Type() != TileType::Suit )
+	if ( io_interpToSet.m_ungrouped.front().IsHonour() || io_interpToSet.m_ungrouped.back().IsHonour() )
 	{
-		// Different tile types, no wait
+		// Already know they're not matching tiles, so if not both suits then there is no wait
 		return;
 	}
 
@@ -96,34 +96,34 @@ namespace Riichi
 	}
 
 	// Tiles are sorted so this should always be a valid thing to ask - tile2 is either 1 or 2 above tile1
-	if ( tile2.m_value == tile1.m_value + SuitTileValue::Set<1>() )
+	if ( tile2.m_number == tile1.m_number + 1 )
 	{
-		if ( tile1.m_value == SuitTileValue::Min )
+		if ( tile1.m_number == Number::One )
 		{
 			// Bottom edge
 			io_interpToSet.m_waitType = WaitType::Penchan;
-			io_interpToSet.m_waits.insert( SuitTile{ tile2.m_suit, tile2.m_value + SuitTileValue::Set<1>() } );
+			io_interpToSet.m_waits.insert( SuitTile{ tile2.m_suit, tile2.m_number + 1 } );
 			return;
 		}
-		else if ( tile2.m_value == SuitTileValue::Max )
+		else if ( tile2.m_number == Number::Nine )
 		{
 			// Top edge
 			io_interpToSet.m_waitType = WaitType::Penchan;
-			io_interpToSet.m_waits.insert( SuitTile{ tile1.m_suit, tile1.m_value - SuitTileValue::Set<1>() } );
+			io_interpToSet.m_waits.insert( SuitTile{ tile1.m_suit, tile1.m_number - 1 } );
 			return;
 		}
 
 		// Open
 		io_interpToSet.m_waitType = WaitType::Ryanmen;
-		io_interpToSet.m_waits.insert( SuitTile{ tile1.m_suit, tile1.m_value - SuitTileValue::Set<1>() } );
-		io_interpToSet.m_waits.insert( SuitTile{ tile2.m_suit, tile2.m_value + SuitTileValue::Set<1>() } );
+		io_interpToSet.m_waits.insert( SuitTile{ tile1.m_suit, tile1.m_number - 1 } );
+		io_interpToSet.m_waits.insert( SuitTile{ tile2.m_suit, tile2.m_number + 1 } );
 		return;
 	}
-	else if ( tile2.m_value == tile1.m_value + SuitTileValue::Set<2>() )
+	else if ( tile2.m_number == tile1.m_number + 2 )
 	{
 		// Middle wait
 		io_interpToSet.m_waitType = WaitType::Kanchan;
-		io_interpToSet.m_waits.insert( SuitTile{ tile1.m_suit, tile1.m_value + SuitTileValue::Set<1>() } );
+		io_interpToSet.m_waits.insert( SuitTile{ tile1.m_suit, tile1.m_number + 1 } );
 		return;
 	}
 
@@ -223,7 +223,7 @@ namespace Riichi
 		if ( tile.Type() == TileType::Suit )
 		{
 			SuitTile const& suitTile = tile.Get<TileType::Suit>();
-			if ( suitTile.m_value >= SuitTileValue::Max - SuitTileValue::Set<1>() )
+			if ( suitTile.m_number >= Number::Eight )
 			{
 				// Can't find two tiles of higher value as this one is already too high
 				continue;
@@ -235,7 +235,7 @@ namespace Riichi
 				if ( tile2.Type() == TileType::Suit )
 				{
 					SuitTile const& suitTile2 = tile2.Get<TileType::Suit>();
-					if ( suitTile.m_suit == suitTile2.m_suit && suitTile2.m_value == suitTile.m_value + SuitTileValue::Set<1>() )
+					if ( suitTile.m_suit == suitTile2.m_suit && suitTile2.m_number == suitTile.m_number + 1 )
 					{
 						// Found second tile, try for third
 						for ( size_t tile3I = tile2I + 1; tile3I < i_sortedRemaining.size(); ++tile3I )
@@ -244,7 +244,7 @@ namespace Riichi
 							if ( tile3.Type() == TileType::Suit )
 							{
 								SuitTile const& suitTile3 = tile3.Get<TileType::Suit>();
-								if ( suitTile.m_suit == suitTile3.m_suit && suitTile3.m_value == suitTile2.m_value + SuitTileValue::Set<1>() )
+								if ( suitTile.m_suit == suitTile3.m_suit && suitTile3.m_number == suitTile2.m_number + 1 )
 								{
 									// Found three tiles
 									HandInterpretation withSeq = i_soFar;
@@ -377,16 +377,6 @@ void ThirteenOrphansInterpreter::AddInterpretations
 		return;
 	}
 
-	auto fnRequiredTile = []( Tile const& i_tile )
-	{
-		if ( i_tile.Type() != TileType::Suit )
-		{
-			return true;
-		}
-		SuitTile const& suitTile = i_tile.Get<TileType::Suit>();
-		return suitTile.m_value == 1 || suitTile.m_value == 9;
-	};
-
 	// We're going to add all free tiles to the ungrouped list
 	// But then assess the waits based on if we actually have kokushi musou
 	HandInterpretation interp = i_fixedPart;
@@ -395,12 +385,12 @@ void ThirteenOrphansInterpreter::AddInterpretations
 	// TODO-OPT: Can we do this without filling a container?
 
 	Vector<Tile> requiredTiles{
-		SuitTile{ Suit::Manzu, SuitTileValue::Min },
-		SuitTile{ Suit::Manzu, SuitTileValue::Max },
-		SuitTile{ Suit::Pinzu, SuitTileValue::Min },
-		SuitTile{ Suit::Pinzu, SuitTileValue::Max },
-		SuitTile{ Suit::Souzu, SuitTileValue::Min },
-		SuitTile{ Suit::Souzu, SuitTileValue::Max },
+		SuitTile{ Suit::Manzu, Number::One },
+		SuitTile{ Suit::Manzu, Number::Nine },
+		SuitTile{ Suit::Pinzu, Number::One },
+		SuitTile{ Suit::Pinzu, Number::Nine },
+		SuitTile{ Suit::Souzu, Number::One },
+		SuitTile{ Suit::Souzu, Number::Nine },
 		DragonTileType::White,
 		DragonTileType::Green,
 		DragonTileType::Red,
@@ -412,7 +402,7 @@ void ThirteenOrphansInterpreter::AddInterpretations
 
 	for ( Tile const& tile : interp.m_ungrouped )
 	{
-		if ( !fnRequiredTile( tile ) )
+		if ( !tile.IsHonourOrTerminal() )
 		{
 			// We have an invalid tile for 13 orphans, so definitely no waits here
 			io_interps.push_back( std::move( interp ) );

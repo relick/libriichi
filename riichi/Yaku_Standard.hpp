@@ -220,9 +220,7 @@ DECLARE_YAKU( Chinitsu, Standard );
 // THIRTEEN ORPHANS
 // 19m19s19p1234567z + any terminal/honor, closed only
 //------------------------------------------------------------------------------
-BEGIN_YAKU( KokushiMusou, ThirteenOrphans )
-	static bool RequiredTile( Tile const& i_tile );
-END_YAKU();
+DECLARE_YAKU( KokushiMusou, ThirteenOrphans );
 
 //------------------------------------------------------------------------------
 // Any 4 concealed triplets or quads in hand

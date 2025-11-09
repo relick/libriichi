@@ -148,7 +148,7 @@ Vector<Pair<Tile, Tile>> Hand::ChiOptions
 	Tile const& i_tile
 )	const
 {
-	if ( i_tile.Type() != TileType::Suit )
+	if ( i_tile.IsHonour() )
 	{
 		// Cannot chi if not suit tile
 		return {};
@@ -195,24 +195,24 @@ Vector<Pair<Tile, Tile>> Hand::ChiOptions
 		tiles2.clear();
 	};
 
-	if ( suitTile.m_value <= SuitTileValue::Max - SuitTileValue::Set<2>() )
+	if ( suitTile.m_number <= Number::Seven )
 	{
-		SuitTile const oneUp{ suitTile.m_suit, suitTile.m_value + SuitTileValue::Set<1>() };
-		SuitTile const twoUp{ suitTile.m_suit, suitTile.m_value + SuitTileValue::Set<2>() };
+		SuitTile const oneUp{ suitTile.m_suit, suitTile.m_number + 1 };
+		SuitTile const twoUp{ suitTile.m_suit, suitTile.m_number + 2 };
 		fnSearchForTiles( oneUp, twoUp );
 	}
 
-	if ( suitTile.m_value >= SuitTileValue::Min + SuitTileValue::Set<1>() && suitTile.m_value <= SuitTileValue::Max - SuitTileValue::Set<1>() )
+	if ( suitTile.m_number >= Number::Two && suitTile.m_number <= Number::Eight )
 	{
-		SuitTile const oneDown{ suitTile.m_suit, suitTile.m_value - SuitTileValue::Set<1>() };
-		SuitTile const oneUp{ suitTile.m_suit, suitTile.m_value + SuitTileValue::Set<1>() };
+		SuitTile const oneDown{ suitTile.m_suit, suitTile.m_number - 1 };
+		SuitTile const oneUp{ suitTile.m_suit, suitTile.m_number + 1 };
 		fnSearchForTiles( oneDown, oneUp );
 	}
 
-	if ( suitTile.m_value >= SuitTileValue::Min + SuitTileValue::Set<2>() )
+	if ( suitTile.m_number >= Number::Three )
 	{
-		SuitTile const twoDown{ suitTile.m_suit, suitTile.m_value - SuitTileValue::Set<2>() };
-		SuitTile const oneDown{ suitTile.m_suit, suitTile.m_value - SuitTileValue::Set<1>() };
+		SuitTile const twoDown{ suitTile.m_suit, suitTile.m_number - 2 };
+		SuitTile const oneDown{ suitTile.m_suit, suitTile.m_number - 1 };
 		fnSearchForTiles( twoDown, oneDown );
 	}
 
@@ -307,7 +307,7 @@ std::ostream& operator<<( std::ostream& io_out, Hand const& i_hand )
 					fnPrintSuit( lastSuit.value() );
 				}
 				lastSuit = tile.Get<TileType::Suit>().m_suit;
-				io_out << static_cast< int >( tile.Get<TileType::Suit>().m_value.m_val );
+				io_out << static_cast< int >( ValueOf( tile.Get<TileType::Suit>().m_number ) );
 			}
 			else
 			{
@@ -422,12 +422,12 @@ Suit HandGroup::CommonSuit
 }
 
 //------------------------------------------------------------------------------
-SuitTileValue HandGroup::CommonSuitTileValue
+Number HandGroup::CommonNumber
 (
 )	const
 {
-	riEnsure( TilesType() == TileType::Suit, "Cannot call CommonSuitTileValue when not a suit group" );
-	return m_tiles.front().Get<TileType::Suit>().m_value;
+	riEnsure( TilesType() == TileType::Suit, "Cannot call CommonNumber when not a suit group" );
+	return m_tiles.front().Get<TileType::Suit>().m_number;
 }
 
 //------------------------------------------------------------------------------
@@ -448,20 +448,15 @@ HandAssessment::HandAssessment
 		[ this ]( Tile const& tile )
 		{
 			m_containsTileType[ tile.Type() ] = true;
-
+			m_containsHonours |= tile.IsHonour();
+			m_containsTerminals |= tile.IsTerminal();
 			if ( tile.Type() == TileType::Suit )
 			{
-				SuitTile const& suitTile = tile.Get<TileType::Suit>();
-				m_containsSuit[ suitTile.m_suit ] = true;
-				if ( suitTile.m_value == 1 || suitTile.m_value == 9 )
-				{
-					m_containsTerminals = true;
-				}
+				m_containsSuit[ tile.Get<TileType::Suit>().m_suit ] = true;
 			}
 		}
 	);
 
-	m_containsHonours = m_containsTileType[ TileType::Dragon ] || m_containsTileType[ TileType::Wind ];
 
 	// Finally, make possible hand interpretations
 	// Start by setting up the fixed part determined by the melds

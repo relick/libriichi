@@ -317,13 +317,7 @@ HanValue Chantaiyao::CalculateValue
 
 /*static*/ bool Chantaiyao::RequiredTile( Tile const& i_tile )
 {
-	if ( i_tile.Type() != TileType::Suit )
-	{
-		return true;
-	}
-
-	SuitTile const& suitTile = i_tile.Get<TileType::Suit>();
-	return suitTile.m_value == 1 || suitTile.m_value == 9;
+	return i_tile.IsHonourOrTerminal();
 }
 
 //------------------------------------------------------------------------------
@@ -395,8 +389,8 @@ HanValue SanshokuDoujun::CalculateValue
 		[]( auto const& i_tileSet )
 		{
 			auto const& [tileA, tileB, tileC] = i_tileSet;
-			return tileA.template Get<TileType::Suit>().m_value == tileB.template Get<TileType::Suit>().m_value
-				&& tileB.template Get<TileType::Suit>().m_value == tileC.template Get<TileType::Suit>().m_value;
+			return tileA.template Get<TileType::Suit>().m_number == tileB.template Get<TileType::Suit>().m_number
+				&& tileB.template Get<TileType::Suit>().m_number == tileC.template Get<TileType::Suit>().m_number;
 		}
 	);
 }
@@ -409,6 +403,13 @@ HanValue Ikkitsuukan::CalculateValue
 {
 	// This one isn't so bad. We'll make a matrix of suit x sequence and just search for all the groups we need
 
+	static constexpr Array<Number, 3> c_requiredSequenceStarts
+	{
+		Number::One,
+		Number::Four,
+		Number::Seven,
+	};
+
 	Utils::EnumIndexedArray<Array<bool, 3>, Suit, c_suitCount> groupsPerSuit{};
 
 	auto fnEvalGroup = [ &groupsPerSuit ]( HandGroup const& i_group )
@@ -420,10 +421,10 @@ HanValue Ikkitsuukan::CalculateValue
 
 		for ( size_t i = 0; i < 3; ++i )
 		{
-			if ( i_group[ 0 ].Get<TileType::Suit>().m_value == SuitTileValue::Set<1>() + ( SuitTileValue::Set<3>() * i )
-				&& i_group[ 1 ].Get<TileType::Suit>().m_value == SuitTileValue::Set<2>() + ( SuitTileValue::Set<3>() * i )
-				&& i_group[ 2 ].Get<TileType::Suit>().m_value == SuitTileValue::Set<3>() + ( SuitTileValue::Set<3>() * i ) )
+			if ( i_group[ 0 ].Get<TileType::Suit>().m_number == c_requiredSequenceStarts[ i ] )
 			{
+				riEnsure( i_group[ 1 ].Get<TileType::Suit>().m_number == c_requiredSequenceStarts[ i ] + 1, "Invalid sequence provided" );
+				riEnsure( i_group[ 2 ].Get<TileType::Suit>().m_number == c_requiredSequenceStarts[ i ] + 2, "Invalid sequence provided" );
 				groupsPerSuit[ i_group.CommonSuit() ][ i ] = true;
 				break;
 			}
@@ -571,7 +572,7 @@ HanValue SanshokuDoukou::CalculateValue
 	}
 
 	// Check values match
-	return i_a.CommonSuitTileValue() == i_b.CommonSuitTileValue() && i_b.CommonSuitTileValue() == i_c.CommonSuitTileValue();
+	return i_a.CommonNumber() == i_b.CommonNumber() && i_b.CommonNumber() == i_c.CommonNumber();
 }
 
 //------------------------------------------------------------------------------
@@ -656,13 +657,7 @@ HanValue Honroutou::CalculateValue
 
 /*static*/ bool Honroutou::ValidTile( Tile const& i_tile )
 {
-	if ( i_tile.Type() != TileType::Suit )
-	{
-		return true;
-	}
-
-	SuitTile const& suitTile = i_tile.Get<TileType::Suit>();
-	return suitTile.m_value == 1 || suitTile.m_value == 9;
+	return i_tile.IsHonourOrTerminal();
 }
 
 //------------------------------------------------------------------------------
@@ -745,7 +740,7 @@ HanValue JunchanTaiyao::CalculateValue
 )	const
 {
 	// Only suit groups possible in a junchan hand
-	if ( i_assessment.m_containsHonours || i_lastTile.m_tile.Type() != TileType::Suit )
+	if ( i_assessment.m_containsHonours || i_lastTile.m_tile.IsHonour() )
 	{
 		return NoYaku;
 	}
@@ -770,13 +765,7 @@ HanValue JunchanTaiyao::CalculateValue
 
 /*static*/ bool JunchanTaiyao::RequiredTile( Tile const& i_tile )
 {
-	if ( i_tile.Type() != TileType::Suit )
-	{
-		return false;
-	}
-
-	SuitTile const& suitTile = i_tile.Get<TileType::Suit>();
-	return suitTile.m_value == 1 || suitTile.m_value == 9;
+	return i_tile.IsTerminal();
 }
 
 //------------------------------------------------------------------------------
@@ -857,7 +846,7 @@ HanValue Chinitsu::CalculateValue
 	YAKU_CALCULATEVALUE_PARAMS()
 )	const
 {
-	if ( i_assessment.m_containsHonours || i_lastTile.m_tile.Type() != TileType::Suit )
+	if ( i_assessment.m_containsHonours || i_lastTile.m_tile.IsHonour() )
 	{
 		return NoYaku;
 	}
@@ -885,14 +874,17 @@ HanValue KokushiMusou::CalculateValue
 	YAKU_CALCULATEVALUE_PARAMS()
 )	const
 {
-	if ( i_assessment.m_open )
+	if ( i_assessment.m_open
+		|| !ranges::all_of( i_assessment.m_containsTileType, std::identity{} )
+		|| !ranges::all_of( i_assessment.m_containsSuit, std::identity{} )
+		)
 	{
 		return NoYaku;
 	}
 
 	// TODO-OPT: Can we do this without filling a container?
 
-	// Sufficient to check that all tiles are terminals/honors and that the distinct tile count >= 13
+	// Sufficient to check that all tiles are terminals/honours and that the distinct tile count >= 13
 	Set<Tile> uniqueTiles;
 	uniqueTiles.reserve( 14 );
 
@@ -900,7 +892,7 @@ HanValue KokushiMusou::CalculateValue
 	{
 		for ( Tile const& tile : group.Tiles() )
 		{
-			if ( !RequiredTile( tile ) )
+			if ( !tile.IsHonourOrTerminal() )
 			{
 				return NoYaku;
 			}
@@ -910,7 +902,7 @@ HanValue KokushiMusou::CalculateValue
 
 	for ( Tile const& tile : i_interp.m_ungrouped )
 	{
-		if ( !RequiredTile( tile ) )
+		if ( !tile.IsHonourOrTerminal() )
 		{
 			return NoYaku;
 		}
@@ -918,7 +910,7 @@ HanValue KokushiMusou::CalculateValue
 	}
 
 	// And finally the big tile itself
-	if ( !RequiredTile( i_lastTile.m_tile ) )
+	if ( !i_lastTile.m_tile.IsHonourOrTerminal() )
 	{
 		return NoYaku;
 	}
@@ -930,16 +922,6 @@ HanValue KokushiMusou::CalculateValue
 	}
 
 	return NoYaku;
-}
-
-/*static*/ bool KokushiMusou::RequiredTile( Tile const& i_tile )
-{
-	if ( i_tile.Type() != TileType::Suit )
-	{
-		return true;
-	}
-	SuitTile const& suitTile = i_tile.Get<TileType::Suit>();
-	return suitTile.m_value == 1 || suitTile.m_value == 9;
 }
 
 //------------------------------------------------------------------------------
@@ -1114,7 +1096,7 @@ HanValue Chinroutou::CalculateValue
 	YAKU_CALCULATEVALUE_PARAMS()
 )	const
 {
-	if ( i_assessment.m_containsHonours || !i_assessment.m_containsTerminals || i_lastTile.m_tile.Type() != TileType::Suit )
+	if ( i_assessment.m_containsHonours || !i_assessment.m_containsTerminals || i_lastTile.m_tile.IsHonour() || !i_lastTile.m_tile.IsTerminal() )
 	{
 		return NoYaku;
 	}
@@ -1138,8 +1120,7 @@ HanValue Chinroutou::CalculateValue
 
 /*static*/ bool Chinroutou::RequiredTile( Tile const& i_tile )
 {
-	SuitTile const& suitTile = i_tile.Get<TileType::Suit>();
-	return suitTile.m_value == 1 || suitTile.m_value == 9;
+	return i_tile.IsTerminal();
 }
 
 //------------------------------------------------------------------------------
@@ -1182,11 +1163,11 @@ HanValue Ryuuiisou::CalculateValue
 	{
 		// Already checked tile is souzu
 		SuitTile const& suitTile = i_tile.Get<TileType::Suit>();
-		return suitTile.m_value == 2
-			|| suitTile.m_value == 3
-			|| suitTile.m_value == 4
-			|| suitTile.m_value == 6
-			|| suitTile.m_value == 8
+		return suitTile.m_number == Number::Two
+			|| suitTile.m_number == Number::Three
+			|| suitTile.m_number == Number::Four
+			|| suitTile.m_number == Number::Six
+			|| suitTile.m_number == Number::Eight
 			;
 	}
 
@@ -1200,7 +1181,7 @@ HanValue ChuurenPoutou::CalculateValue
 	YAKU_CALCULATEVALUE_PARAMS()
 )	const
 {
-	if ( i_assessment.m_open || i_assessment.m_containsHonours || i_lastTile.m_tile.Type() != TileType::Suit )
+	if ( i_assessment.m_open || i_assessment.m_containsHonours || i_lastTile.m_tile.IsHonour() )
 	{
 		return NoYaku;
 	}
@@ -1219,7 +1200,7 @@ HanValue ChuurenPoutou::CalculateValue
 		{
 			return false;
 		}
-		--requiredOfEachValue[ i_tile.Get<TileType::Suit>().m_value ];
+		--requiredOfEachValue[ IndexOf( i_tile.Get<TileType::Suit>().m_number ) ];
 		return true;
 	};
 
