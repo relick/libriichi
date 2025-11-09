@@ -307,7 +307,7 @@ std::ostream& operator<<( std::ostream& io_out, Hand const& i_hand )
 					fnPrintSuit( lastSuit.value() );
 				}
 				lastSuit = tile.Get<TileType::Suit>().m_suit;
-				io_out << static_cast< int >( ValueOf( tile.Get<TileType::Suit>().m_number ) );
+				io_out << static_cast< int >( tile.Get<TileType::Suit>().m_number );
 			}
 			else
 			{

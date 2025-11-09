@@ -26,54 +26,104 @@ namespace Riichi::Utils
 //------------------------------------------------------------------------------
 struct NullType{};
 
+template<auto t_EnumMin, auto t_EnumMax>
+concept ValidEnumMinMax = requires {
+	requires std::is_enum_v<decltype( t_EnumMin )>;
+	requires std::same_as<decltype( t_EnumMin ), decltype( t_EnumMax )>;
+	requires t_EnumMin <= t_EnumMax;
+};
+
 //------------------------------------------------------------------------------
-template<typename T_Enum, size_t t_EnumEnd, size_t t_EnumBegin = 0>
+template<auto t_EnumMin, auto t_EnumMax>
+	requires ValidEnumMinMax<t_EnumMin, t_EnumMax>
 struct EnumRange
 {
+	using T_Enum = decltype( t_EnumMin );
+
+	static constexpr T_Enum Min() { return t_EnumMin; }
+	static constexpr T_Enum Max() { return t_EnumMax; }
+	static constexpr size_t Count() { return static_cast< size_t >( Max() ) + 1 - static_cast< size_t >( Min() ); }
+
+	static constexpr size_t BeginValue() { return static_cast< size_t >( Min() ); }
+	static constexpr size_t EndValue() { return BeginValue() + Count(); }
+
+	static T_Enum IndexToValue( size_t i_index )
+	{
+		riEnsure( i_index < Count(), "Index too large for enum range" );
+		return static_cast< T_Enum >( i_index + BeginValue() );
+	}
+
+	static size_t ValueToIndex( T_Enum i_value )
+	{
+		riEnsure( i_value >= Min(), "Enum value too small for enum range" );
+		riEnsure( i_value <= Max(), "Enum value too large for enum range" );
+		return static_cast< size_t >( i_value ) - BeginValue();
+	}
+
 	struct EnumIter
 	{
-		size_t m_enumPos{ t_EnumEnd };
+		size_t m_enumPos{ EndValue() };
 
 		void operator++() { ++m_enumPos; }
 		T_Enum operator*() { return ( T_Enum )m_enumPos; }
 		bool operator!=( EnumIter const& b ) const { return m_enumPos != b.m_enumPos; }
 	};
 
-	static EnumIter begin() { return EnumIter{ t_EnumBegin }; }
-	static EnumIter end() { return EnumIter{ t_EnumEnd }; }
+	static constexpr EnumIter begin() { return EnumIter{ BeginValue() }; }
+	static constexpr EnumIter end() { return EnumIter{ EndValue() }; }
+};
+
+template<typename T_EnumRange>
+concept ValidEnumRange = requires {
+	T_EnumRange::Min();
+	T_EnumRange::Max();
+	{ T_EnumRange::Count() } -> std::convertible_to<size_t>;
+	{ T_EnumRange::BeginValue() } -> std::convertible_to<size_t>;
+	{ T_EnumRange::EndValue() } -> std::convertible_to<size_t>;
+	requires ValidEnumMinMax<T_EnumRange::Min(), T_EnumRange::Max()>;
 };
 
 //------------------------------------------------------------------------------
-template<typename T_Value, typename T_Enum, size_t t_EnumCount>
-struct EnumIndexedArray
+template<typename T_Value, typename T_EnumRange>
+	requires ValidEnumRange<T_EnumRange>
+struct EnumArray
 {
-	Array<T_Value, t_EnumCount> data;
-	T_Value& operator[]( T_Enum e ) { return data[ ( size_t )e ]; }
-	T_Value const& operator[]( T_Enum e ) const { return data[ ( size_t )e ]; }
-	auto begin() const { return data.begin(); }
-	auto end() const { return data.end(); }
+	using T_Enum = T_EnumRange::T_Enum;
+
+	static constexpr size_t Size() { return T_EnumRange::Count(); }
+
+	Array<T_Value, Size()> m_data;
+	T_Value& operator[]( T_Enum i_value ) { return m_data[ T_EnumRange::ValueToIndex( i_value ) ]; }
+	T_Value const& operator[]( T_Enum i_value ) const { return m_data[ T_EnumRange::ValueToIndex( i_value ) ]; }
+	auto begin() const { return m_data.begin(); }
+	auto end() const { return m_data.end(); }
 };
 
 //------------------------------------------------------------------------------
-template<typename T_Enum, size_t t_EnumCount>
+template<typename T_EnumRange>
+	requires ValidEnumRange<T_EnumRange>
 class EnumSet
 {
-	Utils::EnumIndexedArray<bool, T_Enum, t_EnumCount> m_enumVals{};
+public:
+	using T_Enum = T_EnumRange::T_Enum;
+
+private:
+	Utils::EnumArray<bool, T_EnumRange> m_enumVals{};
 	size_t m_size{ 0 }; // TODO-OPT: could also not have this member and instead do a count when Size() is called.
 
 public:
 	struct Iter
 	{
 		EnumSet const* m_set{ nullptr };
-		size_t m_enumPos{ t_EnumCount };
+		size_t m_enumPos{ T_EnumRange::EndValue() };
 
-		void operator++() { do { ++m_enumPos; } while ( m_enumPos < t_EnumCount && !m_set->Contains( ( T_Enum )m_enumPos ) ); }
+		void operator++() { do { ++m_enumPos; } while ( m_enumPos < T_EnumRange::EndValue() && !m_set->Contains( ( T_Enum )m_enumPos ) ); }
 		T_Enum operator*() { return ( T_Enum )m_enumPos; }
 		bool operator!=( Iter const& b ) const { return m_enumPos != b.m_enumPos; }
 	};
 
-	Iter begin() const { return Iter{ this, [ this ] { size_t pos = 0; while ( pos < t_EnumCount && !Contains( ( T_Enum )pos ) ) { ++pos; } return pos; }() }; }
-	Iter end() const { return Iter{ this, t_EnumCount }; }
+	Iter begin() const { return Iter{ this, [ this ] { size_t pos = T_EnumRange::BeginValue(); while ( pos < T_EnumRange::EndValue() && !Contains( ( T_Enum )pos ) ) { ++pos; } return pos; }() }; }
+	Iter end() const { return Iter{ this, T_EnumRange::EndValue() }; }
 
 	explicit EnumSet() = default;
 	explicit EnumSet( std::initializer_list<T_Enum> i_vals )
@@ -90,7 +140,7 @@ public:
 	bool Contains( T_Enum i_val ) const { return m_enumVals[ i_val ]; }
 	bool ContainsAllOf( EnumSet const& i_o ) const
 	{
-		for ( T_Enum val : EnumRange<T_Enum, t_EnumCount>{} )
+		for ( T_Enum val : T_EnumRange{} )
 		{
 			if ( !Contains( val ) && i_o.Contains( val ) )
 			{

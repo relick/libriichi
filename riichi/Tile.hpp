@@ -15,8 +15,7 @@ enum class TileType : EnumValueType
 	Dragon,
 	Wind,
 };
-inline constexpr size_t c_tileTypeCount = 3;
-using TileTypes = Utils::EnumRange<TileType, c_tileTypeCount>;
+using TileTypes = Utils::EnumRange<TileType::Suit, TileType::Wind>;
 
 //------------------------------------------------------------------------------
 enum class Suit : EnumValueType
@@ -25,8 +24,7 @@ enum class Suit : EnumValueType
 	Pinzu,
 	Souzu,
 };
-inline constexpr size_t c_suitCount = 3;
-using Suits = Utils::EnumRange<Suit, c_suitCount>;
+using Suits = Utils::EnumRange<Suit::Manzu, Suit::Souzu>;
 
 //------------------------------------------------------------------------------
 enum class Number : EnumValueType
@@ -41,15 +39,9 @@ enum class Number : EnumValueType
 	Eight    = 8,
 	Nine     = 9,
 };
-inline constexpr size_t c_numberCount = 9;
-using Numbers = Utils::EnumRange<Number, 10, 1>;
-
-inline constexpr EnumValueType ValueOf( Number i_num ) { return ( EnumValueType )i_num; }
-inline constexpr size_t IndexOf( Number i_num ) { return ValueOf( i_num ) - 1; }
-inline constexpr Number FromValue( EnumValueType i_int ) { Number num = ( Number )i_int; riEnsure( num >= Number::One && num <= Number::Nine, "Value needs to be within range" ); return num; }
-inline constexpr Number FromIndex( EnumValueType i_int ) { Number num = ( Number )( i_int + 1 ); riEnsure( num >= Number::One && num <= Number::Nine, "Value needs to be within range" ); return num; }
-inline constexpr Number operator+( Number i_num, size_t i_offset ) { return FromIndex( ( IndexOf( i_num ) + i_offset ) % c_numberCount ); }
-inline constexpr Number operator-( Number i_num, size_t i_offset ) { return FromIndex( ( IndexOf( i_num ) - ( i_offset % c_numberCount ) + c_numberCount ) % c_numberCount ); }
+using Numbers = Utils::EnumRange<Number::One, Number::Nine>;
+inline Number operator+( Number i_num, size_t i_offset ) { return Numbers::IndexToValue( ( Numbers::ValueToIndex( i_num ) + i_offset ) % Numbers::Count() ); }
+inline Number operator-( Number i_num, size_t i_offset ) { return Numbers::IndexToValue( ( Numbers::ValueToIndex( i_num ) - ( i_offset % Numbers::Count() ) + Numbers::Count() ) % Numbers::Count() ); }
 
 //------------------------------------------------------------------------------
 struct SuitTile
@@ -81,8 +73,7 @@ enum class DragonTileType : EnumValueType
 	Green,
 	Red,
 };
-inline constexpr size_t c_dragonTileTypeCount = 3;
-using DragonTileTypes = Utils::EnumRange<DragonTileType, c_dragonTileTypeCount>;
+using DragonTileTypes = Utils::EnumRange<DragonTileType::White, DragonTileType::Red>;
 
 
 //------------------------------------------------------------------------------
@@ -96,8 +87,7 @@ enum class WindTileType : EnumValueType
 	West,
 	North,
 };
-inline constexpr size_t c_windTileTypeCount = 4;
-using WindTileTypes = Utils::EnumRange<WindTileType, c_windTileTypeCount>;
+using WindTileTypes = Utils::EnumRange<WindTileType::East, WindTileType::North>;
 
 //------------------------------------------------------------------------------
 WindTileType NextTile( WindTileType i_tile );
@@ -193,7 +183,7 @@ struct std::hash<Riichi::Tile>
 		{
 			SuitTile const& suitTile = i_tile.Get<Suit>();
 			std::size_t h3 = std::hash<EnumValueType>{}( static_cast< EnumValueType >( suitTile.m_suit ) );
-			h2 = std::hash<uint8_t>{}( ValueOf( suitTile.m_number ) ) ^ ( h3 << 1 );
+			h2 = std::hash<uint8_t>{}( static_cast<uint8_t>( suitTile.m_number ) ) ^ ( h3 << 1 );
 			break;
 		}
 		case Dragon:

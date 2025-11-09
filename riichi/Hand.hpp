@@ -135,8 +135,8 @@ struct HandInterpretation
 //------------------------------------------------------------------------------
 struct HandAssessment
 {
-	Utils::EnumIndexedArray<bool, TileType, c_tileTypeCount> m_containsTileType{};
-	Utils::EnumIndexedArray<bool, Suit, c_suitCount> m_containsSuit{};
+	Utils::EnumArray<bool, TileTypes> m_containsTileType{};
+	Utils::EnumArray<bool, Suits> m_containsSuit{};
 	bool m_containsTerminals{ false }; // 1 or 9 of suit tiles
 	bool m_containsHonours{ false }; // wind or dragon
 	bool m_open{ false };

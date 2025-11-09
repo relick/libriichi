@@ -410,7 +410,7 @@ HanValue Ikkitsuukan::CalculateValue
 		Number::Seven,
 	};
 
-	Utils::EnumIndexedArray<Array<bool, 3>, Suit, c_suitCount> groupsPerSuit{};
+	Utils::EnumArray<Array<bool, 3>, Suits> groupsPerSuit{};
 
 	auto fnEvalGroup = [ &groupsPerSuit ]( HandGroup const& i_group )
 	{
@@ -1188,7 +1188,7 @@ HanValue ChuurenPoutou::CalculateValue
 
 	Suit const requiredSuit = i_lastTile.m_tile.Get<TileType::Suit>().m_suit;
 
-	Array<int, 9> requiredOfEachValue = {
+	Utils::EnumArray<int, Numbers> requiredOfEachValue = {
 		3, 1, 1,
 		1, 1, 1,
 		1, 1, 3,
@@ -1200,7 +1200,7 @@ HanValue ChuurenPoutou::CalculateValue
 		{
 			return false;
 		}
-		--requiredOfEachValue[ IndexOf( i_tile.Get<TileType::Suit>().m_number ) ];
+		--requiredOfEachValue[ i_tile.Get<TileType::Suit>().m_number ];
 		return true;
 	};
 

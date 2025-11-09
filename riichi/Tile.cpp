@@ -49,13 +49,7 @@ DragonTileType NextTile
 	DragonTileType i_tile
 )
 {
-	size_t index = ( size_t )i_tile;
-	++index;
-	if ( index == c_dragonTileTypeCount )
-	{
-		index = 0;
-	}
-	return ( DragonTileType )index;
+	return static_cast< DragonTileType >( ( static_cast< size_t >( i_tile ) + 1 ) % DragonTileTypes::Count() );
 }
 
 //------------------------------------------------------------------------------
@@ -64,13 +58,7 @@ WindTileType NextTile
 	WindTileType i_tile
 )
 {
-	size_t index = ( size_t )i_tile;
-	++index;
-	if ( index == c_windTileTypeCount )
-	{
-		index = 0;
-	}
-	return ( WindTileType )index;
+	return static_cast< WindTileType >( ( static_cast< size_t >( i_tile ) + 1 ) % WindTileTypes::Count() );
 }
 
 //------------------------------------------------------------------------------
@@ -138,9 +126,9 @@ std::ostream& operator<<( std::ostream& io_out, Tile const& i_tile )
 		switch ( tile.m_suit )
 		{
 			using enum Suit;
-		case Manzu: io_out << static_cast< int >( ValueOf( tile.m_number ) ) << "m"; return io_out;
-		case Pinzu: io_out << static_cast< int >( ValueOf( tile.m_number ) ) << "p"; return io_out;
-		case Souzu: io_out << static_cast< int >( ValueOf( tile.m_number ) ) << "s"; return io_out;
+		case Manzu: io_out << static_cast< int >( tile.m_number ) << "m"; return io_out;
+		case Pinzu: io_out << static_cast< int >( tile.m_number ) << "p"; return io_out;
+		case Souzu: io_out << static_cast< int >( tile.m_number ) << "s"; return io_out;
 		}
 		break;
 	}

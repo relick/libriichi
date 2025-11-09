@@ -52,15 +52,15 @@ int main()
 		{
 			if ( i_input[ 1 ] == 'm' )
 			{
-				return Riichi::SuitTile{Riichi::Suit::Manzu, Riichi::FromValue(( uint8_t )i_input[ 0 ] - '0')};
+				return Riichi::SuitTile{Riichi::Suit::Manzu, (Riichi::Number)(( uint8_t )i_input[ 0 ] - '0')};
 			}
 			else if ( i_input[ 1 ] == 'p' )
 			{
-				return Riichi::SuitTile{Riichi::Suit::Pinzu, Riichi::FromValue(( uint8_t )i_input[ 0 ] - '0')};
+				return Riichi::SuitTile{Riichi::Suit::Pinzu, (Riichi::Number)(( uint8_t )i_input[ 0 ] - '0')};
 			}
 			else if ( i_input[ 1 ] == 's' )
 			{
-				return Riichi::SuitTile{Riichi::Suit::Souzu, Riichi::FromValue(( uint8_t )i_input[ 0 ] - '0') };
+				return Riichi::SuitTile{Riichi::Suit::Souzu, (Riichi::Number)(( uint8_t )i_input[ 0 ] - '0')};
 			}
 		}
 		else if ( i_input == "east" )
