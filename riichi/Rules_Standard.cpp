@@ -570,16 +570,14 @@ Pair<Points, Points> StandardYonmaCore::PointsEachPlayerInTenpaiDraw
 	size_t i_playersInTenpai
 )	const
 {
-	if ( i_playersInTenpai == 0 )
+	if ( i_playersInTenpai == 0 || i_playersInTenpai == 4 )
 	{
 		return { 0, 0 };
 	}
 
-	size_t const playerCount = GetPlayerCount();
-	size_t const playersNotInTenpai = playerCount - i_playersInTenpai;
-	size_t const pointsAvailable = playersNotInTenpai * 1000;
-	Points const pointsGainedPerTenpaiPlayer = static_cast< Points >( pointsAvailable / i_playersInTenpai );
-	Points const pointsPaidPerNonTenpaiPlayer = static_cast< Points >( pointsAvailable / playersNotInTenpai );
+	size_t constexpr c_pointsAvailable = 3000;
+	Points const pointsGainedPerTenpaiPlayer = static_cast< Points >( c_pointsAvailable / i_playersInTenpai );
+	Points const pointsPaidPerNonTenpaiPlayer = static_cast< Points >( c_pointsAvailable / ( GetPlayerCount() - i_playersInTenpai ) );
 
 	return { pointsGainedPerTenpaiPlayer, pointsPaidPerNonTenpaiPlayer };
 }
