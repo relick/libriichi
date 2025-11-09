@@ -96,7 +96,7 @@ int main()
 	};
 
 	int loopCount = 0;
-	// TODO: Let's start with the manual loop + manual switch approach
+	// TODO-DEBT: Let's start with the manual loop + manual switch approach
 	// then see if we can tidy it up with something better later
 	do
 	{
