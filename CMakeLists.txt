@@ -22,20 +22,55 @@ target_compile_options (libriichi_common_flags INTERFACE
 set (CMAKE_TRY_COMPILE_TARGET_TYPE "STATIC_LIBRARY")
 
 # Library
-set(LIBRIICHI_SOURCE
- "riichi/Hand.cpp"
- "riichi/HandInterpreter.cpp"
- "riichi/Round.cpp"
- "riichi/Table.cpp"
- "riichi/TableState.cpp"
- "riichi/Tile.cpp"
- "riichi/HandInterpreter_Standard.cpp"
- "riichi/Yaku_Standard.cpp"
- "riichi/Rules_Standard.cpp"
+add_library(libriichi STATIC)
+target_sources(libriichi PUBLIC FILE_SET HEADERS FILES
+	# Library Support
+	riichi/Base.hpp
+	riichi/Containers.hpp
+	riichi/Random.hpp
+	riichi/Utils.hpp
+
+	# Riichi Mahjong Engine
+	riichi/Declare.hpp
+	riichi/Hand.hpp
+	riichi/Hand.inl
+	riichi/HandInterpreter.hpp
+	riichi/NamedUnion.hpp
+	riichi/Player.hpp
+	riichi/PlayerCount.hpp
+	riichi/Round.hpp
+	riichi/Rules.inl
+	riichi/Seat.hpp
+	riichi/Table.hpp
+	riichi/Table.inl
+	riichi/TableEvent.hpp
+	riichi/TableState.hpp
+	riichi/Tile.hpp
+	riichi/Yaku.hpp
+
+	# Example Riichi implementation
+	riichi/Declare_Standard.hpp
+	riichi/HandInterpreter_Standard.hpp
+	riichi/Rules_Standard.hpp
+	riichi/Rules_Standard.inl
+	riichi/Yaku_Standard.hpp
+	riichi/Yaku_Standard.inl
 )
-add_library(libriichi STATIC ${LIBRIICHI_SOURCE})
+target_sources(libriichi PRIVATE
+	# Riichi Mahjong Engine
+	riichi/Hand.cpp
+	riichi/HandInterpreter.cpp
+	riichi/Round.cpp
+	riichi/Table.cpp
+	riichi/TableState.cpp
+	riichi/Tile.cpp
+	
+	# Example Riichi implementation
+	riichi/HandInterpreter_Standard.cpp
+	riichi/Yaku_Standard.cpp
+	riichi/Rules_Standard.cpp
+)
 target_link_libraries(libriichi PRIVATE libriichi_common_flags)
-target_include_directories(libriichi PUBLIC ".")
 target_include_directories(libriichi PUBLIC "range-v3/include")
 
 # Demo
