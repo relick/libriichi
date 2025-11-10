@@ -65,25 +65,34 @@ StandardYonmaCore::StandardYonmaCore
 		m_yaku.emplace_back( std::make_unique<Chihou>() );
 	}
 
+	// Set up properties, namely akadora
+	RegisterTileProperties(
+		Akadora{}
+	);
+
 	// Yonma uses all tiles
-	// TODO-RULES: red dora
 	uint32_t tileID = 0;
 	for ( int tileTypeCount = 0; tileTypeCount < 4; ++tileTypeCount )
 	{
 		for ( Suit suit : Suits{} )
 		{
-			for ( Number num : Numbers{} )
+			for ( Face num : Numbers{} )
 			{
-				m_tileSet.emplace_back( SuitTile{ suit, num }, tileID++ );
+				TileProperties props;
+				if ( num == Face::Five && tileTypeCount == 0 )
+				{
+					props = TileProperties{ Akadora{} };
+				}
+				m_tileSet.emplace_back( Tile{ suit, num, props }, tileID++ );
 			}
 		}
 
-		for ( DragonTileType dragon : DragonTileTypes{} )
+		for ( Face dragon : Dragons{} )
 		{
 			m_tileSet.emplace_back( dragon, tileID++ );
 		}
 
-		for ( WindTileType wind : WindTileTypes{} )
+		for ( Face wind : Winds{} )
 		{
 			m_tileSet.emplace_back( wind, tileID++ );
 		}
@@ -93,7 +102,7 @@ StandardYonmaCore::StandardYonmaCore
 }
 
 //------------------------------------------------------------------------------
-Pair<Set<Tile>, Vector<Tile>> StandardYonmaCore::WaitsWithYaku
+Pair<Set<TileKind>, Vector<TileInstance>> StandardYonmaCore::WaitsWithYaku
 (
 	Round const& i_round,
 	Seat const& i_playerSeat,
@@ -103,9 +112,9 @@ Pair<Set<Tile>, Vector<Tile>> StandardYonmaCore::WaitsWithYaku
 ) const
 {
 	bool riichiAddsYaku = false;
-	Vector<Tile> validDiscardsForRiichi;
+	Vector<TileInstance> validDiscardsForRiichi;
 
-	auto fnAddDiscardsForRiichi = [ & ]( HandAssessment const& i_assessment, HandInterpretation const& i_interp, Tile const& i_discardedTile )
+	auto fnAddDiscardsForRiichi = [ & ]( HandAssessment const& i_assessment, HandInterpretation const& i_interp, TileInstance const& i_discardedTile )
 	{
 		if ( !i_considerForRiichi || i_interp.m_waitType == WaitType::None )
 		{
@@ -127,7 +136,8 @@ Pair<Set<Tile>, Vector<Tile>> StandardYonmaCore::WaitsWithYaku
 					i_hand,
 					i_assessment,
 					i_interp,
-					{ *i_interp.m_waits.begin(), TileDrawType::DiscardDraw }
+					*i_interp.m_waits.begin(),
+					TileDrawType::DiscardDraw
 				).IsValid() )
 				{
 					validDiscardsForRiichi.push_back( i_discardedTile );
@@ -167,12 +177,12 @@ Pair<Set<Tile>, Vector<Tile>> StandardYonmaCore::WaitsWithYaku
 	// Let's  a s s e s s
 	HandAssessment const assessment( i_hand, *this );
 
-	Set<Tile> waits;
+	Set<TileKind> waits;
 	for ( HandInterpretation const& interp : assessment.Interpretations() )
 	{
 		fnAddDiscardsForRiichi( assessment, interp, i_lastTile.m_tile );
 
-		if ( interp.m_waitType == WaitType::None || !interp.m_waits.contains( i_lastTile.m_tile ) )
+		if ( interp.m_waitType == WaitType::None || !interp.m_waits.contains( i_lastTile.m_tile.Tile() ) )
 		{
 			continue;
 		}
@@ -187,7 +197,8 @@ Pair<Set<Tile>, Vector<Tile>> StandardYonmaCore::WaitsWithYaku
 					i_hand,
 					assessment,
 					interp,
-					i_lastTile
+					i_lastTile.m_tile.Tile(),
+					i_lastTile.m_type
 				).IsValid() )
 				{
 					ranges::actions::insert( waits, interp.m_waits );
@@ -216,7 +227,7 @@ HandScore StandardYonmaCore::CalculateBasicPoints
 	HandInterpretation const* maxInterp{ nullptr };
 	for ( HandInterpretation const& interp : assessment.Interpretations() )
 	{
-		if ( !interp.m_waits.contains( i_lastTile.m_tile ) )
+		if ( !interp.m_waits.contains( i_lastTile.m_tile.Tile() ) )
 		{
 			continue;
 		}
@@ -233,7 +244,8 @@ HandScore StandardYonmaCore::CalculateBasicPoints
 					i_hand,
 					assessment,
 					interp,
-					i_lastTile
+					i_lastTile.m_tile.Tile(),
+					i_lastTile.m_type
 				);
 
 				if ( value.IsValid() )
@@ -269,32 +281,41 @@ HandScore StandardYonmaCore::CalculateBasicPoints
 	{
 		bool constexpr c_indicatedValue = true;
 		bool const includeUradora = fnHandHasYaku( "Riichi" ) || fnHandHasYaku( "DoubleRiichi" );
-		Vector<Tile> const doraTiles = i_round.GatherDoraTiles( c_indicatedValue );
-		Vector<Tile> const uraDoraTiles = includeUradora ? i_round.GatherUradoraTiles( c_indicatedValue ) : Vector<Tile>{};
+		Vector<TileKind> const doraTiles = i_round.GetDoraTiles( includeUradora );
 
 		Han doraValue{ 0 };
 		Han uradoraValue{ 0 };
+		Han akadoraValue{ 0 };
+
+		size_t const doraBegin = 0;
+		size_t const doraEnd = doraTiles.size() / ( includeUradora ? 2 : 1 );
+		size_t const uradoraBegin = doraEnd;
+		size_t const uradoraEnd = doraTiles.size();
 
 		auto fnAssessTile = [ & ]( Tile const& i_tile )
 		{
-			for ( Tile const& doraTile : doraTiles )
+			for ( size_t i = doraBegin; i < doraEnd; ++i )
 			{
-				if ( doraTile == i_tile )
+				if ( doraTiles[ i ] == i_tile )
 				{
 					++doraValue;
 				}
 			}
-			for ( Tile const& uradoraTile : uraDoraTiles )
+			for ( size_t i = uradoraBegin; i < uradoraEnd; ++i )
 			{
-				if ( uradoraTile == i_tile )
+				if ( doraTiles[ i ] == i_tile )
 				{
 					++uradoraValue;
 				}
 			}
+			if ( i_tile.HasProperty<Akadora>() )
+			{
+				++akadoraValue;
+			}
 		};
 
-		i_hand.VisitTiles( fnAssessTile	);
-		fnAssessTile( i_lastTile.m_tile );
+		i_hand.VisitTiles( fnAssessTile );
+		fnAssessTile( i_lastTile.m_tile.Tile() );
 
 		if ( doraValue > 0 )
 		{
@@ -305,6 +326,11 @@ HandScore StandardYonmaCore::CalculateBasicPoints
 		{
 			maxScore.push_back( { "Uradora", uradoraValue } );
 			max += uradoraValue;
+		}
+		if ( akadoraValue > 0 )
+		{
+			maxScore.push_back( { "Akadora", akadoraValue } );
+			max += akadoraValue;
 		}
 	}
 
@@ -374,15 +400,15 @@ HandScore StandardYonmaCore::CalculateBasicPoints
 	}
 	case Shanpon:
 	{
-		fu += i_lastTile.m_tile.IsHonourOrTerminal() ? 8 : 4;
+		fu += i_lastTile.m_tile.Tile().IsHonourOrTerminal() ? 8 : 4;
 		break;
 	}
 	}
 
 	// Yakuhai
-	if ( maxInterp->m_waitType == WaitType::Tanki && i_lastTile.m_tile.Type() == TileType::Wind )
+	if ( maxInterp->m_waitType == WaitType::Tanki && i_lastTile.m_tile.Tile().IsWind() )
 	{
-		WindTileType const wind = i_lastTile.m_tile.Get<TileType::Wind>();
+		Face const wind = i_lastTile.m_tile.Tile().Face();
 		if ( i_playerSeat == wind || i_round.Wind() == wind )
 		{
 			// TODO-RULES: double wind may score 4 instead of 2
@@ -393,9 +419,9 @@ HandScore StandardYonmaCore::CalculateBasicPoints
 	{
 		for ( HandGroup const& group : maxInterp->m_groups )
 		{
-			if ( group.Type() == GroupType::Pair && group[ 0 ].Type() == TileType::Wind )
+			if ( group.Type() == GroupType::Pair && group[ 0 ].IsWind() )
 			{
-				WindTileType const wind = group[ 0 ].Get<TileType::Wind>();
+				Face const wind = group[ 0 ].Face();
 				if ( i_playerSeat == wind || i_round.Wind() == wind )
 				{
 					// TODO-RULES: double wind may score 4 instead of 2

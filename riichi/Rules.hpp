@@ -24,7 +24,7 @@ struct Rules
 	virtual size_t GetPlayerCount() const = 0;
 	virtual Points InitialPoints() const = 0;
 	virtual Points RiichiBet() const = 0;
-	virtual Vector<Tile> const& Tileset() const = 0;
+	virtual Vector<TileInstance> const& Tileset() const = 0;
 	// Not sure there's a reason to vary this, but it's a nice place to put it
 	// Dead wall size derived from this, and kan call maximum is treated as equal
 	virtual size_t DeadWallDrawsAvailable() const = 0;
@@ -32,7 +32,7 @@ struct Rules
 
 	// Hand evaluation
 	// Returns valid waits for a win, and valid discards for riichi
-	virtual Pair<Set<Tile>, Vector<Tile>> WaitsWithYaku
+	virtual Pair<Set<TileKind>, Vector<TileInstance>> WaitsWithYaku
 	(
 		Round const& i_round,
 		Seat const& i_playerSeat,

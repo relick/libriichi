@@ -60,6 +60,10 @@ struct EnumRange
 		return static_cast< size_t >( i_value ) - BeginValue();
 	}
 
+	static constexpr bool InRange( T_Enum i_value ) { return i_value >= Min() && i_value <= Max(); }
+	static constexpr T_Enum NextWrapped( T_Enum i_value ) { return IndexToValue( ( ValueToIndex( i_value ) + 1 ) % Count() ); }
+	static constexpr T_Enum PrevWrapped( T_Enum i_value ) { return IndexToValue( ( ValueToIndex( i_value ) + Count() - 1 ) % Count()); }
+
 	struct EnumIter
 	{
 		size_t m_enumPos{ EndValue() };
@@ -163,11 +167,27 @@ T_Container Append( T_Container i_c, T_Value i_v )
 
 //------------------------------------------------------------------------------
 template<typename T_Container, typename T_Pred>
-bool EraseOne( T_Container& i_c, T_Pred i_fnPred )
+bool EraseOneIf( T_Container& i_c, T_Pred i_fnPred )
 {
 	for ( auto i = i_c.begin(); i != i_c.end(); ++i )
 	{
 		if ( i_fnPred( *i ) )
+		{
+			i_c.erase( i );
+			return true;
+		}
+	}
+
+	return false;
+}
+
+//------------------------------------------------------------------------------
+template<typename T_Container, typename T_Value>
+bool EraseOne( T_Container& i_c, T_Value const& i_val )
+{
+	for ( auto i = i_c.begin(); i != i_c.end(); ++i )
+	{
+		if ( *i == i_val )
 		{
 			i_c.erase( i );
 			return true;

@@ -69,18 +69,14 @@ END_YAKU();
 // There are 5 yakuhai, each with their own name
 // It's easier if we implement it in as few repetitions as possible
 //------------------------------------------------------------------------------
-template<NameString t_YakuhaiName, DragonTileType t_DragonType>
+template<NameString t_YakuhaiName, Face t_Dragon>
+	requires Dragon<t_Dragon>
 struct DragonYakuhai
 	: public NamedYaku<t_YakuhaiName, "Standard">
 {
 	HanValue CalculateValue
 	(
-		Round const& i_round,
-		Seat const& i_playerSeat,
-		Hand const& i_hand,
-		HandAssessment const& i_assessment,
-		HandInterpretation const& i_interp,
-		TileDraw const& i_lastTile
+		YAKU_CALCULATEVALUE_PARAMS()
 	) const final;
 
 private:
@@ -91,21 +87,21 @@ private:
 // Need a triple of haku
 //------------------------------------------------------------------------------
 struct Yakuhai_Haku
-	: DragonYakuhai<"Haku", DragonTileType::White>
+	: DragonYakuhai<"Haku", Face::Haku>
 {};
 
 //------------------------------------------------------------------------------
 // Need a triple of hatsu
 //------------------------------------------------------------------------------
 struct Yakuhai_Hatsu
-	: DragonYakuhai<"Hatsu", DragonTileType::Green>
+	: DragonYakuhai<"Hatsu", Face::Hatsu>
 {};
 
 //------------------------------------------------------------------------------
 // Need a triple of chun
 //------------------------------------------------------------------------------
 struct Yakuhai_Chun
-	: DragonYakuhai<"Chun", DragonTileType::Red>
+	: DragonYakuhai<"Chun", Face::Chun>
 {};
 
 //------------------------------------------------------------------------------

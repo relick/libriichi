@@ -11,10 +11,10 @@ int main()
 	Riichi::StandardYonma<Riichi::Seat::East> yonma;
 
 	Riichi::Hand nineGatesHand;
-	for ( Riichi::Number num : Riichi::Numbers{} )
+	for ( Riichi::Face num : Riichi::Numbers{} )
 	{
-		Riichi::SuitTile const tile{Riichi::Suit::Manzu, num};
-		if ( num == Riichi::Number::One || num == Riichi::Number::Nine )
+		Riichi::Tile const tile{ Riichi::Suit::Manzu, num };
+		if ( tile.IsTerminal() )
 		{
 			nineGatesHand.AddFreeTiles( { tile, tile, tile } );
 		}
@@ -27,105 +27,105 @@ int main()
 	Riichi::HandAssessment nineGatesAssessment( nineGatesHand, yonma );
 
 	Riichi::Hand threeFourHand;
-	threeFourHand.AddFreeTiles( { Riichi::SuitTile::One<Riichi::Suit::Manzu>(), } );
-	threeFourHand.AddFreeTiles( { Riichi::SuitTile::One<Riichi::Suit::Manzu>(), } );
-	threeFourHand.AddFreeTiles( { Riichi::SuitTile::Two<Riichi::Suit::Manzu>(), } );
-	threeFourHand.AddFreeTiles( { Riichi::SuitTile::Two<Riichi::Suit::Manzu>(), } );
-	threeFourHand.AddFreeTiles( { Riichi::SuitTile::Two<Riichi::Suit::Manzu>(), } );
-	threeFourHand.AddFreeTiles( { Riichi::SuitTile::Three<Riichi::Suit::Manzu>(), } );
-	threeFourHand.AddFreeTiles( { Riichi::SuitTile::Three<Riichi::Suit::Manzu>(), } );
-	threeFourHand.AddFreeTiles( { Riichi::SuitTile::Three<Riichi::Suit::Manzu>(), } );
-	threeFourHand.AddFreeTiles( { Riichi::SuitTile::Nine<Riichi::Suit::Manzu>(), } );
-	threeFourHand.AddFreeTiles( { Riichi::SuitTile::Nine<Riichi::Suit::Manzu>(), } );
-	threeFourHand.AddFreeTiles( { Riichi::SuitTile::Five<Riichi::Suit::Manzu>(), } );
-	threeFourHand.AddFreeTiles( { Riichi::SuitTile::Five<Riichi::Suit::Manzu>(), } );
-	threeFourHand.AddFreeTiles( { Riichi::SuitTile::Five<Riichi::Suit::Manzu>(), } );
+	threeFourHand.AddFreeTiles( { Riichi::Tile{ Riichi::Suit::Manzu, Riichi::Face::One }, } );
+	threeFourHand.AddFreeTiles( { Riichi::Tile{ Riichi::Suit::Manzu, Riichi::Face::One }, } );
+	threeFourHand.AddFreeTiles( { Riichi::Tile{ Riichi::Suit::Manzu, Riichi::Face::Two }, } );
+	threeFourHand.AddFreeTiles( { Riichi::Tile{ Riichi::Suit::Manzu, Riichi::Face::Two }, } );
+	threeFourHand.AddFreeTiles( { Riichi::Tile{ Riichi::Suit::Manzu, Riichi::Face::Two }, } );
+	threeFourHand.AddFreeTiles( { Riichi::Tile{ Riichi::Suit::Manzu, Riichi::Face::Three }, } );
+	threeFourHand.AddFreeTiles( { Riichi::Tile{ Riichi::Suit::Manzu, Riichi::Face::Three }, } );
+	threeFourHand.AddFreeTiles( { Riichi::Tile{ Riichi::Suit::Manzu, Riichi::Face::Three }, } );
+	threeFourHand.AddFreeTiles( { Riichi::Tile{ Riichi::Suit::Manzu, Riichi::Face::Nine }, } );
+	threeFourHand.AddFreeTiles( { Riichi::Tile{ Riichi::Suit::Manzu, Riichi::Face::Nine }, } );
+	threeFourHand.AddFreeTiles( { Riichi::Tile{ Riichi::Suit::Manzu, Riichi::Face::Five }, } );
+	threeFourHand.AddFreeTiles( { Riichi::Tile{ Riichi::Suit::Manzu, Riichi::Face::Five }, } );
+	threeFourHand.AddFreeTiles( { Riichi::Tile{ Riichi::Suit::Manzu, Riichi::Face::Five }, } );
 
 	Riichi::HandAssessment threeFourAssessment( threeFourHand, yonma );
 
 	Riichi::Hand allPairs;
-	allPairs.AddFreeTiles( { Riichi::SuitTile::Two<Riichi::Suit::Manzu>(), } );
-	allPairs.AddFreeTiles( { Riichi::SuitTile::Two<Riichi::Suit::Manzu>(), } );
-	allPairs.AddFreeTiles( { Riichi::SuitTile::Three<Riichi::Suit::Manzu>(), } );
-	allPairs.AddFreeTiles( { Riichi::SuitTile::Three<Riichi::Suit::Manzu>(), } );
-	allPairs.AddFreeTiles( { Riichi::SuitTile::Two<Riichi::Suit::Pinzu>(), } );
-	allPairs.AddFreeTiles( { Riichi::SuitTile::Two<Riichi::Suit::Pinzu>(), } );
-	allPairs.AddFreeTiles( { Riichi::SuitTile::Three<Riichi::Suit::Pinzu>(), } );
-	allPairs.AddFreeTiles( { Riichi::SuitTile::Three<Riichi::Suit::Pinzu>(), } );
-	allPairs.AddFreeTiles( { Riichi::SuitTile::Two<Riichi::Suit::Souzu>(), } );
-	allPairs.AddFreeTiles( { Riichi::SuitTile::Two<Riichi::Suit::Souzu>(), } );
-	allPairs.AddFreeTiles( { Riichi::SuitTile::Three<Riichi::Suit::Souzu>(), } );
-	allPairs.AddFreeTiles( { Riichi::SuitTile::Three<Riichi::Suit::Souzu>(), } );
-	allPairs.AddFreeTiles( { Riichi::SuitTile::Three<Riichi::Suit::Souzu>(), } );
+	allPairs.AddFreeTiles( { Riichi::Tile{ Riichi::Suit::Manzu, Riichi::Face::Two }, } );
+	allPairs.AddFreeTiles( { Riichi::Tile{ Riichi::Suit::Manzu, Riichi::Face::Two }, } );
+	allPairs.AddFreeTiles( { Riichi::Tile{ Riichi::Suit::Manzu, Riichi::Face::Three }, } );
+	allPairs.AddFreeTiles( { Riichi::Tile{ Riichi::Suit::Manzu, Riichi::Face::Three }, } );
+	allPairs.AddFreeTiles( { Riichi::Tile{ Riichi::Suit::Pinzu, Riichi::Face::Two }, } );
+	allPairs.AddFreeTiles( { Riichi::Tile{ Riichi::Suit::Pinzu, Riichi::Face::Two }, } );
+	allPairs.AddFreeTiles( { Riichi::Tile{ Riichi::Suit::Pinzu, Riichi::Face::Three }, } );
+	allPairs.AddFreeTiles( { Riichi::Tile{ Riichi::Suit::Pinzu, Riichi::Face::Three }, } );
+	allPairs.AddFreeTiles( { Riichi::Tile{ Riichi::Suit::Souzu, Riichi::Face::Two }, } );
+	allPairs.AddFreeTiles( { Riichi::Tile{ Riichi::Suit::Souzu, Riichi::Face::Two }, } );
+	allPairs.AddFreeTiles( { Riichi::Tile{ Riichi::Suit::Souzu, Riichi::Face::Three }, } );
+	allPairs.AddFreeTiles( { Riichi::Tile{ Riichi::Suit::Souzu, Riichi::Face::Three }, } );
+	allPairs.AddFreeTiles( { Riichi::Tile{ Riichi::Suit::Souzu, Riichi::Face::Three }, } );
 
 	Riichi::HandAssessment allPairsAssessment( allPairs, yonma );
 
 	Riichi::Hand seqTrip;
-	seqTrip.AddFreeTiles( { Riichi::SuitTile::One<Riichi::Suit::Manzu>(), } );
-	seqTrip.AddFreeTiles( { Riichi::SuitTile::One<Riichi::Suit::Manzu>(), } );
-	seqTrip.AddFreeTiles( { Riichi::SuitTile::One<Riichi::Suit::Manzu>(), } );
-	seqTrip.AddFreeTiles( { Riichi::SuitTile::Two<Riichi::Suit::Manzu>(), } );
-	seqTrip.AddFreeTiles( { Riichi::SuitTile::Six<Riichi::Suit::Manzu>(), } );
-	seqTrip.AddFreeTiles( { Riichi::SuitTile::Six<Riichi::Suit::Manzu>(), } );
-	seqTrip.AddFreeTiles( { Riichi::SuitTile::Six<Riichi::Suit::Manzu>(), } );
-	seqTrip.AddFreeTiles( { Riichi::SuitTile::Six<Riichi::Suit::Pinzu>(), } );
-	seqTrip.AddFreeTiles( { Riichi::SuitTile::Six<Riichi::Suit::Pinzu>(), } );
-	seqTrip.AddFreeTiles( { Riichi::SuitTile::Six<Riichi::Suit::Pinzu>(), } );
-	seqTrip.AddFreeTiles( { Riichi::SuitTile::Six<Riichi::Suit::Souzu>(), } );
-	seqTrip.AddFreeTiles( { Riichi::SuitTile::Six<Riichi::Suit::Souzu>(), } );
-	seqTrip.AddFreeTiles( { Riichi::SuitTile::Six<Riichi::Suit::Souzu>(), } );
+	seqTrip.AddFreeTiles( { Riichi::Tile{ Riichi::Suit::Manzu, Riichi::Face::One }, } );
+	seqTrip.AddFreeTiles( { Riichi::Tile{ Riichi::Suit::Manzu, Riichi::Face::One }, } );
+	seqTrip.AddFreeTiles( { Riichi::Tile{ Riichi::Suit::Manzu, Riichi::Face::One }, } );
+	seqTrip.AddFreeTiles( { Riichi::Tile{ Riichi::Suit::Manzu, Riichi::Face::Two }, } );
+	seqTrip.AddFreeTiles( { Riichi::Tile{ Riichi::Suit::Manzu, Riichi::Face::Six }, } );
+	seqTrip.AddFreeTiles( { Riichi::Tile{ Riichi::Suit::Manzu, Riichi::Face::Six }, } );
+	seqTrip.AddFreeTiles( { Riichi::Tile{ Riichi::Suit::Manzu, Riichi::Face::Six }, } );
+	seqTrip.AddFreeTiles( { Riichi::Tile{ Riichi::Suit::Pinzu, Riichi::Face::Six }, } );
+	seqTrip.AddFreeTiles( { Riichi::Tile{ Riichi::Suit::Pinzu, Riichi::Face::Six }, } );
+	seqTrip.AddFreeTiles( { Riichi::Tile{ Riichi::Suit::Pinzu, Riichi::Face::Six }, } );
+	seqTrip.AddFreeTiles( { Riichi::Tile{ Riichi::Suit::Souzu, Riichi::Face::Six }, } );
+	seqTrip.AddFreeTiles( { Riichi::Tile{ Riichi::Suit::Souzu, Riichi::Face::Six }, } );
+	seqTrip.AddFreeTiles( { Riichi::Tile{ Riichi::Suit::Souzu, Riichi::Face::Six }, } );
 
 	Riichi::HandAssessment seqTripAssessment( seqTrip, yonma );
 
 	Riichi::Hand multiInterpFewGroups;
-	seqTrip.AddFreeTiles( { Riichi::SuitTile::Two<Riichi::Suit::Manzu>(), } );
-	seqTrip.AddFreeTiles( { Riichi::SuitTile::Three<Riichi::Suit::Manzu>(), } );
-	seqTrip.AddFreeTiles( { Riichi::SuitTile::Seven<Riichi::Suit::Manzu>(), } );
-	seqTrip.AddFreeTiles( { Riichi::SuitTile::Eight<Riichi::Suit::Manzu>(), } );
-	seqTrip.AddFreeTiles( { Riichi::SuitTile::Nine<Riichi::Suit::Manzu>(), } );
-	seqTrip.AddFreeTiles( { Riichi::SuitTile::Nine<Riichi::Suit::Manzu>(), } );
-	seqTrip.AddFreeTiles( { Riichi::SuitTile::Nine<Riichi::Suit::Manzu>(), } );
-	seqTrip.AddFreeTiles( { Riichi::SuitTile::Six<Riichi::Suit::Pinzu>(), } );
-	seqTrip.AddFreeTiles( { Riichi::SuitTile::Two<Riichi::Suit::Souzu>(), } );
-	seqTrip.AddFreeTiles( { Riichi::SuitTile::Six<Riichi::Suit::Souzu>(), } );
-	seqTrip.AddFreeTiles( { Riichi::SuitTile::Eight<Riichi::Suit::Souzu>(), } );
-	seqTrip.AddFreeTiles( { Riichi::DragonTileType::Red } );
-	seqTrip.AddFreeTiles( { Riichi::DragonTileType::Red } );
+	seqTrip.AddFreeTiles( { Riichi::Tile{ Riichi::Suit::Manzu, Riichi::Face::Two }, } );
+	seqTrip.AddFreeTiles( { Riichi::Tile{ Riichi::Suit::Manzu, Riichi::Face::Three }, } );
+	seqTrip.AddFreeTiles( { Riichi::Tile{ Riichi::Suit::Manzu, Riichi::Face::Seven }, } );
+	seqTrip.AddFreeTiles( { Riichi::Tile{ Riichi::Suit::Manzu, Riichi::Face::Eight }, } );
+	seqTrip.AddFreeTiles( { Riichi::Tile{ Riichi::Suit::Manzu, Riichi::Face::Nine }, } );
+	seqTrip.AddFreeTiles( { Riichi::Tile{ Riichi::Suit::Manzu, Riichi::Face::Nine }, } );
+	seqTrip.AddFreeTiles( { Riichi::Tile{ Riichi::Suit::Manzu, Riichi::Face::Nine }, } );
+	seqTrip.AddFreeTiles( { Riichi::Tile{ Riichi::Suit::Pinzu, Riichi::Face::Six }, } );
+	seqTrip.AddFreeTiles( { Riichi::Tile{ Riichi::Suit::Souzu, Riichi::Face::Two }, } );
+	seqTrip.AddFreeTiles( { Riichi::Tile{ Riichi::Suit::Souzu, Riichi::Face::Six }, } );
+	seqTrip.AddFreeTiles( { Riichi::Tile{ Riichi::Suit::Souzu, Riichi::Face::Eight }, } );
+	seqTrip.AddFreeTiles( { Riichi::Tile{ Riichi::Face::Chun } } );
+	seqTrip.AddFreeTiles( { Riichi::Tile{ Riichi::Face::Chun } } );
 
 	Riichi::Hand multiInterpNoWaits;
-	seqTrip.AddFreeTiles( { Riichi::SuitTile::Three<Riichi::Suit::Manzu>(), } );
-	seqTrip.AddFreeTiles( { Riichi::SuitTile::Four<Riichi::Suit::Manzu>(), } );
-	seqTrip.AddFreeTiles( { Riichi::SuitTile::Five<Riichi::Suit::Manzu>(), } );
-	seqTrip.AddFreeTiles( { Riichi::SuitTile::Two<Riichi::Suit::Pinzu>(), } );
-	seqTrip.AddFreeTiles( { Riichi::SuitTile::Five<Riichi::Suit::Pinzu>(), } );
-	seqTrip.AddFreeTiles( { Riichi::SuitTile::Six<Riichi::Suit::Pinzu>(), } );
-	seqTrip.AddFreeTiles( { Riichi::SuitTile::Seven<Riichi::Suit::Pinzu>(), } );
-	seqTrip.AddFreeTiles( { Riichi::SuitTile::Seven<Riichi::Suit::Souzu>(), } );
-	seqTrip.AddFreeTiles( { Riichi::SuitTile::Eight<Riichi::Suit::Souzu>(), } );
-	seqTrip.AddFreeTiles( { Riichi::SuitTile::Eight<Riichi::Suit::Souzu>(), } );
-	seqTrip.AddFreeTiles( { Riichi::SuitTile::Eight<Riichi::Suit::Souzu>(), } );
-	seqTrip.AddFreeTiles( { Riichi::SuitTile::Nine<Riichi::Suit::Souzu>(), } );
-	seqTrip.AddFreeTiles( { Riichi::DragonTileType::Red } );
+	seqTrip.AddFreeTiles( { Riichi::Tile{ Riichi::Suit::Manzu, Riichi::Face::Three }, } );
+	seqTrip.AddFreeTiles( { Riichi::Tile{ Riichi::Suit::Manzu, Riichi::Face::Four }, } );
+	seqTrip.AddFreeTiles( { Riichi::Tile{ Riichi::Suit::Manzu, Riichi::Face::Five }, } );
+	seqTrip.AddFreeTiles( { Riichi::Tile{ Riichi::Suit::Pinzu, Riichi::Face::Two }, } );
+	seqTrip.AddFreeTiles( { Riichi::Tile{ Riichi::Suit::Pinzu, Riichi::Face::Five }, } );
+	seqTrip.AddFreeTiles( { Riichi::Tile{ Riichi::Suit::Pinzu, Riichi::Face::Six }, } );
+	seqTrip.AddFreeTiles( { Riichi::Tile{ Riichi::Suit::Pinzu, Riichi::Face::Seven }, } );
+	seqTrip.AddFreeTiles( { Riichi::Tile{ Riichi::Suit::Souzu, Riichi::Face::Seven }, } );
+	seqTrip.AddFreeTiles( { Riichi::Tile{ Riichi::Suit::Souzu, Riichi::Face::Eight }, } );
+	seqTrip.AddFreeTiles( { Riichi::Tile{ Riichi::Suit::Souzu, Riichi::Face::Eight }, } );
+	seqTrip.AddFreeTiles( { Riichi::Tile{ Riichi::Suit::Souzu, Riichi::Face::Eight }, } );
+	seqTrip.AddFreeTiles( { Riichi::Tile{ Riichi::Suit::Souzu, Riichi::Face::Nine }, } );
+	seqTrip.AddFreeTiles( { Riichi::Tile{ Riichi::Face::Chun } } );
 
 	Riichi::Hand multiInterpSomeWaits;
-	seqTrip.AddFreeTiles( { Riichi::SuitTile::Three<Riichi::Suit::Manzu>(), } );
-	seqTrip.AddFreeTiles( { Riichi::SuitTile::Four<Riichi::Suit::Manzu>(), } );
-	seqTrip.AddFreeTiles( { Riichi::SuitTile::Five<Riichi::Suit::Manzu>(), } );
-	seqTrip.AddFreeTiles( { Riichi::SuitTile::Three<Riichi::Suit::Pinzu>(), } );
-	seqTrip.AddFreeTiles( { Riichi::SuitTile::Four<Riichi::Suit::Pinzu>(), } );
-	seqTrip.AddFreeTiles( { Riichi::SuitTile::Five<Riichi::Suit::Pinzu>(), } );
-	seqTrip.AddFreeTiles( { Riichi::SuitTile::Five<Riichi::Suit::Pinzu>(), } );
-	seqTrip.AddFreeTiles( { Riichi::SuitTile::Five<Riichi::Suit::Pinzu>(), } );
-	seqTrip.AddFreeTiles( { Riichi::SuitTile::Three<Riichi::Suit::Souzu>(), } );
-	seqTrip.AddFreeTiles( { Riichi::SuitTile::Four<Riichi::Suit::Souzu>(), } );
-	seqTrip.AddFreeTiles( { Riichi::SuitTile::Six<Riichi::Suit::Souzu>(), } );
-	seqTrip.AddFreeTiles( { Riichi::SuitTile::Seven<Riichi::Suit::Souzu>(), } );
-	seqTrip.AddFreeTiles( { Riichi::SuitTile::Eight<Riichi::Suit::Souzu>(), } );
+	seqTrip.AddFreeTiles( { Riichi::Tile{ Riichi::Suit::Manzu, Riichi::Face::Three }, } );
+	seqTrip.AddFreeTiles( { Riichi::Tile{ Riichi::Suit::Manzu, Riichi::Face::Four }, } );
+	seqTrip.AddFreeTiles( { Riichi::Tile{ Riichi::Suit::Manzu, Riichi::Face::Five }, } );
+	seqTrip.AddFreeTiles( { Riichi::Tile{ Riichi::Suit::Pinzu, Riichi::Face::Three }, } );
+	seqTrip.AddFreeTiles( { Riichi::Tile{ Riichi::Suit::Pinzu, Riichi::Face::Four }, } );
+	seqTrip.AddFreeTiles( { Riichi::Tile{ Riichi::Suit::Pinzu, Riichi::Face::Five }, } );
+	seqTrip.AddFreeTiles( { Riichi::Tile{ Riichi::Suit::Pinzu, Riichi::Face::Five }, } );
+	seqTrip.AddFreeTiles( { Riichi::Tile{ Riichi::Suit::Pinzu, Riichi::Face::Five }, } );
+	seqTrip.AddFreeTiles( { Riichi::Tile{ Riichi::Suit::Souzu, Riichi::Face::Three }, } );
+	seqTrip.AddFreeTiles( { Riichi::Tile{ Riichi::Suit::Souzu, Riichi::Face::Four }, } );
+	seqTrip.AddFreeTiles( { Riichi::Tile{ Riichi::Suit::Souzu, Riichi::Face::Six }, } );
+	seqTrip.AddFreeTiles( { Riichi::Tile{ Riichi::Suit::Souzu, Riichi::Face::Seven }, } );
+	seqTrip.AddFreeTiles( { Riichi::Tile{ Riichi::Suit::Souzu, Riichi::Face::Eight }, } );
 
 	Riichi::ShuffleRNG shuffleRNG{ std::random_device()( ) };
 	while ( true )
 	{
-		Riichi::Vector<Riichi::Tile> tileSet = yonma.Tileset();
+		Riichi::Vector<Riichi::TileInstance> tileSet = yonma.Tileset();
 		ranges::shuffle( tileSet, shuffleRNG );
 		tileSet.erase( tileSet.begin() + 13, tileSet.end() );
 

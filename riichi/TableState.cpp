@@ -28,7 +28,7 @@ void BetweenTurnsBase::TransitionToTurn
 		Hand const& playerHand = round.GetHand( round.CurrentTurn() );
 
 		bool canTsumo = false;
-		Vector<Tile> riichiDiscards;
+		Vector<TileInstance> riichiDiscards;
 
 		bool const isRiichi = round.CalledRiichi( round.CurrentTurn() );
 
@@ -45,11 +45,11 @@ void BetweenTurnsBase::TransitionToTurn
 				allowedToRiichi
 			);
 
-			canTsumo = validWaits.contains( i_tileDraw.value().m_tile );
+			canTsumo = validWaits.contains( i_tileDraw.value().m_tile.Tile() );
 			riichiDiscards = std::move( validRiichiDiscards );
 		}
 
-		Vector<Hand::DrawKanResult> kanOptions = round.GetHand( round.CurrentTurn() ).DrawKanOptions( i_tileDraw.has_value() ? Option<Tile>( i_tileDraw.value().m_tile ) : Option<Tile>( std::nullopt ) );
+		Vector<Hand::DrawKanResult> kanOptions = round.GetHand( round.CurrentTurn() ).DrawKanOptions( i_tileDraw.has_value() ? Option<TileInstance>( i_tileDraw.value().m_tile ) : Option<TileInstance>( std::nullopt ) );
 		table.Transition(
 			TableStates::Turn_User{ table, round.CurrentTurn(), canTsumo, std::move( riichiDiscards ), isRiichi, std::move( kanOptions ) },
 			std::move( i_tableEvent )
@@ -206,7 +206,7 @@ Hand const& BaseTurn::GetHand
 }
 
 //------------------------------------------------------------------------------
-Option<Tile> BaseTurn::GetDrawnTile
+Option<TileInstance> BaseTurn::GetDrawnTile
 (
 )	const
 {
@@ -222,7 +222,7 @@ Option<Tile> BaseTurn::GetDrawnTile
 //------------------------------------------------------------------------------
 void BaseTurn::TransitionToBetweenTurns
 (
-	Tile const& i_discardedTile,
+	TileInstance const& i_discardedTile,
 	TableEvent&& i_tableEvent
 )	const
 {
@@ -232,7 +232,7 @@ void BaseTurn::TransitionToBetweenTurns
 
 	// TODO-RULES: call options (particularly chi) should be controllable by rules
 	Seat const nextPlayer = NextPlayer( round.CurrentTurn(), table.m_players.size() );
-	Pair<Seat, Vector<Pair<Tile, Tile>>> canChi{nextPlayer, round.GetHand( nextPlayer ).ChiOptions( i_discardedTile )};
+	Pair<Seat, Vector<Pair<Tile, Tile>>> canChi{nextPlayer, round.GetHand( nextPlayer ).ChiOptions( i_discardedTile.Tile() )};
 	if ( round.CalledRiichi( nextPlayer ) )
 	{
 		canChi.second.clear();
@@ -252,11 +252,11 @@ void BaseTurn::TransitionToBetweenTurns
 
 		bool const isRiichi = round.CalledRiichi( seat );
 
-		if ( !isRiichi && round.GetHand( seat ).CanPon( i_discardedTile ) )
+		if ( !isRiichi && round.GetHand( seat ).CanPon( i_discardedTile.Tile() ) )
 		{
 			canPon.Insert( seat );
 		}
-		if ( !isRiichi && round.GetHand( seat ).CanCallKan( i_discardedTile ) )
+		if ( !isRiichi && round.GetHand( seat ).CanCallKan( i_discardedTile.Tile() ) )
 		{
 			canKan.Insert( seat );
 		}
@@ -300,7 +300,7 @@ void Turn_AI::MakeDecision
 	// TODO-AI: Super good AI goes here
 	// For now, we just discard the drawn tile
 	Round& round = table.m_rounds.back();
-	Tile const discardedTile = round.Discard( std::nullopt );
+	TileInstance const discardedTile = round.Discard( std::nullopt );
 
 	TransitionToBetweenTurns(
 		discardedTile,
@@ -314,7 +314,7 @@ Turn_User::Turn_User
 	Table& i_table,
 	Seat i_seat,
 	bool i_canTsumo,
-	Vector<Tile> i_riichiDiscards,
+	Vector<TileInstance> i_riichiDiscards,
 	bool i_isRiichi,
 	Vector<Hand::DrawKanResult> i_kanOptions
 )
@@ -347,7 +347,7 @@ void Turn_User::Tsumo
 		tileDraw
 	);
 
-	Tile const winningTile = round.AddWinner( round.CurrentTurn(), score );
+	TileInstance const winningTile = round.AddWinner( round.CurrentTurn(), score );
 
 	bool const isDealer = round.IsDealer( round.CurrentTurn() );
 	Pair<Points, Points> const winnings = table.m_rules->PointsFromEachPlayerTsumo( score.first, isDealer );
@@ -396,13 +396,13 @@ void Turn_User::Tsumo
 //------------------------------------------------------------------------------
 void Turn_User::Discard
 (
-	Option<Tile> const& i_handTileToDiscard
+	Option<TileInstance> const& i_handTileToDiscard
 )	const
 {
 	Table& table = m_table.get();
 
 	Round& round = table.m_rounds.back();
-	Tile const discardedTile = round.Discard( i_handTileToDiscard );
+	TileInstance const discardedTile = round.Discard( i_handTileToDiscard );
 
 	TransitionToBetweenTurns(
 		discardedTile,
@@ -413,7 +413,7 @@ void Turn_User::Discard
 //------------------------------------------------------------------------------
 void Turn_User::Riichi
 (
-	Option<Tile> const& i_handTileToDiscard
+	Option<TileInstance> const& i_handTileToDiscard
 )	const
 {
 	Table& table = m_table.get();
@@ -433,7 +433,7 @@ void Turn_User::Riichi
 	table.ModifyPoints( round.GetPlayerID( round.CurrentTurn() ), -table.m_rules->RiichiBet() );
 
 	// Make the discard
-	Tile const discardedTile = round.Riichi( i_handTileToDiscard );
+	TileInstance const discardedTile = round.Riichi( i_handTileToDiscard );
 
 	TransitionToBetweenTurns(
 		discardedTile,
@@ -444,7 +444,7 @@ void Turn_User::Riichi
 //------------------------------------------------------------------------------
 void Turn_User::Kan
 (
-	Tile const& i_tile
+	TileInstance const& i_tile
 )	const
 {
 	Table& table = m_table.get();
@@ -583,7 +583,7 @@ void BetweenTurns::UserChi
 	Table& table = m_table.get();
 
 	Round& round = table.m_rounds.back();
-	Pair<Seat, Tile> const calledTile = round.Chi( i_user, i_option );
+	Pair<Seat, TileInstance> const calledTile = round.Chi( i_user, i_option );
 
 	TransitionToTurn(
 		std::nullopt,
@@ -600,7 +600,7 @@ void BetweenTurns::UserPon
 	Table& table = m_table.get();
 
 	Round& round = table.m_rounds.back();
-	Pair<Seat, Tile> const calledTile = round.Pon( i_user );
+	Pair<Seat, TileInstance> const calledTile = round.Pon( i_user );
 
 	TransitionToTurn(
 		std::nullopt,

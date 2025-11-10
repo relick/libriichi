@@ -15,60 +15,43 @@ namespace Riichi
 //------------------------------------------------------------------------------
 void Hand::AddFreeTiles
 (
-	Vector<Tile> const& i_newTiles
+	Vector<TileInstance> const& i_newTiles
 )
 {
 	m_freeTiles.insert( m_freeTiles.end(), i_newTiles.begin(), i_newTiles.end() );
-	std::sort( m_freeTiles.begin(), m_freeTiles.end() ); // TODO-QOL: players may not always want their hand sorted
+	std::sort( m_freeTiles.begin(), m_freeTiles.end(), OrderTileInstanceByTile{} ); // TODO-QOL: players may not always want their hand sorted
 }
 
 //------------------------------------------------------------------------------
 void Hand::Discard
 (
-	Tile const& i_toDiscard,
+	TileInstance const& i_toDiscard,
 	Option<TileDraw> const& i_drawToAdd
 )
 {
-	bool const success = Utils::EraseOne( m_freeTiles,
-		[ & ]( Tile const& i_tile )
-		{
-			return i_tile.Is( i_toDiscard );
-		}
-	);
+	bool const success = Utils::EraseOne( m_freeTiles, i_toDiscard );
 	riEnsure( success, "Failed to discard tile - invalid?" );
 
 	if ( i_drawToAdd.has_value() )
 	{
 		m_freeTiles.push_back( i_drawToAdd.value().m_tile );
-		std::sort( m_freeTiles.begin(), m_freeTiles.end() ); // TODO-QOL: players may not always want their hand sorted
+		std::sort( m_freeTiles.begin(), m_freeTiles.end(), OrderTileInstanceByTile{} ); // TODO-QOL: players may not always want their hand sorted
 	}
 }
 
 //------------------------------------------------------------------------------
 void Hand::MakeMeld
 (
-	Pair<Seat, Tile> const& i_meldTile,
-	Pair<Tile, Tile> const& i_otherTiles,
+	Pair<Seat, TileInstance> const& i_meldTile,
+	Pair<TileInstance, TileInstance> const& i_otherTiles,
 	GroupType i_meldType
 )
 {
 	riEnsure( i_meldType < GroupType::Quad, "Must call MakeKan instead of MakeMeld for quads" );
 
-	Utils::EraseOne(
-		m_freeTiles,
-		[ & ]( Tile const& i_tile )
-		{
-			return i_tile.Is( i_otherTiles.first );
-		}
-	);
+	Utils::EraseOne( m_freeTiles, i_otherTiles.first );
 
-	Utils::EraseOne(
-		m_freeTiles,
-		[ & ]( Tile const& i_tile )
-		{
-			return i_tile.Is( i_otherTiles.second );
-		}
-	);
+	Utils::EraseOne( m_freeTiles, i_otherTiles.second );
 
 	Meld newMeld;
 	newMeld.m_tiles.push_back( { i_meldTile.second, i_meldTile.first } );
@@ -83,7 +66,7 @@ void Hand::MakeMeld
 //------------------------------------------------------------------------------
 Hand::KanResult Hand::MakeKan
 (
-	Tile const& i_meldTile,
+	TileInstance const& i_meldTile,
 	bool i_drawnTile,
 	Option<Seat> i_calledFrom
 )
@@ -121,7 +104,7 @@ Hand::KanResult Hand::MakeKan
 	// Find the remaining 3
 	std::erase_if(
 		m_freeTiles,
-		[ & ]( Tile const& i_tile )
+		[ & ]( TileInstance const& i_tile )
 		{
 			if ( i_tile == i_meldTile )
 			{
@@ -145,7 +128,7 @@ Hand::KanResult Hand::MakeKan
 //------------------------------------------------------------------------------
 Vector<Pair<Tile, Tile>> Hand::ChiOptions
 (
-	Tile const& i_tile
+	TileKind const& i_tile
 )	const
 {
 	if ( i_tile.IsHonour() )
@@ -154,28 +137,26 @@ Vector<Pair<Tile, Tile>> Hand::ChiOptions
 		return {};
 	}
 
-	SuitTile const& suitTile = i_tile.Get<TileType::Suit>();
-
 	// It's a little complicated searching for chi options
 	// We have to check for 3 shapes: DHH HDH HHD where D is the discarded tile and H are hand tiles
-	// We also want to multiply chi options based on strict tile comparison (so aka dora are treated as separate options)
+	// We also want to multiply chi options based on differing Tile values (NOT just TileKinds!)
 	// It works quite well then to reuse a pair of sets and search for the tiles we need in each shape, then fill out options from that as a cartesian product
 
 	Vector<Pair<Tile, Tile>> options;
-	Set<Tile, EquivalentTile> tiles1;
-	Set<Tile, EquivalentTile> tiles2;
+	Set<Tile> tiles1;
+	Set<Tile> tiles2;
 
-	auto fnSearchForTiles = [ & ]( Tile const& i_search1, Tile const& i_search2 )
+	auto fnSearchForTiles = [ & ]( TileKind const& i_search1, TileKind const& i_search2 )
 	{
-		for ( Tile const& tile : m_freeTiles )
+		for ( TileInstance const& tile : m_freeTiles )
 		{
-			if ( tile == i_search1 )
+			if ( tile.Tile() == i_search1 )
 			{
-				tiles1.insert( tile );
+				tiles1.insert( tile.Tile() );
 			}
-			else if ( tile == i_search2 )
+			else if ( tile.Tile() == i_search2 )
 			{
-				tiles2.insert( tile );
+				tiles2.insert( tile.Tile() );
 			}
 		}
 
@@ -195,25 +176,19 @@ Vector<Pair<Tile, Tile>> Hand::ChiOptions
 		tiles2.clear();
 	};
 
-	if ( suitTile.m_number <= Number::Seven )
+	if ( i_tile.Face() <= Face::Seven )
 	{
-		SuitTile const oneUp{ suitTile.m_suit, suitTile.m_number + 1 };
-		SuitTile const twoUp{ suitTile.m_suit, suitTile.m_number + 2 };
-		fnSearchForTiles( oneUp, twoUp );
+		fnSearchForTiles( i_tile.Next(), i_tile.Next().Next() );
 	}
 
-	if ( suitTile.m_number >= Number::Two && suitTile.m_number <= Number::Eight )
+	if ( i_tile.Face() >= Face::Two && i_tile.Face() <= Face::Eight )
 	{
-		SuitTile const oneDown{ suitTile.m_suit, suitTile.m_number - 1 };
-		SuitTile const oneUp{ suitTile.m_suit, suitTile.m_number + 1 };
-		fnSearchForTiles( oneDown, oneUp );
+		fnSearchForTiles( i_tile.Prev(), i_tile.Next() );
 	}
 
-	if ( suitTile.m_number >= Number::Three )
+	if ( i_tile.Face() >= Face::Three )
 	{
-		SuitTile const twoDown{ suitTile.m_suit, suitTile.m_number - 2 };
-		SuitTile const oneDown{ suitTile.m_suit, suitTile.m_number - 1 };
-		fnSearchForTiles( twoDown, oneDown );
+		fnSearchForTiles( i_tile.Prev().Prev(), i_tile.Prev() );
 	}
 
 	return options;
@@ -222,27 +197,27 @@ Vector<Pair<Tile, Tile>> Hand::ChiOptions
 //------------------------------------------------------------------------------
 bool Hand::CanPon
 (
-	Tile const& i_tile
+	TileKind const& i_tile
 )	const
 {
-	size_t const othersCount = ranges::count( m_freeTiles, i_tile );
+	size_t const othersCount = ranges::count_if( m_freeTiles, [ & ]( TileInstance const& tile ) { return tile.Tile() == i_tile; } );
 	return othersCount >= 2;
 }
 
 //------------------------------------------------------------------------------
 bool Hand::CanCallKan
 (
-	Tile const& i_tile
+	TileKind const& i_tile
 )	const
 {
-	size_t const othersCount = ranges::count( m_freeTiles, i_tile );
+	size_t const othersCount = ranges::count_if( m_freeTiles, [ & ]( TileInstance const& tile ) { return tile.Tile() == i_tile; } );
 	return othersCount >= 3;
 }
 
 //------------------------------------------------------------------------------
 Vector<Hand::DrawKanResult> Hand::DrawKanOptions
 (
-	Option<Tile> const& i_drawnTile
+	Option<TileInstance> const& i_drawnTile
 )	const
 {
 	Vector<DrawKanResult> results;
@@ -298,16 +273,17 @@ std::ostream& operator<<( std::ostream& io_out, Hand const& i_hand )
 	auto fnPrintTiles = [ & ]( auto const& i_tiles )
 	{
 		Option<Suit> lastSuit;
-		for ( Tile const& tile : i_tiles )
+		for ( TileInstance const& tileInstance : i_tiles )
 		{
-			if ( tile.Type() == TileType::Suit )
+			Tile const& tile = tileInstance.Tile();
+			if ( tile.IsNumber() )
 			{
-				if ( lastSuit.has_value() && lastSuit.value() != tile.Get<TileType::Suit>().m_suit )
+				if ( lastSuit.has_value() && lastSuit.value() != tile.Suit() )
 				{
 					fnPrintSuit( lastSuit.value() );
 				}
-				lastSuit = tile.Get<TileType::Suit>().m_suit;
-				io_out << static_cast< int >( tile.Get<TileType::Suit>().m_number );
+				lastSuit = tile.Suit();
+				io_out << static_cast< int >( tile.Face() );
 			}
 			else
 			{
@@ -325,8 +301,8 @@ std::ostream& operator<<( std::ostream& io_out, Hand const& i_hand )
 		}
 	};
 
-	Vector<Tile> sortedTiles = i_hand.m_freeTiles;
-	std::sort( sortedTiles.begin(), sortedTiles.end() );
+	Vector<TileInstance> sortedTiles = i_hand.m_freeTiles;
+	std::sort( sortedTiles.begin(), sortedTiles.end(), OrderTileInstanceByTile{} );
 
 	fnPrintTiles( sortedTiles );
 
@@ -364,8 +340,8 @@ HandGroup::HandGroup
 	case Sequence:
 	{
 		riEnsure( m_tiles.size() == 3, "Sequence group didn't have 3 tiles" );
-		riEnsure( ranges::all_of( m_tiles, []( Tile const& i_t ) { return i_t.Type() == TileType::Suit; } ), "Sequence group has a non-suit tile" );
-		riEnsure( ranges::adjacent_find( m_tiles, std::not_equal_to{}, []( Tile const& i_t ) { return i_t.Get<TileType::Suit>().m_suit; } ) == m_tiles.end(), "Sequence group didn't have matching suits" );
+		riEnsure( ranges::all_of( m_tiles, []( Tile const& i_t ) { return i_t.IsNumber(); }), "Sequence group has a non-suit tile");
+		riEnsure( ranges::adjacent_find( m_tiles, std::not_equal_to{}, []( Tile const& i_t ) { return i_t.Suit(); } ) == m_tiles.end(), "Sequence group didn't have matching suits" );
 		break;
 	}
 	case Triplet:
@@ -405,11 +381,27 @@ HandGroup::HandGroup
 {}
 
 //------------------------------------------------------------------------------
-TileType HandGroup::TilesType
+bool HandGroup::IsNumbers
 (
 )	const
 {
-	return m_tiles.front().Type();
+	return ( *this )[ 0 ].IsNumber();
+}
+
+//------------------------------------------------------------------------------
+bool HandGroup::IsDragons
+(
+)	const
+{
+	return ( *this )[ 0 ].IsDragon();
+}
+
+//------------------------------------------------------------------------------
+bool HandGroup::IsWinds
+(
+)	const
+{
+	return ( *this )[ 0 ].IsWind();
 }
 
 //------------------------------------------------------------------------------
@@ -417,17 +409,17 @@ Suit HandGroup::CommonSuit
 (
 )	const
 {
-	riEnsure( TilesType() == TileType::Suit, "Cannot call CommonSuit when not a suit group" );
-	return m_tiles.front().Get<TileType::Suit>().m_suit;
+	riEnsure( IsNumbers(), "Cannot call CommonSuit when not a suit group" );
+	return ( *this )[ 0 ].Suit();
 }
 
 //------------------------------------------------------------------------------
-Number HandGroup::CommonNumber
+Face HandGroup::CommonNumber
 (
 )	const
 {
-	riEnsure( TilesType() == TileType::Suit, "Cannot call CommonNumber when not a suit group" );
-	return m_tiles.front().Get<TileType::Suit>().m_number;
+	riEnsure( IsNumbers(), "Cannot call CommonNumber when not a suit group" );
+	return ( *this )[ 0 ].Face();
 }
 
 //------------------------------------------------------------------------------
@@ -447,12 +439,15 @@ HandAssessment::HandAssessment
 	i_hand.VisitTiles(
 		[ this ]( Tile const& tile )
 		{
-			m_containsTileType[ tile.Type() ] = true;
-			m_containsHonours |= tile.IsHonour();
-			m_containsTerminals |= tile.IsTerminal();
-			if ( tile.Type() == TileType::Suit )
+			if ( tile.IsNumber() )
 			{
-				m_containsSuit[ tile.Get<TileType::Suit>().m_suit ] = true;
+				m_containsSuitSimples[ tile.Suit() ] |= tile.IsSimple();
+				m_containsSuitTerminals[ tile.Suit() ] |= tile.IsTerminal();
+			}
+			else
+			{
+				m_containsDragons |= tile.IsDragon();
+				m_containsWinds |= tile.IsWind();
 			}
 		}
 	);
@@ -463,15 +458,20 @@ HandAssessment::HandAssessment
 	HandInterpretation fixedPart;
 	for ( Meld const& meld : i_hand.Melds() )
 	{
+		Vector<Tile> meldTiles;
+		meldTiles.reserve( meld.m_tiles.size() );
+		std::ranges::transform( meld.m_tiles, std::back_inserter( meldTiles ), []( auto const& p ) { return p.first.Tile(); } );
 		fixedPart.m_groups.emplace_back(
-			ranges::to<Vector<Tile>>( ranges::views::keys( meld.m_tiles ) ),
+			std::move( meldTiles ),
 			meld.m_type,
 			meld.m_open
 		);
 	}
 
 	// Then sort the remaining free tiles
-	Vector<Tile> sortedFreeTiles = i_hand.FreeTiles();
+	Vector<Tile> sortedFreeTiles;
+	sortedFreeTiles.reserve( i_hand.FreeTiles().size() );
+	std::ranges::transform( i_hand.FreeTiles(), std::back_inserter( sortedFreeTiles ), []( TileInstance const& t ) { return t.Tile(); } );
 	std::sort( sortedFreeTiles.begin(), sortedFreeTiles.end() );
 
 	// And visit all the interpreters

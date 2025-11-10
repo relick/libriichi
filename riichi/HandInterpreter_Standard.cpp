@@ -71,59 +71,59 @@ namespace Riichi
 
 	riEnsure( io_interpToSet.m_ungrouped.size() == 2, "Wasn't a tanki wait but didn't have 2 tiles remaining" );
 
+	TileKind const& tile1 = io_interpToSet.m_ungrouped.front();
+	TileKind const& tile2 = io_interpToSet.m_ungrouped.back();
+
 	// Check for shanpon second
-	if ( io_interpToSet.m_ungrouped.front() == io_interpToSet.m_ungrouped.back() )
+	if ( tile1 == tile2 )
 	{
 		io_interpToSet.m_waitType = WaitType::Shanpon;
-		io_interpToSet.m_waits.insert( io_interpToSet.m_ungrouped.front() );
+		io_interpToSet.m_waits.insert( tile1 );
 		return;
 	}
 
 	// If not shanpon then work out the type of sequence wait, if there is one
-	if ( io_interpToSet.m_ungrouped.front().IsHonour() || io_interpToSet.m_ungrouped.back().IsHonour() )
+	if ( tile1.IsHonour() || tile2.IsHonour() )
 	{
 		// Already know they're not matching tiles, so if not both suits then there is no wait
 		return;
 	}
 
-	SuitTile const& tile1 = io_interpToSet.m_ungrouped.front().Get<TileType::Suit>();
-	SuitTile const& tile2 = io_interpToSet.m_ungrouped.back().Get<TileType::Suit>();
-
-	if ( tile1.m_suit != tile2.m_suit )
+	if ( tile1.Suit() != tile2.Suit() )
 	{
 		// Different suits, no wait
 		return;
 	}
 
 	// Tiles are sorted so this should always be a valid thing to ask - tile2 is either 1 or 2 above tile1
-	if ( tile2.m_number == tile1.m_number + 1 )
+	if ( tile2.Face() == tile1.Next().Face() )
 	{
-		if ( tile1.m_number == Number::One )
+		if ( tile1.Face() == Face::One )
 		{
 			// Bottom edge
 			io_interpToSet.m_waitType = WaitType::Penchan;
-			io_interpToSet.m_waits.insert( SuitTile{ tile2.m_suit, tile2.m_number + 1 } );
+			io_interpToSet.m_waits.insert( tile2.Next() );
 			return;
 		}
-		else if ( tile2.m_number == Number::Nine )
+		else if ( tile2.Face() == Face::Nine )
 		{
 			// Top edge
 			io_interpToSet.m_waitType = WaitType::Penchan;
-			io_interpToSet.m_waits.insert( SuitTile{ tile1.m_suit, tile1.m_number - 1 } );
+			io_interpToSet.m_waits.insert( tile1.Prev() );
 			return;
 		}
 
 		// Open
 		io_interpToSet.m_waitType = WaitType::Ryanmen;
-		io_interpToSet.m_waits.insert( SuitTile{ tile1.m_suit, tile1.m_number - 1 } );
-		io_interpToSet.m_waits.insert( SuitTile{ tile2.m_suit, tile2.m_number + 1 } );
+		io_interpToSet.m_waits.insert( tile1.Prev() );
+		io_interpToSet.m_waits.insert( tile2.Next() );
 		return;
 	}
-	else if ( tile2.m_number == tile1.m_number + 2 )
+	else if ( tile2.Face() == tile1.Next().Next().Face() )
 	{
 		// Middle wait
 		io_interpToSet.m_waitType = WaitType::Kanchan;
-		io_interpToSet.m_waits.insert( SuitTile{ tile1.m_suit, tile1.m_number + 1 } );
+		io_interpToSet.m_waits.insert( tile1.Next() );
 		return;
 	}
 
@@ -220,10 +220,9 @@ namespace Riichi
 		}
 
 		// Try to make sequence
-		if ( tile.Type() == TileType::Suit )
+		if ( tile.IsNumber() )
 		{
-			SuitTile const& suitTile = tile.Get<TileType::Suit>();
-			if ( suitTile.m_number >= Number::Eight )
+			if ( tile.Face() >= Face::Eight )
 			{
 				// Can't find two tiles of higher value as this one is already too high
 				continue;
@@ -232,19 +231,17 @@ namespace Riichi
 			for ( size_t tile2I = tileI + 1; tile2I < i_sortedRemaining.size(); ++tile2I )
 			{
 				Tile const& tile2 = i_sortedRemaining[ tile2I ];
-				if ( tile2.Type() == TileType::Suit )
+				if ( tile2.IsNumber() )
 				{
-					SuitTile const& suitTile2 = tile2.Get<TileType::Suit>();
-					if ( suitTile.m_suit == suitTile2.m_suit && suitTile2.m_number == suitTile.m_number + 1 )
+					if ( tile.Suit() == tile2.Suit() && tile2.Face() == tile.Next().Face() )
 					{
 						// Found second tile, try for third
 						for ( size_t tile3I = tile2I + 1; tile3I < i_sortedRemaining.size(); ++tile3I )
 						{
 							Tile const& tile3 = i_sortedRemaining[ tile3I ];
-							if ( tile3.Type() == TileType::Suit )
+							if ( tile3.IsNumber() )
 							{
-								SuitTile const& suitTile3 = tile3.Get<TileType::Suit>();
-								if ( suitTile.m_suit == suitTile3.m_suit && suitTile3.m_number == suitTile2.m_number + 1 )
+								if ( tile.Suit() == tile3.Suit() && tile3.Face() == tile2.Next().Face() )
 								{
 									// Found three tiles
 									HandInterpretation withSeq = i_soFar;
@@ -385,19 +382,19 @@ void ThirteenOrphansInterpreter::AddInterpretations
 	// TODO-OPT: Can we do this without filling a container?
 
 	Vector<Tile> requiredTiles{
-		SuitTile{ Suit::Manzu, Number::One },
-		SuitTile{ Suit::Manzu, Number::Nine },
-		SuitTile{ Suit::Pinzu, Number::One },
-		SuitTile{ Suit::Pinzu, Number::Nine },
-		SuitTile{ Suit::Souzu, Number::One },
-		SuitTile{ Suit::Souzu, Number::Nine },
-		DragonTileType::White,
-		DragonTileType::Green,
-		DragonTileType::Red,
-		WindTileType::East,
-		WindTileType::South,
-		WindTileType::West,
-		WindTileType::North,
+		{ Suit::Manzu, Face::One },
+		{ Suit::Manzu, Face::Nine },
+		{ Suit::Pinzu, Face::One },
+		{ Suit::Pinzu, Face::Nine },
+		{ Suit::Souzu, Face::One },
+		{ Suit::Souzu, Face::Nine },
+		Face::Haku,
+		Face::Hatsu,
+		Face::Chun,
+		Face::East,
+		Face::South,
+		Face::West,
+		Face::North,
 	};
 
 	for ( Tile const& tile : interp.m_ungrouped )

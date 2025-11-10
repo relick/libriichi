@@ -32,9 +32,9 @@ inline constexpr char const* ToString( Seat i_seat )
 }
 
 //------------------------------------------------------------------------------
-inline bool operator==( Seat i_seat, WindTileType i_windTile )
+inline bool operator==( Seat i_seat, Face i_windTile )
 {
-	return static_cast< EnumValueType >( i_seat ) == static_cast< EnumValueType >( i_windTile );
+	return Seats::ValueToIndex( i_seat ) == Winds::ValueToIndex( i_windTile );
 }
 
 //------------------------------------------------------------------------------

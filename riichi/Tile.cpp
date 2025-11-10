@@ -4,160 +4,48 @@ namespace Riichi
 {
 
 //------------------------------------------------------------------------------
-SuitTile NextTile
-(
-	SuitTile const& i_tile
-)
-{
-	return { i_tile.m_suit, i_tile.m_number + 1 };
-}
-
-//------------------------------------------------------------------------------
-// Include specialness of the tile
-//------------------------------------------------------------------------------
-bool SuitTile::Equivalent
-(
-	SuitTile const& i_o
-) const
-{
-	return m_suit == i_o.m_suit && m_number == i_o.m_number;
-}
-
-//------------------------------------------------------------------------------
-bool SuitTile::IsTerminal
-(
-) const
-{
-	return m_number == Number::One || m_number == Number::Nine;
-}
-
-//------------------------------------------------------------------------------
-bool operator<
-(
-	SuitTile const& i_a,
-	SuitTile const& i_b
-)
-{
-	return ( i_a.m_suit == i_b.m_suit )
-		? ( i_a.m_number < i_b.m_number )
-		: ( i_a.m_suit < i_b.m_suit );
-}
-
-//------------------------------------------------------------------------------
-DragonTileType NextTile
-(
-	DragonTileType i_tile
-)
-{
-	return static_cast< DragonTileType >( ( static_cast< size_t >( i_tile ) + 1 ) % DragonTileTypes::Count() );
-}
-
-//------------------------------------------------------------------------------
-WindTileType NextTile
-(
-	WindTileType i_tile
-)
-{
-	return static_cast< WindTileType >( ( static_cast< size_t >( i_tile ) + 1 ) % WindTileTypes::Count() );
-}
-
-//------------------------------------------------------------------------------
-Tile NextTile
-(
-	Tile const& i_tile
-)
-{
-	switch ( i_tile.Type() )
-	{
-	using enum TileType;
-	case Suit: return NextTile( i_tile.Get<Suit>() );
-	case Dragon: return NextTile( i_tile.Get<Dragon>() );
-	case Wind: return NextTile( i_tile.Get<Wind>() );
-	}
-
-	riError( "Invalid tile type" );
-	return i_tile;
-}
-
-//------------------------------------------------------------------------------
-bool Tile::Equivalent
-(
-	Tile const& i_o
-)	const
-{
-	if ( Type() != i_o.Type() )
-	{
-		return false;
-	}
-
-	switch ( Type() )
-	{
-		using enum TileType;
-	case Suit: return Get<Suit>().Equivalent( i_o.Get<Suit>() );
-	case Dragon: return Get<Dragon>() == i_o.Get<Dragon>();
-	case Wind: return Get<Wind>() == i_o.Get<Wind>();
-	}
-
-	return false;
-}
-
-//------------------------------------------------------------------------------
-bool Tile::Is
-(
-	Tile const& i_o
-)	const
-{
-	if ( HasID() && i_o.HasID() )
-	{
-		return ID() == i_o.ID();
-	}
-
-	return Equivalent( i_o );
-}
-
-//------------------------------------------------------------------------------
 std::ostream& operator<<( std::ostream& io_out, Tile const& i_tile )
 {
-	switch ( i_tile.Type() )
+	switch ( i_tile.Face() )
 	{
-	case TileType::Suit:
+	case Face::One:
+	case Face::Two:
+	case Face::Three:
+	case Face::Four:
+	case Face::Five:
+	case Face::Six:
+	case Face::Seven:
+	case Face::Eight:
+	case Face::Nine:
 	{
-		SuitTile const& tile = i_tile.Get<TileType::Suit>();
-		switch ( tile.m_suit )
-		{
-			using enum Suit;
-		case Manzu: io_out << static_cast< int >( tile.m_number ) << "m"; return io_out;
-		case Pinzu: io_out << static_cast< int >( tile.m_number ) << "p"; return io_out;
-		case Souzu: io_out << static_cast< int >( tile.m_number ) << "s"; return io_out;
-		}
+		io_out << static_cast< int >( i_tile.Face() );
 		break;
 	}
-	case TileType::Dragon:
+
+	case Face::Haku: io_out << "白"; break;
+	case Face::Hatsu: io_out << "発"; break;
+	case Face::Chun: io_out << "中"; break;
+
+	case Face::East: io_out << "東"; break;
+	case Face::South: io_out << "南"; break;
+	case Face::West: io_out << "西"; break;
+	case Face::North: io_out << "北"; break;
+	}
+
+	if ( i_tile.HasProperty<Akadora>() )
 	{
-		DragonTileType const& tile = i_tile.Get<TileType::Dragon>();
-		switch ( tile )
-		{
-			using enum DragonTileType;
-		case White: io_out << "白"; return io_out;
-		case Green: io_out << "発"; return io_out;
-		case Red: io_out << "中"; return io_out;
-		}
-		break;
+		io_out << "*";
 	}
-	case TileType::Wind:
+
+	switch ( i_tile.Suit() )
 	{
-		WindTileType const& tile = i_tile.Get<TileType::Wind>();
-		switch ( tile )
-		{
-			using enum WindTileType;
-		case East: io_out << "東"; return io_out;
-		case South: io_out << "南"; return io_out;
-		case West: io_out << "西"; return io_out;
-		case North: io_out << "北"; return io_out;
-		}
-		break;
+	case Suit::Manzu: io_out << "m"; break;
+	case Suit::Pinzu: io_out << "p"; break;
+	case Suit::Souzu: io_out << "s"; break;
+
+	case Suit::None: break;
 	}
-	}
+
 	return io_out;
 }
 

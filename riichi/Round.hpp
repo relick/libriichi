@@ -19,8 +19,8 @@ class Round
 		PlayerID m_playerID; // index to Table's player list
 		Option<size_t> m_riichiDiscardTile;
 		bool m_riichiIppatsuValid{ false };
-		Vector<Tile> m_discards;
-		Vector<Tile> m_visibleDiscards; // Called tiles removed from this list
+		Vector<TileInstance> m_discards;
+		Vector<TileInstance> m_visibleDiscards; // Called tiles removed from this list
 		bool m_tempFuriten{ false }; // Passing up on a ron sets this true until next turn, or until the end of the game if riichi'd
 		Hand m_hand;
 		Option<TileDraw> m_draw; // Currently drawn tile
@@ -37,7 +37,7 @@ class Round
 	// Wall is ordered in columns, clockwise from the dealer's right corner (initially), and reversed
 	// i.e. drawing is pop_back and dead wall is the 14 tiles at the start of the vector
 	// This makes it easy to draw, but complicates the maths a bit for wall breaking
-	Vector<Tile> m_wall;
+	Vector<TileInstance> m_wall;
 	size_t m_breakPointFromDealerRight{ 0 }; // Unused other than for indicating to the user where to put the wall visuals
 	size_t m_deadWallSize{ 0 };
 	size_t m_deadWallDrawsRemaining{ 0 }; // This will decrement as dead wall draws are made
@@ -60,9 +60,9 @@ public:
 	Option<size_t> RiichiTileIndex( Seat i_player ) const;
 	bool CalledDoubleRiichi( Seat i_player ) const;
 	bool RiichiIppatsuValid( Seat i_player ) const;
-	bool Furiten( Seat i_player, Set<Tile> const& i_waits ) const;
-	Vector<Tile> const& Discards( Seat i_player ) const;
-	Vector<Tile> const& VisibleDiscards( Seat i_player ) const;
+	bool Furiten( Seat i_player, Set<TileKind> const& i_waits ) const;
+	Vector<TileInstance> const& Discards( Seat i_player ) const;
+	Vector<TileInstance> const& VisibleDiscards( Seat i_player ) const;
 	Hand const& GetHand( Seat i_player ) const;
 	Option<TileDraw> const& DrawnTile( Seat i_player ) const;
 	bool IsWinner( Seat i_player ) const;
@@ -77,8 +77,8 @@ public:
 	bool AnyFinishedInTenpai() const;
 	bool NextPlayerIsInitial() const;
 	// If indicated value true -> returns the tiles that would score points, false -> returns the actual tiles of the wall
-	Vector<Tile> GatherDoraTiles( bool i_indicatedValue ) const;
-	Vector<Tile> GatherUradoraTiles( bool i_indicatedValue ) const;
+	Vector<TileKind> GetDoraTiles( bool i_includeUradora ) const;
+	Vector<TileInstance> GetDoraIndicatorTiles( bool i_includeUradora ) const;
 	size_t HonbaSticks() const;
 	size_t RiichiSticks() const;
 
@@ -106,21 +106,21 @@ public:
 	TileDraw DealHands();
 
 	// Player turn actions
-	Tile Discard( Option<Tile> const& i_handTileToDiscard ); // returns discarded tile
-	Tile Riichi( Option<Tile> const& i_handTileToDiscard ); // returns discarded tile
-	Hand::KanResult HandKan( Option<Tile> const& i_handTileToKan ); // returns if kan was upgraded pon
+	TileInstance Discard( Option<TileInstance> const& i_handTileToDiscard ); // returns discarded tile
+	TileInstance Riichi( Option<TileInstance> const& i_handTileToDiscard ); // returns discarded tile
+	Hand::KanResult HandKan( Option<TileInstance> const& i_handTileToKan ); // returns if kan was upgraded pon
 	TileDraw PassCalls( SeatSet const& i_couldRon ); // draws for next player, returns draw
 	TileDraw HandKanRonPass(); // returns dead wall draw ☠
-	Pair<Seat, Tile> Chi( Seat i_caller, Pair<Tile, Tile> const& i_meldTiles ); // returns called tile and called from
-	Pair<Seat, Tile> Pon( Seat i_caller ); // returns called tile and called from
-	Pair<TileDraw, Pair<Seat, Tile>> DiscardKan( Seat i_caller ); // returns dead wall draw ☠, called tile and called from
+	Pair<Seat, TileInstance> Chi( Seat i_caller, Pair<TileInstance, TileInstance> const& i_meldTiles ); // returns called tile and called from
+	Pair<Seat, TileInstance> Pon( Seat i_caller ); // returns called tile and called from
+	Pair<TileDraw, Pair<Seat, TileInstance>> DiscardKan( Seat i_caller ); // returns dead wall draw ☠, called tile and called from
 
-	Tile AddWinner( Seat i_player, HandScore const& i_score ); // returns winning tile
+	TileInstance AddWinner( Seat i_player, HandScore const& i_score ); // returns winning tile
 	void AddFinishedInTenpai( Seat i_player );
 
 private:
 	void BreakWall( ShuffleRNG& i_shuffleRNG );
-	Vector<Tile> DealTiles( size_t i_num );
+	Vector<TileInstance> DealTiles( size_t i_num );
 	TileDraw SelfDraw();
 	TileDraw DeadWallDraw();
 };

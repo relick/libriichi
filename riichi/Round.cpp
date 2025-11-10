@@ -98,16 +98,16 @@ bool Round::RiichiIppatsuValid
 bool Round::Furiten
 (
 	Seat i_player,
-	Set<Tile> const& i_waits
+	Set<TileKind> const& i_waits
 )	const
 {
 	PlayerData const& player = m_players[ ( size_t )i_player ];
 	return player.m_tempFuriten
-		|| ranges::any_of( player.m_discards, [ & ]( Tile const& i_tile ) { return i_waits.contains( i_tile ); } );
+		|| ranges::any_of( player.m_discards, [ & ]( TileInstance const& i_tile ) { return i_waits.contains( i_tile.Tile() ); } );
 }
 
 //------------------------------------------------------------------------------
-Vector<Tile> const& Round::Discards
+Vector<TileInstance> const& Round::Discards
 (
 	Seat i_player
 )	const
@@ -116,7 +116,7 @@ Vector<Tile> const& Round::Discards
 }
 
 //------------------------------------------------------------------------------
-Vector<Tile> const& Round::VisibleDiscards
+Vector<TileInstance> const& Round::VisibleDiscards
 (
 	Seat i_player
 )	const
@@ -289,43 +289,59 @@ bool Round::NextPlayerIsInitial
 }
 
 //------------------------------------------------------------------------------
-Vector<Tile> Round::GatherDoraTiles
+Vector<TileKind> Round::GetDoraTiles
 (
-	bool i_indicatedValue
+	bool i_includeUradora
 )	const
 {
-	Vector<Tile> doraTiles;
+	Vector<TileKind> doraTiles;
 
 	size_t firstDoraTileI = m_deadWallDrawsRemaining + 1;
+	size_t firstUradoraTileI = m_deadWallDrawsRemaining;
+
+	// TODO-RULES: using .Next() on the tile isn't great since e.g. sanma is missing tiles and would want to do it differently.
 
 	for ( size_t i = 0; i < m_doraCount; ++i )
 	{
-		// TODO-RULES: actually, some rulesets don't have all tiles, and they still need to work for indicated value.
-		Tile const& wallTile = m_wall[ firstDoraTileI + ( i * 2 ) ];
-		doraTiles.push_back( i_indicatedValue ? NextTile( wallTile ) : wallTile );
+		doraTiles.push_back( m_wall[ firstDoraTileI + ( i * 2 ) ].Tile().Next() );
+	}
+
+	if ( i_includeUradora )
+	{
+		for ( size_t i = 0; i < m_doraCount; ++i )
+		{
+			doraTiles.push_back( m_wall[ firstUradoraTileI + ( i * 2 ) ].Tile().Next() );
+		}
 	}
 
 	return doraTiles;
 }
 
 //------------------------------------------------------------------------------
-Vector<Tile> Round::GatherUradoraTiles
+Vector<TileInstance> Round::GetDoraIndicatorTiles
 (
-	bool i_indicatedValue
+	bool i_includeUradora
 )	const
 {
-	Vector<Tile> doraTiles;
+	Vector<TileInstance> doraIndicatorTiles;
 
+	size_t firstDoraTileI = m_deadWallDrawsRemaining + 1;
 	size_t firstUradoraTileI = m_deadWallDrawsRemaining;
 
 	for ( size_t i = 0; i < m_doraCount; ++i )
 	{
-		// TODO-RULES: actually, some rulesets don't have all tiles, and they still need to work for indicated value.
-		Tile const& wallTile = m_wall[ firstUradoraTileI + ( i * 2 ) ];
-		doraTiles.push_back( i_indicatedValue ? NextTile( wallTile ) : wallTile );
+		doraIndicatorTiles.push_back( m_wall[ firstDoraTileI + ( i * 2 ) ] );
 	}
 
-	return doraTiles;
+	if ( i_includeUradora )
+	{
+		for ( size_t i = 0; i < m_doraCount; ++i )
+		{
+			doraIndicatorTiles.push_back( m_wall[ firstUradoraTileI + ( i * 2 ) ] );
+		}
+	}
+
+	return doraIndicatorTiles;
 }
 
 //------------------------------------------------------------------------------
@@ -352,7 +368,7 @@ Round::Round
 
 	// Shuffle the tiles to build the wall
 	m_wall = i_rules.Tileset();
-	riEnsure( ranges::all_of( m_wall, []( Tile const& i_tile ) { return i_tile.HasID(); } ), "Not all tiles were assigned IDs in ruleset" );
+	riEnsure( ranges::all_of( m_wall, []( TileInstance const& i_tile ) { return i_tile.HasID(); } ), "Not all tiles were assigned IDs in ruleset" );
 	ranges::shuffle( m_wall, i_shuffleRNG );
 
 	// Then break the wall
@@ -474,13 +490,13 @@ TileDraw Round::DealHands
 }
 
 //------------------------------------------------------------------------------
-Tile Round::Discard
+TileInstance Round::Discard
 (
-	Option<Tile> const& i_handTileToDiscard
+	Option<TileInstance> const& i_handTileToDiscard
 )
 {
 	PlayerData& player = m_players[ ( size_t )m_currentTurn ];
-	Tile discarded = [ & ]()
+	TileInstance discarded = [ & ]()
 	{
 		if ( i_handTileToDiscard.has_value() )
 		{
@@ -501,15 +517,15 @@ Tile Round::Discard
 }
 
 //------------------------------------------------------------------------------
-Tile Round::Riichi
+TileInstance Round::Riichi
 (
-	Option<Tile> const& i_handTileToDiscard
+	Option<TileInstance> const& i_handTileToDiscard
 )
 {
 	PlayerData& player = m_players[ ( size_t )m_currentTurn ];
 	player.m_riichiDiscardTile = player.m_discards.size();
 
-	Tile const discarded = Discard( i_handTileToDiscard );
+	TileInstance const discarded = Discard( i_handTileToDiscard );
 	// Set ippatsu valid afterwards as Discard will reset it
 	player.m_riichiIppatsuValid = true;
 
@@ -542,7 +558,7 @@ TileDraw Round::PassCalls
 //------------------------------------------------------------------------------
 Hand::KanResult Round::HandKan
 (
-	Option<Tile> const& i_handTileToKan
+	Option<TileInstance> const& i_handTileToKan
 )
 {
 	PlayerData& player = m_players[ ( size_t )m_currentTurn ];
@@ -563,14 +579,14 @@ TileDraw Round::HandKanRonPass
 }
 
 //------------------------------------------------------------------------------
-Pair<Seat, Tile> Round::Chi
+Pair<Seat, TileInstance> Round::Chi
 (
 	Seat i_caller,
-	Pair<Tile, Tile> const& i_meldTiles
+	Pair<TileInstance, TileInstance> const& i_meldTiles
 )
 {
 	PlayerData& current = m_players[ ( size_t )m_currentTurn ];
-	Pair<Seat, Tile> const ret{ m_currentTurn, current.m_discards.back() };
+	Pair<Seat, TileInstance> const ret{ m_currentTurn, current.m_discards.back() };
 
 	// Disappear it from the visible discards in front of the player
 	current.m_visibleDiscards.pop_back();
@@ -591,14 +607,14 @@ Pair<Seat, Tile> Round::Chi
 }
 
 //------------------------------------------------------------------------------
-Pair<Seat, Tile> Round::Pon
+Pair<Seat, TileInstance> Round::Pon
 (
 	Seat i_caller
 )
 {
 	// TODO-RULES: Uhhhh I guess I forgot that you might want to pon and have different options too like a chi
 	PlayerData& current = m_players[ ( size_t )m_currentTurn ];
-	Pair<Seat, Tile> const ret{ m_currentTurn, current.m_discards.back() };
+	Pair<Seat, TileInstance> const ret{ m_currentTurn, current.m_discards.back() };
 
 	// Disappear it from the visible discards in front of the player
 	current.m_visibleDiscards.pop_back();
@@ -622,13 +638,13 @@ Pair<Seat, Tile> Round::Pon
 }
 
 //------------------------------------------------------------------------------
-Pair<TileDraw, Pair<Seat, Tile>> Round::DiscardKan
+Pair<TileDraw, Pair<Seat, TileInstance>> Round::DiscardKan
 (
 	Seat i_caller
 )
 {
 	PlayerData& current = m_players[ ( size_t )m_currentTurn ];
-	Pair<Seat, Tile> const ret{ m_currentTurn, current.m_discards.back() };
+	Pair<Seat, TileInstance> const ret{ m_currentTurn, current.m_discards.back() };
 
 	// Disappear it from the visible discards in front of the player
 	current.m_visibleDiscards.pop_back();
@@ -651,7 +667,7 @@ Pair<TileDraw, Pair<Seat, Tile>> Round::DiscardKan
 }
 
 //------------------------------------------------------------------------------
-Tile Round::AddWinner
+TileInstance Round::AddWinner
 (
 	Seat i_player,
 	HandScore const& i_score
@@ -681,14 +697,14 @@ void Round::AddFinishedInTenpai
 }
 
 //------------------------------------------------------------------------------
-Vector<Tile> Round::DealTiles
+Vector<TileInstance> Round::DealTiles
 (
 	size_t i_num
 )
 {
 	riEnsure( WallTilesRemaining() >= i_num, "Tried to draw more tiles than in wall" );
 
-	Vector<Tile> tiles;
+	Vector<TileInstance> tiles;
 	tiles.reserve( i_num );
 	for ( size_t i = 0; i < i_num; ++i )
 	{
@@ -705,7 +721,7 @@ TileDraw Round::SelfDraw
 {
 	riEnsure( WallTilesRemaining() >= 1, "Tried to draw more tiles than in wall" );
 
-	Tile drawn = std::move( m_wall.back() );
+	TileInstance drawn = std::move( m_wall.back() );
 	m_wall.pop_back();
 	return { drawn, TileDrawType::SelfDraw, };
 }
@@ -721,7 +737,7 @@ TileDraw Round::DeadWallDraw
 	--m_deadWallDrawsRemaining;
 	++m_doraCount;
 
-	Tile drawn = std::move( m_wall.front() );
+	TileInstance drawn = std::move( m_wall.front() );
 	m_wall.erase( m_wall.begin() );
 	return { drawn, TileDrawType::DeadWallDraw, };
 }

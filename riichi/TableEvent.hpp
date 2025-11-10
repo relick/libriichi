@@ -87,32 +87,32 @@ enum class CallType : EnumValueType
 class Call
 {
 	CallType m_callType;
-	Tile m_calledTile;
+	TileInstance m_calledTile;
 	Seat m_takenFrom;
 public:
-	explicit Call( CallType i_callType, Tile const& i_calledTile, Seat i_takenFrom )
+	explicit Call( CallType i_callType, TileInstance const& i_calledTile, Seat i_takenFrom )
 		: m_callType{ i_callType }
 		, m_calledTile{ i_calledTile }
 		, m_takenFrom{ i_takenFrom }
 	{}
 
 	CallType GetCallType() const { return m_callType; }
-	Tile const& CalledTile() const { return m_calledTile; }
+	TileInstance const& CalledTile() const { return m_calledTile; }
 	Seat TakenFrom() const { return m_takenFrom; }
 };
 
 //------------------------------------------------------------------------------
 class Discard
 {
-	Tile m_tileDiscarded;
+	TileInstance m_tileDiscarded;
 	Seat m_player;
 public:
-	explicit Discard( Tile const& i_tileDiscarded, Seat i_player )
+	explicit Discard( TileInstance const& i_tileDiscarded, Seat i_player )
 		: m_tileDiscarded{ i_tileDiscarded }
 		, m_player{ i_player }
 	{}
 
-	Tile const& TileDiscarded() const { return m_tileDiscarded; }
+	TileInstance const& TileDiscarded() const { return m_tileDiscarded; }
 	Seat Player() const { return m_player; }
 };
 using Riichi = Discard;
@@ -120,47 +120,47 @@ using Riichi = Discard;
 //------------------------------------------------------------------------------
 class HandKan
 {
-	Tile m_kanTile;
+	TileInstance m_kanTile;
 	bool m_closed;
 public:
-	explicit HandKan( Tile const& i_kanTile, bool i_closed )
+	explicit HandKan( TileInstance const& i_kanTile, bool i_closed )
 		: m_kanTile{ i_kanTile }
 		, m_closed{ i_closed }
 	{}
 
-	Tile const& KanTile() const { return m_kanTile; }
+	TileInstance const& KanTile() const { return m_kanTile; }
 	bool Closed() const { return m_closed; }
 };
 
 //------------------------------------------------------------------------------
 class Tsumo
 {
-	Tile m_winningTile;
+	TileInstance m_winningTile;
 	Seat m_winner;
 public:
-	explicit Tsumo( Tile const& i_winningTile, Seat i_winner )
+	explicit Tsumo( TileInstance const& i_winningTile, Seat i_winner )
 		: m_winningTile{ i_winningTile }
 		, m_winner{ i_winner }
 	{}
 
-	Tile const& WinningTile() const { return m_winningTile; }
+	TileInstance const& WinningTile() const { return m_winningTile; }
 	Seat Winner() const { return m_winner; }
 };
 
 //------------------------------------------------------------------------------
 class Ron
 {
-	Tile m_winningTile;
+	TileInstance m_winningTile;
 	SeatSet m_winners;
 	Seat m_loser;
 public:
-	explicit Ron( Tile const& i_winningTile, SeatSet i_winners, Seat i_loser )
+	explicit Ron( TileInstance const& i_winningTile, SeatSet i_winners, Seat i_loser )
 		: m_winningTile{ i_winningTile }
 		, m_winners{ std::move( i_winners ) }
 		, m_loser{ i_loser }
 	{}
 
-	Tile const& WinningTile() const { return m_winningTile; }
+	TileInstance const& WinningTile() const { return m_winningTile; }
 	SeatSet const& Winners() const { return m_winners; }
 	Seat Loser() const { return m_loser; }
 };

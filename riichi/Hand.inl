@@ -16,15 +16,15 @@ void Hand::VisitTiles
 {
 	for ( Meld const& meld : m_melds )
 	{
-		for ( Tile const& tile : ranges::views::keys( meld.m_tiles ) )
+		for ( TileInstance const& tile : ranges::views::keys( meld.m_tiles ) )
 		{
-			i_visitor( tile );
+			i_visitor( tile.Tile() );
 		}
 	}
 
-	for ( Tile const& tile : m_freeTiles )
+	for ( TileInstance const& tile : m_freeTiles )
 	{
-		i_visitor( tile );
+		i_visitor( tile.Tile() );
 	}
 }
 

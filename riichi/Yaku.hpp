@@ -54,7 +54,8 @@ struct Yaku
 		Hand const& i_hand,
 		HandAssessment const& i_assessment,
 		HandInterpretation const& i_interp,
-		TileDraw const& i_lastTile
+		Tile const& i_lastTile,
+		TileDrawType const& i_lastTileDrawType
 	) const = 0;
 
 	// Would this yaku be valid if we riichi'd? This will determine if riichi can be done or not
@@ -95,7 +96,8 @@ Seat const& i_playerSeat,					\
 Hand const& i_hand,							\
 HandAssessment const& i_assessment,			\
 HandInterpretation const& i_interp,			\
-TileDraw const& i_lastTile
+Tile const& i_lastTile,						\
+TileDrawType const& i_lastTileDrawType
 
 #define BEGIN_YAKU( NAME, INTERPRETER )		\
 struct NAME									\

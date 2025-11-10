@@ -10,17 +10,17 @@ namespace Riichi
 class StandardYonmaCore
 	: public Rules
 {
-	Vector<Tile> m_tileSet;
+	Vector<TileInstance> m_tileSet;
 public:
 	StandardYonmaCore();
 
 	size_t GetPlayerCount() const override { return 4_Players; }
 	Points InitialPoints() const override { return 25'000; }
 	Points RiichiBet() const override { return 1'000; }
-	Vector<Tile> const& Tileset() const override { return m_tileSet; }
+	Vector<TileInstance> const& Tileset() const override { return m_tileSet; }
 	size_t DeadWallDrawsAvailable() const override { return 4u; }
 
-	Pair<Set<Tile>, Vector<Tile>> WaitsWithYaku
+	Pair<Set<TileKind>, Vector<TileInstance>> WaitsWithYaku
 	(
 		Round const& i_round,
 		Seat const& i_playerSeat,

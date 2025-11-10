@@ -28,7 +28,7 @@ HanValue Tanyao<t_KuitanEnabled>::CalculateValue
 		}
 	}
 
-	if ( InvalidTile( i_lastTile.m_tile ) || ranges::any_of( i_interp.m_ungrouped, InvalidTile ) )
+	if ( InvalidTile( i_lastTile ) || ranges::any_of( i_interp.m_ungrouped, InvalidTile ) )
 	{
 		return NoYaku;
 	}
@@ -54,8 +54,9 @@ template<bool t_KuitanEnabled>
 }
 
 //------------------------------------------------------------------------------
-template<NameString t_YakuhaiName, DragonTileType t_DragonType>
-HanValue DragonYakuhai<t_YakuhaiName, t_DragonType>::CalculateValue
+template<NameString t_YakuhaiName, Face t_Dragon>
+	requires Dragon<t_Dragon>
+HanValue DragonYakuhai<t_YakuhaiName, t_Dragon>::CalculateValue
 (
 	YAKU_CALCULATEVALUE_PARAMS()
 )	const
@@ -71,7 +72,7 @@ HanValue DragonYakuhai<t_YakuhaiName, t_DragonType>::CalculateValue
 		}
 	}
 
-	if ( i_interp.m_waitType == WaitType::Shanpon && ValidTile( i_lastTile.m_tile ) )
+	if ( i_interp.m_waitType == WaitType::Shanpon && ValidTile( i_lastTile ) )
 	{
 		return 1;
 	}
@@ -79,10 +80,11 @@ HanValue DragonYakuhai<t_YakuhaiName, t_DragonType>::CalculateValue
 	return NoYaku;
 }
 
-template<NameString t_YakuhaiName, DragonTileType t_DragonType>
-/*static*/ bool DragonYakuhai<t_YakuhaiName, t_DragonType>::ValidTile( Tile const& i_tile )
+template<NameString t_YakuhaiName, Face t_Dragon>
+	requires Dragon<t_Dragon>
+/*static*/ bool DragonYakuhai<t_YakuhaiName, t_Dragon>::ValidTile( Tile const& i_tile )
 {
-	return i_tile.Type() == TileType::Dragon && i_tile.template Get<TileType::Dragon>() == t_DragonType;
+	return i_tile.Face() == t_Dragon;
 }
 
 }

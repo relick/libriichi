@@ -103,11 +103,11 @@ struct BaseTurn
 	BaseTurn( Table& i_table, Seat i_seat );
 
 	Hand const& GetHand() const;
-	Option<Tile> GetDrawnTile() const;
+	Option<TileInstance> GetDrawnTile() const;
 	Seat GetSeat() const { return m_seat; }
 
 protected:
-	void TransitionToBetweenTurns( Tile const& i_discardedTile, TableEvent&& i_tableEvent ) const;
+	void TransitionToBetweenTurns( TileInstance const& i_discardedTile, TableEvent&& i_tableEvent ) const;
 
 private:
 	Seat m_seat;
@@ -126,23 +126,23 @@ struct Turn_AI
 struct Turn_User
 	: BaseTurn
 {
-	Turn_User( Table& i_table, Seat i_seat, bool i_canTsumo, Vector<Tile> i_riichiDiscards, bool i_isRiichi, Vector<Hand::DrawKanResult> i_kanOptions );
+	Turn_User( Table& i_table, Seat i_seat, bool i_canTsumo, Vector<TileInstance> i_riichiDiscards, bool i_isRiichi, Vector<Hand::DrawKanResult> i_kanOptions );
 
 	bool CanTsumo() const { return m_canTsumo; }
 	bool CanRiichi() const { return !m_riichiDiscards.empty(); }
-	Vector<Tile> const& RiichiOptions() const { return m_riichiDiscards; }
+	Vector<TileInstance> const& RiichiOptions() const { return m_riichiDiscards; }
 	bool IsRiichi() const { return m_isRiichi; } // if true, only valid options are tsumo and discard
 	bool CanKan() const { return !m_kanOptions.empty(); }
 	Vector<Hand::DrawKanResult> const& KanOptions() const { return m_kanOptions; }
 
 	void Tsumo() const;
-	void Discard( Option<Tile> const& i_handTileToDiscard ) const; // nullopt will discard drawn tile
-	void Riichi( Option<Tile> const& i_handTileToDiscard ) const; // nullopt will discard drawn tile
-	void Kan( Tile const& i_tile ) const; // Will meld the 4 matching tiles if a closed kan
+	void Discard( Option<TileInstance> const& i_handTileToDiscard ) const; // nullopt will discard drawn tile
+	void Riichi( Option<TileInstance> const& i_handTileToDiscard ) const; // nullopt will discard drawn tile
+	void Kan( TileInstance const& i_tile ) const; // Will meld the 4 matching tiles if a closed kan
 
 private:
 	bool m_canTsumo;
-	Vector<Tile> m_riichiDiscards;
+	Vector<TileInstance> m_riichiDiscards;
 	bool m_isRiichi;
 	Vector<Hand::DrawKanResult> m_kanOptions;
 };

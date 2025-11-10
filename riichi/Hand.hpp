@@ -6,6 +6,9 @@
 #include "Tile.hpp"
 #include "Utils.hpp"
 
+#include <algorithm>
+#include "range/v3/view.hpp"
+
 namespace Riichi
 {
 
@@ -30,7 +33,7 @@ inline bool TripletCompatible( GroupType i_type ) { return i_type == GroupType::
 //------------------------------------------------------------------------------
 struct Meld
 {
-	using MeldTile = Pair<Tile, Option<Seat>>;
+	using MeldTile = Pair<TileInstance, Option<Seat>>;
 
 	Vector<MeldTile> m_tiles;
 	GroupType m_type{ GroupType::Sequence };
@@ -43,32 +46,32 @@ struct Meld
 //------------------------------------------------------------------------------
 class Hand
 {
-	Vector<Tile> m_freeTiles;
+	Vector<TileInstance> m_freeTiles;
 	Vector<Meld> m_melds;
 public:
 
-	Vector<Tile> const& FreeTiles() const { return m_freeTiles; }
+	Vector<TileInstance> const& FreeTiles() const { return m_freeTiles; }
 	Vector<Meld> const& Melds() const { return m_melds; }
-	void AddFreeTiles( Vector<Tile> const& i_newTiles );
-	void Discard( Tile const& i_toDiscard, Option<TileDraw> const& i_drawToAdd );
-	void MakeMeld( Pair<Seat, Tile> const& i_meldTile, Pair<Tile, Tile> const& i_otherTiles, GroupType i_meldType );
+	void AddFreeTiles( Vector<TileInstance> const& i_newTiles );
+	void Discard( TileInstance const& i_toDiscard, Option<TileDraw> const& i_drawToAdd );
+	void MakeMeld( Pair<Seat, TileInstance> const& i_meldTile, Pair<TileInstance, TileInstance> const& i_otherTiles, GroupType i_meldType );
 	struct KanResult
 	{
 		bool m_upgradedFromPon{ false };
 		bool m_open{ false };
 	};
-	KanResult MakeKan( Tile const& i_meldTile, bool i_drawnTile, Option<Seat> i_calledFrom );
+	KanResult MakeKan( TileInstance const& i_meldTile, bool i_drawnTile, Option<Seat> i_calledFrom );
 
 	// These questions only consider the hand's tiles and not the actual validity of the call in the round
-	Vector<Pair<Tile, Tile>> ChiOptions( Tile const& i_tile ) const;
-	bool CanPon( Tile const& i_tile ) const;
-	bool CanCallKan( Tile const& i_tile ) const;
+	Vector<Pair<Tile, Tile>> ChiOptions( TileKind const& i_tile ) const;
+	bool CanPon( TileKind const& i_tile ) const;
+	bool CanCallKan( TileKind const& i_tile ) const;
 	struct DrawKanResult
 	{
-		Tile kanTile;
+		TileInstance kanTile;
 		bool closed;
 	};
-	Vector<DrawKanResult> DrawKanOptions( Option<Tile> const& i_drawnTile ) const;
+	Vector<DrawKanResult> DrawKanOptions( Option<TileInstance> const& i_drawnTile ) const;
 
 	template<typename T_Visitor>
 	void VisitTiles( T_Visitor&& i_visitor ) const;
@@ -115,9 +118,11 @@ public:
 	Tile const& operator[]( size_t i ) const { return m_tiles[ i ]; }
 	GroupType Type() const { return m_type; }
 	bool Open() const { return m_open; }
-	TileType TilesType() const;
+	bool IsNumbers() const;
+	bool IsDragons() const;
+	bool IsWinds() const;
 	Suit CommonSuit() const;
-	Number CommonNumber() const;
+	Face CommonNumber() const;
 };
 
 //------------------------------------------------------------------------------
@@ -126,7 +131,7 @@ struct HandInterpretation
 	char const* m_interpreter;
 	Vector<HandGroup> m_groups;
 	Vector<Tile> m_ungrouped;
-	Set<Tile> m_waits;
+	Set<TileKind> m_waits;
 	WaitType m_waitType{ WaitType::None };
 };
 
@@ -135,11 +140,27 @@ struct HandInterpretation
 //------------------------------------------------------------------------------
 struct HandAssessment
 {
-	Utils::EnumArray<bool, TileTypes> m_containsTileType{};
-	Utils::EnumArray<bool, Suits> m_containsSuit{};
-	bool m_containsTerminals{ false }; // 1 or 9 of suit tiles
-	bool m_containsHonours{ false }; // wind or dragon
+	Utils::EnumArray<bool, Suits> m_containsSuitSimples{ false, false, false, };
+	Utils::EnumArray<bool, Suits> m_containsSuitTerminals{ false, false, false, };
+	bool m_containsDragons{ false };
+	bool m_containsWinds{ false };
 	bool m_open{ false };
+
+	bool HasAnySimples() const { return std::ranges::any_of( m_containsSuitSimples, std::identity{} ); }
+	bool HasAnyTerminals() const { return std::ranges::any_of( m_containsSuitTerminals, std::identity{} ); }
+	bool HasAnyNumbers() const { return HasAnySimples() || HasAnyTerminals(); }
+	bool HasAnySimplesOfSuit( Suit i_suit ) const { return m_containsSuitSimples[ i_suit ]; }
+	bool HasAnyTerminalsOfSuit( Suit i_suit ) const { return m_containsSuitTerminals[ i_suit ]; }
+	bool HasAnyNumbersOfSuit( Suit i_suit ) const { return HasAnySimplesOfSuit( i_suit ) || HasAnyTerminalsOfSuit( i_suit ); }
+	bool HasSimplesOfAllSuits() const { return std::ranges::all_of( m_containsSuitSimples, std::identity{} ); }
+	bool HasTerminalsOfAllSuits() const { return std::ranges::all_of( m_containsSuitTerminals, std::identity{} ); }
+	bool HasNumbersOfAllSuits() const { return std::ranges::all_of( ranges::view::zip( m_containsSuitSimples, m_containsSuitTerminals ), []( auto const& p ) { return p.first || p.second; } ); }
+
+	bool HasAnyDragons() const { return m_containsDragons; }
+	bool HasAnyWinds() const { return m_containsWinds; }
+	bool HasAnyHonours() const { return HasAnyDragons() || HasAnyWinds(); }
+
+	bool IsOpen() const { return m_open; }
 
 	explicit HandAssessment( Hand const& i_hand, Rules const& i_rules );
 

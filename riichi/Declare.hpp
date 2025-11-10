@@ -98,11 +98,8 @@ struct RonAKanChance;
 //------------------------------------------------------------------------------
 // Tile
 //------------------------------------------------------------------------------
-enum class TileType : EnumValueType;
+enum class Face : EnumValueType;
 enum class Suit : EnumValueType;
-struct SuitTile;
-enum class DragonTileType : EnumValueType;
-enum class WindTileType : EnumValueType;
 enum class TileDrawType : EnumValueType;
 struct TileDraw;
 

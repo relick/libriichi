@@ -52,44 +52,44 @@ int main()
 		{
 			if ( i_input[ 1 ] == 'm' )
 			{
-				return Riichi::SuitTile{Riichi::Suit::Manzu, (Riichi::Number)(( uint8_t )i_input[ 0 ] - '0')};
+				return Riichi::Tile{ Riichi::Suit::Manzu, (Riichi::Face)(( uint8_t )i_input[ 0 ] - '0') };
 			}
 			else if ( i_input[ 1 ] == 'p' )
 			{
-				return Riichi::SuitTile{Riichi::Suit::Pinzu, (Riichi::Number)(( uint8_t )i_input[ 0 ] - '0')};
+				return Riichi::Tile{ Riichi::Suit::Pinzu, (Riichi::Face)(( uint8_t )i_input[ 0 ] - '0') };
 			}
 			else if ( i_input[ 1 ] == 's' )
 			{
-				return Riichi::SuitTile{Riichi::Suit::Souzu, (Riichi::Number)(( uint8_t )i_input[ 0 ] - '0')};
+				return Riichi::Tile{ Riichi::Suit::Souzu, (Riichi::Face)(( uint8_t )i_input[ 0 ] - '0') };
 			}
 		}
 		else if ( i_input == "east" )
 		{
-			return Riichi::WindTileType::East;
+			return Riichi::Face::East;
 		}
 		else if ( i_input == "south" )
 		{
-			return Riichi::WindTileType::South;
+			return Riichi::Face::South;
 		}
 		else if ( i_input == "west" )
 		{
-			return Riichi::WindTileType::West;
+			return Riichi::Face::West;
 		}
 		else if ( i_input == "north" )
 		{
-			return Riichi::WindTileType::North;
+			return Riichi::Face::North;
 		}
-		else if ( i_input == "white" )
+		else if ( i_input == "white" || i_input == "haku" )
 		{
-			return Riichi::DragonTileType::White;
+			return Riichi::Face::Haku;
 		}
-		else if ( i_input == "green" )
+		else if ( i_input == "green" || i_input == "hatsu" )
 		{
-			return Riichi::DragonTileType::Green;
+			return Riichi::Face::Hatsu;
 		}
-		else if ( i_input == "red" )
+		else if ( i_input == "red" || i_input == "chun" )
 		{
-			return Riichi::DragonTileType::Red;
+			return Riichi::Face::Chun;
 		}
 
 		return std::nullopt;
@@ -124,11 +124,11 @@ int main()
 				std::cout << Riichi::ToString( seat ) << ": " << table.GetRound().GetHand( seat ) << '\n';
 			}
 
-			bool constexpr c_indicatedValue = false;
+			bool constexpr c_includeUradora = false;
 			std::cout << "\nDora: \n";
-			for ( Riichi::Tile const& tile : table.GetRound().GatherDoraTiles( c_indicatedValue ) )
+			for ( Riichi::TileInstance const& tile : table.GetRound().GetDoraIndicatorTiles( c_includeUradora ) )
 			{
-				std::cout << tile;
+				std::cout << tile.Tile();
 			}
 
 			std::cout << "\n" << std::endl;
@@ -153,7 +153,7 @@ int main()
 			std::cout << "Hand: " << turn.GetHand();
 			if ( turn.GetDrawnTile().has_value() )
 			{
-				std::cout << " " << turn.GetDrawnTile().value();
+				std::cout << " " << turn.GetDrawnTile().value().Tile();
 			}
 			std::cout << "\n";
 
@@ -404,21 +404,21 @@ int main()
 		case DealerDraw:
 		{
 			Riichi::TableEvents::Draw const& draw = event.Get<DealerDraw>();
-			std::cout << "Round started with dealer drawing tile " << draw.TileDrawn().m_tile << std::endl;
+			std::cout << "Round started with dealer drawing tile " << draw.TileDrawn().m_tile.Tile() << std::endl;
 			break;
 		}
 
 		case Draw:
 		{
 			Riichi::TableEvents::Draw const& draw = event.Get<Draw>();
-			std::cout << Riichi::ToString( draw.Player() ) << " drew tile " << draw.TileDrawn().m_tile << std::endl;
+			std::cout << Riichi::ToString( draw.Player() ) << " drew tile " << draw.TileDrawn().m_tile.Tile() << std::endl;
 			break;
 		}
 
 		case Discard:
 		{
 			Riichi::TableEvents::Discard const& discard = event.Get<Discard>();
-			std::cout << Riichi::ToString( discard.Player() ) << " discarded tile " << discard.TileDiscarded() << std::endl;
+			std::cout << Riichi::ToString( discard.Player() ) << " discarded tile " << discard.TileDiscarded().Tile() << std::endl;
 			break;
 		}
 
