@@ -72,9 +72,10 @@ Hand::KanResult Hand::MakeKan
 )
 {
 	// First check existing triplet melds
+	TileKind const& meldTileKind = i_meldTile.Tile().Kind();
 	for ( Meld& meld : m_melds )
 	{
-		if ( meld.m_type == GroupType::Triplet && meld.m_tiles.front().first == i_meldTile )
+		if ( meld.m_type == GroupType::Triplet && meld.m_tiles.front().first.Tile() == meldTileKind )
 		{
 			// Meld comes from our own hand
 			riEnsure( !i_calledFrom.has_value(), "Cannot call kan on already open meld" );
@@ -106,7 +107,7 @@ Hand::KanResult Hand::MakeKan
 		m_freeTiles,
 		[ & ]( TileInstance const& i_tile )
 		{
-			if ( i_tile == i_meldTile )
+			if ( i_tile.Tile() == meldTileKind )
 			{
 				newMeld.m_tiles.push_back( { i_tile, std::nullopt } );
 				return true;
@@ -224,9 +225,10 @@ Vector<Hand::DrawKanResult> Hand::DrawKanOptions
 
 	if ( i_drawnTile.has_value() )
 	{
+		TileKind const& drawnTileKind = i_drawnTile.value().Tile().Kind();
 		for ( Meld const& meld : m_melds )
 		{
-			if ( meld.m_type == GroupType::Triplet && meld.m_tiles.front().first == i_drawnTile.value() )
+			if ( meld.m_type == GroupType::Triplet && meld.m_tiles.front().first.Tile() == drawnTileKind )
 			{
 				results.push_back( { i_drawnTile.value(), false } );
 				break;
@@ -235,7 +237,7 @@ Vector<Hand::DrawKanResult> Hand::DrawKanOptions
 
 		if ( results.empty() )
 		{
-			size_t const othersCount = ranges::count( m_freeTiles, i_drawnTile.value() );
+			size_t const othersCount = ranges::count_if( m_freeTiles, [ & ]( auto const& freeTile ) { return freeTile.Tile() == drawnTileKind; });
 			if ( othersCount >= 3 )
 			{
 				results.push_back( { i_drawnTile.value(), true } );
@@ -247,8 +249,9 @@ Vector<Hand::DrawKanResult> Hand::DrawKanOptions
 	// n^2 but code is simple and n is small
 	for ( auto tileI = m_freeTiles.begin(); tileI != m_freeTiles.end(); ++tileI )
 	{
-		size_t const tilesOfType = std::count( tileI, m_freeTiles.end(), *tileI );
-		if ( tilesOfType >= 4 )
+		TileKind const& thisTileKind = tileI->Tile().Kind();
+		size_t const tilesOfThisKind = std::count_if( tileI, m_freeTiles.end(), [ & ]( auto const& freeTile ) { return freeTile.Tile() == thisTileKind; } );
+		if ( tilesOfThisKind >= 4 )
 		{
 			results.push_back( { *tileI, true } );
 		}
