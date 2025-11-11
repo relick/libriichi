@@ -65,7 +65,7 @@ public:
 	void VisitPlayers( T_Visitor&& i_visitor )  const;
 	Points GetPoints( PlayerID i_playerID ) const;
 	Points ModifyPoints( PlayerID i_playerID, Points i_amount );
-	std::ostream& PrintStandings( std::ostream& io_out ) const;
+	std::ostream& PrintStandings( std::ostream& io_out, std::span<Pair<PlayerID, Points> const> i_changes = {} ) const;
 
 	// Simulation
 	bool Playing() const;

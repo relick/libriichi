@@ -154,6 +154,23 @@ public:
 		return true;
 	}
 	size_t Size() const { return m_size; }
+
+	friend EnumSet operator~( EnumSet const& a )
+	{
+		EnumSet negated = a;
+		for ( T_Enum val : T_EnumRange{} )
+		{
+			if ( negated.Contains( val ) )
+			{
+				negated.Erase( val );
+			}
+			else
+			{
+				negated.Insert( val );
+			}
+		}
+		return negated;
+	}
 };
 
 //------------------------------------------------------------------------------

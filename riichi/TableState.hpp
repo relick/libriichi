@@ -102,8 +102,8 @@ struct BaseTurn
 {
 	BaseTurn( Table& i_table, Seat i_seat );
 
-	Hand const& GetHand() const;
-	Option<TileInstance> GetDrawnTile() const;
+	Hand const& GetCurrentHand() const;
+	Option<TileInstance> GetCurrentTileDraw() const;
 	Seat GetSeat() const { return m_seat; }
 
 protected:

@@ -76,14 +76,28 @@ Points Table::ModifyPoints
 //------------------------------------------------------------------------------
 std::ostream& Table::PrintStandings
 (
-	std::ostream& io_out
+	std::ostream& io_out,
+	std::span<Pair<PlayerID, Points> const> i_changes
 )	const
 {
 	io_out << "Standings:\n";
 	for ( size_t i = 0; i < m_players.size(); ++i )
 	{
 		if ( i > 0 ) { io_out << '\n'; }
+		Points playerChange = 0;
+		for ( auto const& change : i_changes )
+		{
+			if ( change.first == m_playerIDs[ i ] )
+			{
+				playerChange = change.second;
+				break;
+			}
+		}
 		io_out << "Player " << i << ":\t" << m_players[ i ].second;
+		if ( playerChange != 0 )
+		{
+			io_out << "\t (" << ( m_players[ i ].second - playerChange ) << ( ( playerChange > 0 ) ? " +" : " " ) << playerChange << ")";
+		}
 	}
 
 	return io_out;

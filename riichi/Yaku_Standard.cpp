@@ -1265,7 +1265,7 @@ HanValue Tenhou::CalculateValue
 	YAKU_CALCULATEVALUE_PARAMS()
 )	const
 {
-	if ( i_round.IsDealer( i_playerSeat ) && i_round.Discards( i_playerSeat ).empty() )
+	if ( IsDealer( i_playerSeat ) && i_round.Discards( i_playerSeat ).empty() )
 	{
 		return Yakuman;
 	}
@@ -1281,7 +1281,7 @@ HanValue Chihou::CalculateValue
 {
 	if ( i_lastTileDrawType == TileDrawType::SelfDraw
 		&& !i_round.CallsMade()
-		&& !i_round.IsDealer( i_playerSeat )
+		&& !IsDealer( i_playerSeat )
 		&& i_round.Discards( i_playerSeat ).empty()
 		)
 	{

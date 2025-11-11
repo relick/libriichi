@@ -47,4 +47,13 @@ inline Seat NextPlayer( Seat i_seat, size_t i_playerCount )
 	return i_seat;
 }
 
+//------------------------------------------------------------------------------
+inline bool IsDealer
+(
+	Seat i_player
+)
+{
+	return i_player == Seat::East;
+}
+
 }

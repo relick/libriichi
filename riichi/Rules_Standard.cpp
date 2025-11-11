@@ -267,7 +267,7 @@ HandScore StandardYonmaCore::CalculateBasicPoints
 
 	if ( max == 0 )
 	{
-		return { 0, {} };
+		return { 0, 0, {} };
 	}
 
 	riEnsure( maxInterp, "Had max points more than 0 but no valid interpretation" );
@@ -332,26 +332,6 @@ HandScore StandardYonmaCore::CalculateBasicPoints
 			maxScore.push_back( { "Akadora", akadoraValue } );
 			max += akadoraValue;
 		}
-	}
-
-	if ( max >= 5 )
-	{
-		// Counted mangan
-		// TODO-RULES: double/triple yakuman
-		static Points constexpr c_hanTable[] = {
-			0,
-			0,
-			0,
-			0,
-			0,
-			2000,
-			3000,
-			4000,
-			6000,
-			8000,
-		};
-
-		return { c_hanTable[ std::min<Han>( max, 13 ) ], std::move( maxScore ) };
 	}
 
 	// Calculate fu
@@ -477,6 +457,26 @@ HandScore StandardYonmaCore::CalculateBasicPoints
 
 	Points const basePoints = [ & ]()
 	{
+		if ( max >= 5 )
+		{
+			// Counted mangan
+			// TODO-RULES: double/triple yakuman
+			static Points constexpr c_hanTable[] = {
+				0,
+				0,
+				0,
+				0,
+				0,
+				2000,
+				3000,
+				4000,
+				6000,
+				8000,
+			};
+
+			return c_hanTable[ std::min<Han>( max, 13 ) ];
+		}
+
 		Points base = fu * 4;
 		Han han = max;
 		while ( han-- )
@@ -488,7 +488,7 @@ HandScore StandardYonmaCore::CalculateBasicPoints
 		return base >= 2000 ? 2000 : base;
 	}();
 
-	return { basePoints, std::move( maxScore ) };
+	return { basePoints, fu, std::move( maxScore ) };
 }
 
 //------------------------------------------------------------------------------
@@ -541,71 +541,153 @@ bool StandardYonmaCore::ShouldAddHonba
 }
 
 //------------------------------------------------------------------------------
-Pair<Points, Points> StandardYonmaCore::PotPoints
+TablePayments StandardYonmaCore::HonbaPotPayments
 (
 	size_t i_honbaSticks,
+	SeatSet const& i_winners,
+	Option<Seat> i_ronLoser
+)	const
+{
+	if ( i_winners.Size() == 0 )
+	{
+		return {};
+	}
+
+	bool const tsumoWin = !i_ronLoser.has_value();
+
+	riEnsure( !tsumoWin || i_winners.Size() == 1, "Max 1 tsumo allowed" );
+
+	// Honba paid evenly by all non-winners for tsumo, but just the loser when ron
+	Points const singleHonbaPayment = static_cast< Points >( i_honbaSticks * 100 );
+	Points const winnerPayment = singleHonbaPayment * 3;
+
+	TablePayments payments;
+
+	if ( i_ronLoser.has_value() )
+	{
+		// Single loser pays the honba in full to each winner
+		Points const loserPayment = -( winnerPayment * i_winners.Size() );
+
+		for ( Seat winner : i_winners )
+		{
+			payments.m_pointsPerSeat[ winner ] = winnerPayment;
+		}
+		payments.m_pointsPerSeat[ i_ronLoser.value() ] = loserPayment;
+	}
+	else
+	{
+		riEnsure( i_winners.Size() == 1, "Max 1 tsumo allowed" );
+
+		// Non-winners pay evenly to the tsumo winner
+		Points const loserPayment = -singleHonbaPayment;
+
+		for ( Seat loser : ~i_winners )
+		{
+			payments.m_pointsPerSeat[ loser ] = loserPayment;
+		}
+		payments.m_pointsPerSeat[ *i_winners.begin() ] = winnerPayment;
+	}
+
+	return payments;
+}
+
+//------------------------------------------------------------------------------
+TablePayments StandardYonmaCore::RiichiBetPotPayments
+(
 	size_t i_riichiSticks,
-	bool i_isTsumo,
-	size_t i_winners
+	SeatSet const& i_winners,
+	Option<Seat> i_ronLoser
 )	const
 {
-	if ( i_isTsumo )
+	if ( i_winners.Size() == 0 )
 	{
-		// Honba paid by all non-winners
-		riEnsure( i_winners == 1, "Only 1 tsumo" );
-		return { static_cast< Points >( i_honbaSticks * 100 ), static_cast< Points >( i_riichiSticks * RiichiBet() ) };
+		return {};
 	}
 
-	// Honba paid by ron'd player
-	return { static_cast< Points >( i_honbaSticks * 300 ), RoundTo100( static_cast< Points >( ( i_riichiSticks * RiichiBet() ) / i_winners ) ) };
+	// The riichi bet is already paid, so this is adding points to the winners only, by dividing what's in the pot evenly
+	Points const riichiBetPayment = RoundTo100( static_cast< Points >( ( i_riichiSticks * RiichiBetPoints() ) / i_winners.Size() ) );
+
+	TablePayments payments;
+
+	for ( Seat winner : i_winners )
+	{
+		payments.m_pointsPerSeat[ winner ] = riichiBetPayment;
+	}
+
+	return payments;
 }
 
 //------------------------------------------------------------------------------
-Pair<Points, Points> StandardYonmaCore::PointsFromEachPlayerTsumo
+TablePayments StandardYonmaCore::TsumoPayments
 (
-	Points i_basicPoints,
-	bool i_isDealer
+	HandScore const& i_handScore,
+	Seat i_winner
 )	const
 {
-	if ( i_isDealer )
+	TablePayments payments;
+	bool const winnerIsDealer = ( i_winner == Seat::East );
+
+	Points const doubleBasic = RoundTo100( 2 * i_handScore.m_basicPoints );
+	Points const singleBasic = RoundTo100( i_handScore.m_basicPoints );
+
+	for ( Seat seat : Seats{} )
 	{
-		return { RoundTo100( 2 * i_basicPoints ), RoundTo100( 2 * i_basicPoints ) };
+		if ( seat == i_winner )
+		{
+			payments.m_pointsPerSeat[ seat ] = doubleBasic + ( 2 * ( winnerIsDealer ? doubleBasic : singleBasic ) );
+		}
+		else
+		{
+			payments.m_pointsPerSeat[ seat ] = ( seat == Seat::East || winnerIsDealer ) ? -doubleBasic : -singleBasic;
+		}
 	}
-	
-	return { RoundTo100( 2 * i_basicPoints ), RoundTo100( i_basicPoints ) };
+
+	return payments;
 }
 
 //------------------------------------------------------------------------------
-Points StandardYonmaCore::PointsFromPlayerRon
+TablePayments StandardYonmaCore::RonPayments
 (
-	Points i_basicPoints,
-	bool i_isDealer
+	HandScore const& i_handScore,
+	Seat i_winner,
+	Seat i_loser
 )	const
 {
-	if ( i_isDealer )
-	{
-		return RoundTo100( 6 * i_basicPoints );
-	}
+	TablePayments payments;
+	bool const winnerIsDealer = ( i_winner == Seat::East );
 
-	return RoundTo100( 4 * i_basicPoints );
+	payments.m_pointsPerSeat[ i_winner ] = RoundTo100( ( winnerIsDealer ? 6 : 4 ) * i_handScore.m_basicPoints );
+	payments.m_pointsPerSeat[ i_loser ] = -payments.m_pointsPerSeat[ i_winner ];
+
+	return payments;
 }
 
 //------------------------------------------------------------------------------
-Pair<Points, Points> StandardYonmaCore::PointsEachPlayerInTenpaiDraw
+TablePayments StandardYonmaCore::ExhaustiveDrawPayments
 (
-	size_t i_playersInTenpai
+	SeatSet const& i_playersInTenpai
 )	const
 {
-	if ( i_playersInTenpai == 0 || i_playersInTenpai == 4 )
+	if ( i_playersInTenpai.Size() == 0 || i_playersInTenpai.Size() == 4 )
 	{
-		return { 0, 0 };
+		return {};
 	}
 
 	size_t constexpr c_pointsAvailable = 3000;
-	Points const pointsGainedPerTenpaiPlayer = static_cast< Points >( c_pointsAvailable / i_playersInTenpai );
-	Points const pointsPaidPerNonTenpaiPlayer = static_cast< Points >( c_pointsAvailable / ( GetPlayerCount() - i_playersInTenpai ) );
+	Points const pointsPaidPerNonTenpaiPlayer = static_cast< Points >( c_pointsAvailable / ( GetPlayerCount() - i_playersInTenpai.Size() ) );
+	Points const pointsGainedPerTenpaiPlayer = static_cast< Points >( c_pointsAvailable / i_playersInTenpai.Size() );
 
-	return { pointsGainedPerTenpaiPlayer, pointsPaidPerNonTenpaiPlayer };
+	TablePayments payments;
+	for ( Seat tenpaiPlayer : i_playersInTenpai )
+	{
+		payments.m_pointsPerSeat[ tenpaiPlayer ] = pointsGainedPerTenpaiPlayer;
+	}
+	for ( Seat nonTenpaiPlayer : ~i_playersInTenpai )
+	{
+		payments.m_pointsPerSeat[ nonTenpaiPlayer ] = -pointsPaidPerNonTenpaiPlayer;
+	}
+
+	return payments;
 }
 
 //------------------------------------------------------------------------------

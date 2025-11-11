@@ -16,9 +16,10 @@ public:
 
 	size_t GetPlayerCount() const override { return 4_Players; }
 	Points InitialPoints() const override { return 25'000; }
-	Points RiichiBet() const override { return 1'000; }
+	Points RiichiBetPoints() const override { return 1'000; }
 	Vector<TileInstance> const& Tileset() const override { return m_tileSet; }
 	size_t DeadWallDrawsAvailable() const override { return 4u; }
+	bool HasPermissionToRiichi( Seat i_player, Points i_currentPoints ) const override { return i_currentPoints >= RiichiBetPoints(); }
 
 	Pair<Set<TileKind>, Vector<TileInstance>> WaitsWithYaku
 	(
@@ -41,10 +42,11 @@ public:
 	bool RepeatRound( Round const& i_previousRound ) const override;
 	bool ShouldAddHonba( Round const& i_previousRound ) const override;
 
-	Pair<Points, Points> PotPoints( size_t i_honbaSticks, size_t i_riichiSticks, bool i_isTsumo, size_t i_winners ) const override;
-	Pair<Points, Points> PointsFromEachPlayerTsumo( Points i_basicPoints, bool i_isDealer ) const override;
-	Points PointsFromPlayerRon( Points i_basicPoints, bool i_isDealer ) const override;
-	Pair<Points, Points> PointsEachPlayerInTenpaiDraw( size_t i_playersInTenpai ) const override;
+	TablePayments HonbaPotPayments( size_t i_honbaSticks, SeatSet const& i_winners, Option<Seat> i_ronLoser ) const override;
+	TablePayments RiichiBetPotPayments( size_t i_riichiSticks, SeatSet const& i_winners, Option<Seat> i_ronLoser ) const override;
+	TablePayments TsumoPayments( HandScore const& i_handScore, Seat i_winner ) const override;
+	TablePayments RonPayments( HandScore const& i_handScore, Seat i_winner, Seat i_loser ) const override;
+	TablePayments ExhaustiveDrawPayments( SeatSet const& i_playersInTenpai ) const override;
 
 private:
 	static Points RoundTo100( Points i_finalPoints );

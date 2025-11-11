@@ -13,7 +13,7 @@ void Round::PlayerData::UpdateForTurn
 (
 )
 {
-	if ( !m_riichiDiscardTile.has_value() )
+	if ( !m_riichi )
 	{
 		m_tempFuriten = false;
 	}
@@ -49,30 +49,12 @@ Seat Round::CurrentTurn
 }
 
 //------------------------------------------------------------------------------
-bool Round::IsDealer
-(
-	Seat i_player
-)	const
-{
-	return i_player == Seat::East;
-}
-
-//------------------------------------------------------------------------------
 bool Round::CalledRiichi
 (
 	Seat i_player
 )	const
 {
-	return m_players[ ( size_t )i_player ].m_riichiDiscardTile.has_value();
-}
-
-//------------------------------------------------------------------------------
-Option<size_t> Round::RiichiTileIndex
-(
-	Seat i_player
-)	const
-{
-	return m_players[ ( size_t )i_player ].m_riichiDiscardTile;
+	return Player( i_player ).m_riichi.has_value();
 }
 
 //------------------------------------------------------------------------------
@@ -81,7 +63,16 @@ bool Round::CalledDoubleRiichi
 	Seat i_player
 )	const
 {
-	return m_players[ ( size_t )i_player ].m_riichiDiscardTile.value_or( 1u ) == 0u;
+	return CalledRiichi( i_player ) && Player( i_player ).m_riichi->m_sidewaysDiscardIndex == 0u;
+}
+
+//------------------------------------------------------------------------------
+bool Round::WaitingToPayRiichiBet
+(
+	Seat i_player
+)	const
+{
+	return CalledRiichi( i_player ) && Player( i_player ).m_riichi->m_waitingToPayBet;
 }
 
 //------------------------------------------------------------------------------
@@ -91,7 +82,7 @@ bool Round::RiichiIppatsuValid
 )	const
 {
 	// Ippatsu is valid if there have been no calls or further discards since the riichi of the player
-	return m_players[ ( size_t )i_player ].m_riichiIppatsuValid;
+	return CalledRiichi( i_player ) && Player( i_player ).m_riichi->m_ippatsuValid;
 }
 
 //------------------------------------------------------------------------------
@@ -101,7 +92,7 @@ bool Round::Furiten
 	Set<TileKind> const& i_waits
 )	const
 {
-	PlayerData const& player = m_players[ ( size_t )i_player ];
+	PlayerData const& player = Player( i_player );
 	return player.m_tempFuriten
 		|| ranges::any_of( player.m_discards, [ & ]( TileInstance const& i_tile ) { return i_waits.contains( i_tile.Tile() ); } );
 }
@@ -112,34 +103,34 @@ Vector<TileInstance> const& Round::Discards
 	Seat i_player
 )	const
 {
-	return m_players[ ( size_t )i_player ].m_discards;
+	return Player( i_player ).m_discards;
 }
 
 //------------------------------------------------------------------------------
-Vector<TileInstance> const& Round::VisibleDiscards
+Pair<Vector<TileInstance> const&, Option<size_t>> Round::VisibleDiscards
 (
 	Seat i_player
 )	const
 {
-	return m_players[ ( size_t )i_player ].m_visibleDiscards;
+	return { Player( i_player ).m_visibleDiscards, CalledRiichi( i_player ) ? Option<size_t>( Player( i_player ).m_riichi->m_sidewaysDiscardIndex ) : Option<size_t>() };
 }
 
 //------------------------------------------------------------------------------
-Hand const& Round::GetHand
+Hand const& Round::CurrentHand
 (
 	Seat i_player
 )	const
 {
-	return m_players[ ( size_t )i_player ].m_hand;
+	return Player( i_player ).m_hand;
 }
 
 //------------------------------------------------------------------------------
-Option<TileDraw> const& Round::DrawnTile
+Option<TileDraw> const& Round::CurrentTileDraw
 (
 	Seat i_player
 )	const
 {
-	return m_players[ ( size_t )i_player ].m_draw;
+	return Player( i_player ).m_draw;
 }
 
 //------------------------------------------------------------------------------
@@ -148,16 +139,27 @@ bool Round::IsWinner
 	Seat i_player
 )	const
 {
-	return m_players[ ( size_t )i_player ].m_winningScore.has_value();
+	return Player( i_player ).m_endOfRound && Player( i_player ).m_endOfRound->m_winScores;
 }
 
 //------------------------------------------------------------------------------
-Option<HandScore> const& Round::WinnerScore
+Option<Round::WinScores> const& Round::WinnerScores
 (
 	Seat i_player
 )	const
 {
-	return m_players[ ( size_t )i_player ].m_winningScore;
+	riEnsure( Player( i_player ).m_endOfRound.has_value(), "Cannot ask for winner score before end of round info received" );
+	return Player( i_player ).m_endOfRound->m_winScores;
+}
+
+//------------------------------------------------------------------------------
+Points Round::EndOfRoundTablePayment
+(
+	Seat i_player
+)	const
+{
+	riEnsure( Player( i_player ).m_endOfRound.has_value(), "Cannot ask for end of round table payment before end of round info received" );
+	return Player( i_player ).m_endOfRound->m_tablePayment;
 }
 
 //------------------------------------------------------------------------------
@@ -166,7 +168,7 @@ bool Round::FinishedInTenpai
 	Seat i_player
 )	const
 {
-	return m_players[ ( size_t )i_player ].m_finishedInTenpai;
+	return Player( i_player ).m_endOfRound && Player( i_player ).m_endOfRound->m_finishedInTenpai;
 }
 
 //------------------------------------------------------------------------------
@@ -198,7 +200,7 @@ Player const& Round::GetPlayer
 	Table const& i_table
 )	const
 {
-	return i_table.GetPlayer( m_players[ ( size_t )i_player ].m_playerID );
+	return i_table.GetPlayer( GetPlayerID( i_player ) );
 }
 
 //------------------------------------------------------------------------------
@@ -207,7 +209,7 @@ PlayerID Round::GetPlayerID
 	Seat i_player
 )	const
 {
-	return m_players[ ( size_t )i_player ].m_playerID;
+	return Player( i_player ).m_playerID;
 }
 
 //------------------------------------------------------------------------------
@@ -233,7 +235,7 @@ bool Round::AnyWinners
 (
 )	const
 {
-	return ranges::any_of( m_players, []( PlayerData const& i_player ) { return i_player.m_winningScore.has_value(); } );
+	return ranges::any_of( m_players, []( PlayerData const& i_player ) { return i_player.m_endOfRound && i_player.m_endOfRound->m_winScores; } );
 }
 
 //------------------------------------------------------------------------------
@@ -241,7 +243,7 @@ bool Round::AnyFinishedInTenpai
 (
 )	const
 {
-	return ranges::any_of( m_players, []( PlayerData const& i_player ) { return i_player.m_finishedInTenpai; } );
+	return ranges::any_of( m_players, []( PlayerData const& i_player ) { return i_player.m_endOfRound && i_player.m_endOfRound->m_finishedInTenpai; } );
 }
 
 //------------------------------------------------------------------------------
@@ -495,7 +497,7 @@ TileInstance Round::Discard
 	Option<TileInstance> const& i_handTileToDiscard
 )
 {
-	PlayerData& player = m_players[ ( size_t )m_currentTurn ];
+	PlayerData& player = CurrentPlayer();
 	TileInstance discarded = [ & ]()
 	{
 		if ( i_handTileToDiscard.has_value() )
@@ -512,7 +514,12 @@ TileInstance Round::Discard
 		player.m_hand.Discard( discarded, player.m_draw );
 	}
 	player.m_draw.reset();
-	player.m_riichiIppatsuValid = false;
+
+	if ( player.m_riichi )
+	{
+		player.m_riichi->m_ippatsuValid = false;
+	}
+
 	return discarded;
 }
 
@@ -522,15 +529,15 @@ TileInstance Round::Riichi
 	Option<TileInstance> const& i_handTileToDiscard
 )
 {
-	PlayerData& player = m_players[ ( size_t )m_currentTurn ];
-	player.m_riichiDiscardTile = player.m_discards.size();
+	PlayerData& player = CurrentPlayer();
 
+	riEnsure( !player.m_riichi, "Cannot riichi twice!" );
+
+	size_t const sidewaysDiscardIndex = player.m_visibleDiscards.size();
 	TileInstance const discarded = Discard( i_handTileToDiscard );
-	// Set ippatsu valid afterwards as Discard will reset it
-	player.m_riichiIppatsuValid = true;
 
-	// Add the stick
-	++m_riichiSticks;
+	// Set this after discarding to ensure discarding does not affect ippatsu
+	player.m_riichi = PlayerData::Riichi{ sidewaysDiscardIndex };
 
 	return discarded;
 }
@@ -543,13 +550,11 @@ TileDraw Round::PassCalls
 {
 	for ( Seat seat : i_couldRon )
 	{
-		m_players[ ( size_t )seat ].m_tempFuriten = true;
+		Player( seat ).m_tempFuriten = true;
 	}
 
-	m_currentTurn = NextPlayer( m_currentTurn, m_players.size() );
-
-	PlayerData& newPlayer = m_players[ ( size_t )m_currentTurn ];
-	newPlayer.UpdateForTurn();
+	bool constexpr c_callMade = false;
+	PlayerData& newPlayer = StartTurn( NextPlayer( m_currentTurn, m_players.size() ), c_callMade );
 
 	newPlayer.m_draw = SelfDraw();
 	return newPlayer.m_draw.value();
@@ -561,7 +566,7 @@ Hand::KanResult Round::HandKan
 	Option<TileInstance> const& i_handTileToKan
 )
 {
-	PlayerData& player = m_players[ ( size_t )m_currentTurn ];
+	PlayerData& player = CurrentPlayer();
 	Hand::KanResult res = player.m_hand.MakeKan( i_handTileToKan.value_or( player.m_draw.value().m_tile ), i_handTileToKan.has_value(), std::nullopt );
 	player.m_draw.reset();
 	return res;
@@ -572,7 +577,7 @@ TileDraw Round::HandKanRonPass
 (
 )
 {
-	PlayerData& player = m_players[ ( size_t )m_currentTurn ];
+	PlayerData& player = CurrentPlayer();
 
 	player.m_draw = DeadWallDraw();
 	return player.m_draw.value();
@@ -585,23 +590,17 @@ Pair<Seat, TileInstance> Round::Chi
 	Pair<TileInstance, TileInstance> const& i_meldTiles
 )
 {
-	PlayerData& current = m_players[ ( size_t )m_currentTurn ];
+	PlayerData& current = CurrentPlayer();
 	Pair<Seat, TileInstance> const ret{ m_currentTurn, current.m_discards.back() };
 
 	// Disappear it from the visible discards in front of the player
 	current.m_visibleDiscards.pop_back();
 
-	PlayerData& caller = m_players[ ( size_t )i_caller ];
+	PlayerData& caller = Player( i_caller );
 	caller.m_hand.MakeMeld( ret, { i_meldTiles.first, i_meldTiles.second }, GroupType::Sequence );
 
-	// Invalidate riichi ippatsu as call made
-	for ( PlayerData& player : m_players )
-	{
-		player.m_riichiIppatsuValid = false;
-	}
-
-	m_currentTurn = i_caller;
-	caller.UpdateForTurn();
+	bool constexpr c_callMade = true;
+	StartTurn( i_caller, c_callMade );
 
 	return ret;
 }
@@ -612,27 +611,21 @@ Pair<Seat, TileInstance> Round::Pon
 	Seat i_caller
 )
 {
-	// TODO-RULES: Uhhhh I guess I forgot that you might want to pon and have different options too like a chi
-	PlayerData& current = m_players[ ( size_t )m_currentTurn ];
+	PlayerData& current = CurrentPlayer();
 	Pair<Seat, TileInstance> const ret{ m_currentTurn, current.m_discards.back() };
 
 	// Disappear it from the visible discards in front of the player
 	current.m_visibleDiscards.pop_back();
 
-	PlayerData& caller = m_players[ ( size_t )i_caller ];
-	auto tile1 = std::find( caller.m_hand.FreeTiles().begin(), caller.m_hand.FreeTiles().end(), ret.second);
-	auto tile2 = std::find( tile1 + 1, caller.m_hand.FreeTiles().end(), ret.second );
+	// TODO-RULES: Uhhhh I guess I forgot that you might want to pon and have different options too like a chi
+	PlayerData& caller = Player( i_caller );
+	auto tile1 = std::find_if( caller.m_hand.FreeTiles().begin(), caller.m_hand.FreeTiles().end(), [ & ]( auto const& freeTile ) { return freeTile.Tile() == ret.second.Tile().Kind(); } );
+	auto tile2 = std::find_if( tile1 + 1, caller.m_hand.FreeTiles().end(), [ & ]( auto const& freeTile ) { return freeTile.Tile() == ret.second.Tile().Kind(); } );
 
 	caller.m_hand.MakeMeld( ret, { *tile1, *tile2 }, GroupType::Triplet );
 
-	// Invalidate riichi ippatsu as call made
-	for ( PlayerData& player : m_players )
-	{
-		player.m_riichiIppatsuValid = false;
-	}
-
-	m_currentTurn = i_caller;
-	caller.UpdateForTurn();
+	bool constexpr c_callMade = true;
+	StartTurn( i_caller, c_callMade );
 
 	return ret;
 }
@@ -643,23 +636,17 @@ Pair<TileDraw, Pair<Seat, TileInstance>> Round::DiscardKan
 	Seat i_caller
 )
 {
-	PlayerData& current = m_players[ ( size_t )m_currentTurn ];
+	PlayerData& current = CurrentPlayer();
 	Pair<Seat, TileInstance> const ret{ m_currentTurn, current.m_discards.back() };
 
 	// Disappear it from the visible discards in front of the player
 	current.m_visibleDiscards.pop_back();
 
-	PlayerData& caller = m_players[ ( size_t )i_caller ];
+	PlayerData& caller = Player( i_caller );
 	caller.m_hand.MakeKan( ret.second, false, ret.first );
 
-	// Invalidate riichi ippatsu as call made
-	for ( PlayerData& player : m_players )
-	{
-		player.m_riichiIppatsuValid = false;
-	}
-
-	m_currentTurn = i_caller;
-	caller.UpdateForTurn();
+	bool constexpr c_callMade = true;
+	StartTurn( i_caller, c_callMade );
 
 	caller.m_draw = DeadWallDraw();
 
@@ -667,23 +654,43 @@ Pair<TileDraw, Pair<Seat, TileInstance>> Round::DiscardKan
 }
 
 //------------------------------------------------------------------------------
+void Round::RiichiBetPaid
+(
+	Seat i_player
+)
+{
+	PlayerData& player = Player( i_player );
+
+	riEnsure( player.m_riichi, "Player must have already called riichi, to add a riichi stick" );
+	riEnsure( player.m_riichi->m_waitingToPayBet, "Player must not have already added a riichi stick" );
+
+	++m_riichiSticks;
+	player.m_riichi->m_waitingToPayBet = false;
+}
+
+//------------------------------------------------------------------------------
 TileInstance Round::AddWinner
 (
 	Seat i_player,
-	HandScore const& i_score
+	HandScore i_handScore,
+	FinalScore i_finalScore
 )
 {
-	PlayerData& player = m_players[ ( size_t )i_player ];
-	player.m_winningScore = i_score;
+	PlayerData& player = Player( i_player );
+	if ( !player.m_endOfRound )
+	{
+		player.m_endOfRound = PlayerData::EndOfRound{};
+	}
+	player.m_endOfRound->m_winScores = WinScores{ std::move( i_handScore ) , i_finalScore };
 
-	if ( player.m_draw.has_value() )
+	if ( player.m_draw )
 	{
 		// Was tsumo
 		return player.m_draw.value().m_tile;
 	}
 
 	// Was ron
-	return m_players[ ( size_t )m_currentTurn ].m_discards.back();
+	return CurrentPlayer().m_discards.back();
 }
 
 //------------------------------------------------------------------------------
@@ -692,8 +699,47 @@ void Round::AddFinishedInTenpai
 	Seat i_player
 )
 {
-	PlayerData& player = m_players[ ( size_t )i_player ];
-	player.m_finishedInTenpai = true;
+	PlayerData& player = Player( i_player );
+	if ( !player.m_endOfRound )
+	{
+		player.m_endOfRound = PlayerData::EndOfRound{};
+	}
+	player.m_endOfRound->m_finishedInTenpai = true;
+}
+
+//------------------------------------------------------------------------------
+void Round::ApplyPayments
+(
+	TablePayments const& i_payments,
+	Table& io_table
+)
+{
+	for ( size_t i = 0; i < m_players.size(); ++i )
+	{
+		Seat const seat = ( Seat )i;
+		io_table.ModifyPoints( GetPlayerID( seat ), i_payments.m_pointsPerSeat[ seat ] );
+	}
+}
+
+//------------------------------------------------------------------------------
+void Round::ApplyEndOfRoundPayments
+(
+	TablePayments const& i_payments,
+	Table& io_table
+)
+{
+	// Applies the payments, then saves that payment into the end of round data for each player
+	ApplyPayments( i_payments, io_table );
+
+	for ( size_t i = 0; i < m_players.size(); ++i )
+	{
+		Seat const seat = ( Seat )i;
+		if ( !Player( seat ).m_endOfRound )
+		{
+			Player( seat ).m_endOfRound = PlayerData::EndOfRound{};
+		}
+		Player( seat ).m_endOfRound->m_tablePayment = i_payments.m_pointsPerSeat[ seat ];
+	}
 }
 
 //------------------------------------------------------------------------------
@@ -740,6 +786,34 @@ TileDraw Round::DeadWallDraw
 	TileInstance drawn = std::move( m_wall.front() );
 	m_wall.erase( m_wall.begin() );
 	return { drawn, TileDrawType::DeadWallDraw, };
+}
+
+//------------------------------------------------------------------------------
+Round::PlayerData& Round::StartTurn
+(
+	Seat i_player,
+	bool i_callMade
+)
+{
+	riEnsure( Seats().Contains( i_player ), "Started turn for invalid player" );
+
+	if ( i_callMade )
+	{
+		// Invalidate riichi ippatsu as call made
+		for ( PlayerData& player : m_players )
+		{
+			if ( player.m_riichi )
+			{
+				player.m_riichi->m_ippatsuValid = false;
+			}
+		}
+	}
+
+	// Set the current turn and apply PlayerData updates
+	m_currentTurn = i_player;
+	Player( i_player ).UpdateForTurn();
+
+	return Player( i_player );
 }
 
 }

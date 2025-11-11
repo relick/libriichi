@@ -227,24 +227,27 @@ public:
 		return { TileKind::Prev(), *this };
 	}
 
+	inline TileKind const& Kind() const { return *this; }
+	inline TileProperties const& Properties() const { return *this; }
+
 	friend bool operator==( Tile const& i_a, Tile const& i_b )
 	{
-		return ( ( TileKind const& )i_a == ( TileKind const& )i_b ) && ( ( TileProperties const& )i_a == ( TileProperties const& )i_b );
+		return ( i_a.Kind() == i_b.Kind() ) && ( i_a.Properties() == i_b.Properties() );
 	}
 	friend bool operator<( Tile const& i_a, Tile const& i_b )
 	{
-		if ( ( TileKind const& )i_a == ( TileKind const& )i_b )
+		if ( i_a.Kind() == i_b.Kind() )
 		{
-			return ( TileProperties const& )i_a < ( TileProperties const& )i_b;
+			return i_a.Properties() < i_b.Properties();
 		}
 		
-		return ( TileKind const& )i_a < ( TileKind const& )i_b;
+		return i_a.Kind() < i_b.Kind();
 	}
 
 	// Also allowed to compare tiles directly to kinds or properties, just to check that aspect of them
 	friend bool operator==( Tile const& i_a, TileKind const& i_b )
 	{
-		return ( TileKind const& )i_a == i_b;
+		return ( TileKind const& )i_a.Kind() == i_b;
 	}
 	friend bool operator==( TileKind const& i_a, Tile const& i_b )
 	{
@@ -252,7 +255,7 @@ public:
 	}
 	friend bool operator==( Tile const& i_a, TileProperties const& i_b )
 	{
-		return ( TileProperties const& )i_a == i_b;
+		return i_a.Properties() == i_b;
 	}
 	friend bool operator==( TileProperties const& i_a, Tile const& i_b )
 	{

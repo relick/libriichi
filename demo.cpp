@@ -121,7 +121,7 @@ int main()
 			std::cout << "\nInitial Hands: \n";
 			for ( Riichi::Seat seat : Riichi::Seats{} )
 			{
-				std::cout << Riichi::ToString( seat ) << ": " << table.GetRound().GetHand( seat ) << '\n';
+				std::cout << Riichi::ToString( seat ) << ": " << table.GetRound().CurrentHand( seat ) << '\n';
 			}
 
 			bool constexpr c_includeUradora = false;
@@ -150,10 +150,10 @@ int main()
 		{
 			Riichi::TableStates::Turn_User const& turn = state.Get<Turn_User>();
 			std::cout << "Player in seat " << ToString( turn.GetSeat() ) << " taking turn\n";
-			std::cout << "Hand: " << turn.GetHand();
-			if ( turn.GetDrawnTile().has_value() )
+			std::cout << "Hand: " << turn.GetCurrentHand();
+			if ( turn.GetCurrentTileDraw().has_value() )
 			{
-				std::cout << " " << turn.GetDrawnTile().value().Tile();
+				std::cout << " " << turn.GetCurrentTileDraw().value().Tile();
 			}
 			std::cout << "\n";
 
@@ -215,12 +215,12 @@ int main()
 						Riichi::Option<Riichi::Tile> const tile = fnParseTile( input.substr( 7 ) );
 						if ( tile.has_value() && ranges::contains( turn.RiichiOptions(), tile.value() ) )
 						{
-							if ( tile == turn.GetDrawnTile() )
+							if ( tile == turn.GetCurrentTileDraw() )
 							{
 								turn.Riichi( std::nullopt );
 								break;
 							}
-							else if ( ranges::contains( turn.GetHand().FreeTiles(), tile.value() ) )
+							else if ( ranges::contains( turn.GetCurrentHand().FreeTiles(), tile.value() ) )
 							{
 								turn.Riichi( tile );
 								break;
@@ -233,12 +233,12 @@ int main()
 					Riichi::Option<Riichi::Tile> const tile = fnParseTile( input );
 					if ( tile.has_value() )
 					{
-						if ( tile == turn.GetDrawnTile() )
+						if ( tile == turn.GetCurrentTileDraw() )
 						{
 							turn.Discard( std::nullopt );
 							break;
 						}
-						else if ( ranges::contains( turn.GetHand().FreeTiles(), tile.value() ) )
+						else if ( ranges::contains( turn.GetCurrentHand().FreeTiles(), tile.value() ) )
 						{
 							turn.Discard( tile );
 							break;
@@ -387,6 +387,7 @@ int main()
 		// Then, get resulting event, and process into output. This part is technically optional,
 		// but required if you want meaningful output
 		Riichi::TableEvent const event = table.RetrieveEvent();
+		bool printEndOfRoundStandings = false;
 		switch ( event.Type() )
 		{
 		using enum Riichi::TableEventType;
@@ -425,10 +426,9 @@ int main()
 		case Tsumo:
 		{
 			Riichi::TableEvents::Tsumo const& tsumo = event.Get<Tsumo>();
-			auto const& score = table.GetRound().WinnerScore( tsumo.Winner() ).value();
+			Riichi::Round::WinScores const& scores = table.GetRound().WinnerScores( tsumo.Winner() ).value();
 			std::cout << Riichi::ToString( tsumo.Winner() ) << " won with tsumo! Score:\n";
-			Riichi::Han total = 0;
-			for ( auto const& yaku : score.second )
+			for ( auto const& yaku : scores.m_handScore.m_yaku )
 			{
 				std::cout << yaku.first << ": ";
 				if ( yaku.second.IsYakuman() )
@@ -437,14 +437,13 @@ int main()
 				}
 				else
 				{
-					total += yaku.second.Get();
 					std::cout << static_cast< int >( yaku.second.Get() );
 				}
 				std::cout << "\n";
 			}
-			std::cout << "Total: " << static_cast< int >( total ) << " (" << score.first << ")\n\n";
+			std::cout << "Total: " << static_cast< int >( scores.m_handScore.HanTotal() ) << " han " << scores.m_handScore.FuTotal() << " fu (" << scores.m_finalScore.m_fromPlayers << ")\n\n";
 
-			table.PrintStandings( std::cout ) << "\n" << std::endl;
+			printEndOfRoundStandings = true;
 			break;
 		}
 
@@ -453,10 +452,9 @@ int main()
 			Riichi::TableEvents::Ron const& ron = event.Get<Ron>();
 			for ( auto const& winner : ron.Winners() )
 			{
-				auto const& score = table.GetRound().WinnerScore( winner ).value();
+				Riichi::Round::WinScores const& scores = table.GetRound().WinnerScores( winner ).value();
 				std::cout << Riichi::ToString( winner ) << " won with ron! Score:\n";
-				Riichi::Han total = 0;
-				for ( auto const& yaku : score.second )
+				for ( auto const& yaku : scores.m_handScore.m_yaku )
 				{
 					std::cout << yaku.first << ": ";
 					if ( yaku.second.IsYakuman() )
@@ -465,22 +463,22 @@ int main()
 					}
 					else
 					{
-						total += yaku.second.Get();
 						std::cout << static_cast< int >( yaku.second.Get() );
 					}
 					std::cout << "\n";
 				}
-				std::cout << "Total: " << static_cast< int >( total ) << " (" << score.first << ")\n\n";
+				std::cout << "Total: " << static_cast< int >( scores.m_handScore.HanTotal() ) << " han " << scores.m_handScore.FuTotal() << " fu (" << scores.m_finalScore.m_fromPlayers << ")\n\n";
 			}
 
-			table.PrintStandings( std::cout ) << "\n" << std::endl;
+			printEndOfRoundStandings = true;
 			break;
 		}
 
 		case WallDepleted:
 		{
 			std::cout << "Draw\n\n";
-			table.PrintStandings( std::cout ) << "\n" << std::endl;
+
+			printEndOfRoundStandings = true;
 			break;
 		}
 
@@ -490,6 +488,17 @@ int main()
 			break;
 		}
 
+		}
+
+		if ( printEndOfRoundStandings )
+		{
+			Riichi::Utils::EnumArray<Riichi::Pair<Riichi::PlayerID, Riichi::Points>, Riichi::Seats> pointChanges;
+			for ( Riichi::Seat seat : Riichi::Seats{} )
+			{
+				pointChanges[ seat ] = { table.GetRound().GetPlayerID( seat ), table.GetRound().EndOfRoundTablePayment( seat ) };
+			}
+
+			table.PrintStandings( std::cout, pointChanges ) << "\n" << std::endl;
 		}
 
 	} while ( table.Playing() );

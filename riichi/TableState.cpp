@@ -19,13 +19,25 @@ void BetweenTurnsBase::TransitionToTurn
 
 	Round& round = table.m_rounds.back();
 
+	// Any pending riichi bets should now be applied, as it's the start of the next turn
+	for ( Seat player : round.Seats() )
+	{
+		if ( round.WaitingToPayRiichiBet( player ) )
+		{
+			// Pay the bet
+			TablePayments const riichiBetPayments = table.m_rules->RiichiBetPayments( player );
+			round.ApplyPayments( riichiBetPayments, table );
+			round.RiichiBetPaid( player ); // adds the stick to the round pot
+		}
+	}
+
 	Player const& turnPlayer = round.GetPlayer( round.CurrentTurn(), table );
 
 	switch ( turnPlayer.Type() )
 	{
 	case PlayerType::User:
 	{
-		Hand const& playerHand = round.GetHand( round.CurrentTurn() );
+		Hand const& playerHand = round.CurrentHand( round.CurrentTurn() );
 
 		bool canTsumo = false;
 		Vector<TileInstance> riichiDiscards;
@@ -36,7 +48,7 @@ void BetweenTurnsBase::TransitionToTurn
 		{
 			bool const allowedToRiichi = playerHand.Melds().empty()
 				&& !isRiichi
-				&& table.GetPoints( round.GetPlayerID( round.CurrentTurn() ) ) >= table.m_rules->RiichiBet();
+				&& table.m_rules->HasPermissionToRiichi( round.CurrentTurn(), table.GetPoints( round.GetPlayerID( round.CurrentTurn() ) ) );
 			auto [ validWaits, validRiichiDiscards ] = table.m_rules->WaitsWithYaku(
 				round,
 				round.CurrentTurn(),
@@ -49,7 +61,7 @@ void BetweenTurnsBase::TransitionToTurn
 			riichiDiscards = std::move( validRiichiDiscards );
 		}
 
-		Vector<Hand::DrawKanResult> kanOptions = round.GetHand( round.CurrentTurn() ).DrawKanOptions( i_tileDraw.has_value() ? Option<TileInstance>( i_tileDraw.value().m_tile ) : Option<TileInstance>( std::nullopt ) );
+		Vector<Hand::DrawKanResult> kanOptions = round.CurrentHand( round.CurrentTurn() ).DrawKanOptions( i_tileDraw.has_value() ? Option<TileInstance>( i_tileDraw.value().m_tile ) : Option<TileInstance>( std::nullopt ) );
 		table.Transition(
 			TableStates::Turn_User{ table, round.CurrentTurn(), canTsumo, std::move( riichiDiscards ), isRiichi, std::move( kanOptions ) },
 			std::move( i_tableEvent )
@@ -81,51 +93,46 @@ void BetweenTurnsBase::HandleRon
 	// TODO-AI: assess whether any AI should join in ron
 	// TODO-RULES: allow/disallow multiple ron
 
-	bool constexpr c_isTsumo = false;
-	Pair<Points, Points> const pot = table.m_rules->PotPoints( round.HonbaSticks(), round.RiichiSticks(), c_isTsumo, i_winners.Size() );
+	Seat const loser = round.CurrentTurn();
 
-	for ( Seat seat : i_winners )
+	TablePayments const potPayments =
+		table.m_rules->HonbaPotPayments( round.HonbaSticks(), i_winners, loser )
+		+ table.m_rules->RiichiBetPotPayments( round.RiichiSticks(), i_winners, loser );
+
+	TablePayments totalPayments = potPayments;
+	for ( Seat winner : i_winners )
 	{
-		Hand const hand = round.GetHand( seat );
+		Hand const hand = round.CurrentHand( winner );
 
-		HandScore const score = table.m_rules->CalculateBasicPoints(
+		HandScore const handScore = table.m_rules->CalculateBasicPoints(
 			round,
-			seat,
+			winner,
 			hand,
 			i_tileDraw
 		);
 
-		round.AddWinner( seat, score );
+		TablePayments const ronPayments = table.m_rules->RonPayments( handScore, winner, loser );
+		totalPayments += ronPayments;
 
-		bool const isDealer = round.IsDealer( seat );
-		Points const winnings = table.m_rules->PointsFromPlayerRon( score.first, isDealer );
-
-		for ( size_t seatI = 0; seatI < table.m_players.size(); ++seatI )
-		{
-			Seat const standingsSeat = ( Seat )seatI;
-			if ( standingsSeat == seat )
-			{
-				table.ModifyPoints( round.GetPlayerID( standingsSeat ), winnings + pot.second );
-			}
-			else if ( standingsSeat == round.CurrentTurn() )
-			{
-				table.ModifyPoints( round.GetPlayerID( standingsSeat ), -winnings - pot.first );
-			}
-		}
+		FinalScore const finalScore{ ronPayments.m_pointsPerSeat[ winner ], potPayments.m_pointsPerSeat[ winner ] };
+		round.AddWinner( winner, handScore, finalScore );
 	}
+
+	// Modify the points
+	round.ApplyEndOfRoundPayments( totalPayments, table );
 
 	if ( table.m_rules->NoMoreRounds( table, round ) )
 	{
 		table.Transition(
 			TableStates::GameOver{ table },
-			TableEvents::Ron{ i_tileDraw.m_tile, i_winners, round.CurrentTurn() }
+			TableEvents::Ron{ i_tileDraw.m_tile, i_winners, loser }
 		);
 	}
 	else
 	{
 		table.Transition(
 			TableStates::BetweenRounds{ table },
-			TableEvents::Ron{ i_tileDraw.m_tile, i_winners, round.CurrentTurn() }
+			TableEvents::Ron{ i_tileDraw.m_tile, i_winners, loser }
 		);
 	}
 }
@@ -197,21 +204,21 @@ BaseTurn::BaseTurn
 {}
 
 //------------------------------------------------------------------------------
-Hand const& BaseTurn::GetHand
+Hand const& BaseTurn::GetCurrentHand
 (
 )	const
 {
 	Table& table = m_table.get();
-	return table.GetRound().GetHand( m_seat );
+	return table.GetRound().CurrentHand( m_seat );
 }
 
 //------------------------------------------------------------------------------
-Option<TileInstance> BaseTurn::GetDrawnTile
+Option<TileInstance> BaseTurn::GetCurrentTileDraw
 (
 )	const
 {
 	Table& table = m_table.get();
-	Option<TileDraw> const& drawnTile = table.GetRound().DrawnTile( m_seat );
+	Option<TileDraw> const& drawnTile = table.GetRound().CurrentTileDraw( m_seat );
 	if ( drawnTile.has_value() )
 	{
 		return drawnTile.value().m_tile;
@@ -232,7 +239,7 @@ void BaseTurn::TransitionToBetweenTurns
 
 	// TODO-RULES: call options (particularly chi) should be controllable by rules
 	Seat const nextPlayer = NextPlayer( round.CurrentTurn(), table.m_players.size() );
-	Pair<Seat, Vector<Pair<Tile, Tile>>> canChi{nextPlayer, round.GetHand( nextPlayer ).ChiOptions( i_discardedTile.Tile() )};
+	Pair<Seat, Vector<Pair<Tile, Tile>>> canChi{nextPlayer, round.CurrentHand( nextPlayer ).ChiOptions( i_discardedTile.Tile() )};
 	if ( round.CalledRiichi( nextPlayer ) )
 	{
 		canChi.second.clear();
@@ -252,11 +259,11 @@ void BaseTurn::TransitionToBetweenTurns
 
 		bool const isRiichi = round.CalledRiichi( seat );
 
-		if ( !isRiichi && round.GetHand( seat ).CanPon( i_discardedTile.Tile() ) )
+		if ( !isRiichi && round.CurrentHand( seat ).CanPon( i_discardedTile.Tile() ) )
 		{
 			canPon.Insert( seat );
 		}
-		if ( !isRiichi && round.GetHand( seat ).CanCallKan( i_discardedTile.Tile() ) )
+		if ( !isRiichi && round.CurrentHand( seat ).CanCallKan( i_discardedTile.Tile() ) )
 		{
 			canKan.Insert( seat );
 		}
@@ -265,7 +272,7 @@ void BaseTurn::TransitionToBetweenTurns
 		auto const [ validWaits, canRiichi ] = table.m_rules->WaitsWithYaku(
 			round,
 			seat,
-			round.GetHand( seat ),
+			round.CurrentHand( seat ),
 			discardedTileAsDraw,
 			c_allowedToRiichi
 		);
@@ -336,59 +343,43 @@ void Turn_User::Tsumo
 
 	Round& round = table.m_rounds.back();
 
-	riEnsure( round.DrawnTile( round.CurrentTurn() ).has_value(), "Cannot tsumo without drawn tile" );
-	TileDraw const& tileDraw = round.DrawnTile( round.CurrentTurn() ).value();
-	Hand const hand = round.GetHand( round.CurrentTurn() );
+	Seat const winner = round.CurrentTurn();
 
-	HandScore const score = table.m_rules->CalculateBasicPoints(
+	TablePayments const potPayments =
+		table.m_rules->HonbaPotPayments( round.HonbaSticks(), SeatSet{ winner }, std::nullopt )
+		+ table.m_rules->RiichiBetPotPayments( round.RiichiSticks(), SeatSet{ winner }, std::nullopt );
+
+	riEnsure( round.CurrentTileDraw( winner ).has_value(), "Cannot tsumo without drawn tile" );
+	TileDraw const& tileDraw = round.CurrentTileDraw( winner ).value();
+	Hand const hand = round.CurrentHand( winner );
+
+	HandScore const handScore = table.m_rules->CalculateBasicPoints(
 		round,
-		round.CurrentTurn(),
+		winner,
 		hand,
 		tileDraw
 	);
 
-	TileInstance const winningTile = round.AddWinner( round.CurrentTurn(), score );
+	TablePayments const tsumoPayments = table.m_rules->TsumoPayments( handScore, winner );
 
-	bool const isDealer = round.IsDealer( round.CurrentTurn() );
-	Pair<Points, Points> const winnings = table.m_rules->PointsFromEachPlayerTsumo( score.first, isDealer );
+	FinalScore const finalScore{ tsumoPayments.m_pointsPerSeat[ winner ], potPayments.m_pointsPerSeat[ winner ] };
+	TileInstance const winningTile = round.AddWinner( winner, handScore, finalScore );
 
-	bool constexpr c_isTsumo = true;
-	Pair<Points, Points> const pot = table.m_rules->PotPoints( round.HonbaSticks(), round.RiichiSticks(), c_isTsumo, 1 );
-
-	for ( size_t seatI = 0; seatI < table.m_players.size(); ++seatI )
-	{
-		Seat const seat = ( Seat )seatI;
-		if ( seat == round.CurrentTurn() )
-		{
-			Points const points = static_cast< Points >(
-				isDealer
-				? ( ( table.m_players.size() - 1 ) * winnings.second )
-				: ( winnings.first + ( table.m_players.size() - 2 ) * winnings.second )
-				) + static_cast< Points >( pot.first * ( table.m_players.size() - 1 ) ) + pot.second;
-			table.ModifyPoints( round.GetPlayerID( seat ), points );
-		}
-		else if ( round.IsDealer( seat ) )
-		{
-			table.ModifyPoints( round.GetPlayerID( seat ), -winnings.first - pot.first );
-		}
-		else
-		{
-			table.ModifyPoints( round.GetPlayerID( seat ), -winnings.second - pot.first );
-		}
-	}
+	// Modify the points
+	round.ApplyEndOfRoundPayments( potPayments + tsumoPayments, table );
 
 	if ( table.m_rules->NoMoreRounds( table, round ) )
 	{
 		table.Transition(
 			TableStates::GameOver( table ),
-			TableEvents::Tsumo{ winningTile, round.CurrentTurn() }
+			TableEvents::Tsumo{ winningTile, winner }
 		);
 	}
 	else
 	{
 		table.Transition(
 			TableStates::BetweenRounds( table ),
-			TableEvents::Tsumo{ winningTile, round.CurrentTurn() }
+			TableEvents::Tsumo{ winningTile, winner }
 		);
 	}
 }
@@ -425,14 +416,12 @@ void Turn_User::Riichi
 	riEnsure(
 		i_handTileToDiscard.has_value()
 		? ranges::contains( m_riichiDiscards, i_handTileToDiscard.value() )
-		: ranges::contains( m_riichiDiscards, round.DrawnTile( round.CurrentTurn() ).value().m_tile )
+		: ranges::contains( m_riichiDiscards, round.CurrentTileDraw( round.CurrentTurn() ).value().m_tile )
 		, "Invalid tile to riichi with"
 	);
 
-	// Pay the bet
-	table.ModifyPoints( round.GetPlayerID( round.CurrentTurn() ), -table.m_rules->RiichiBet() );
-
 	// Make the discard
+	// Note: paying the bet is deferred until the end of BetweenTurns, in case a ron occurs. The bet is not paid in that case.
 	TileInstance const discardedTile = round.Riichi( i_handTileToDiscard );
 
 	TransitionToBetweenTurns(
@@ -471,7 +460,7 @@ void Turn_User::Kan
 			auto const [ validWaits, canRiichi ] = table.m_rules->WaitsWithYaku(
 				round,
 				seat,
-				round.GetHand( seat ),
+				round.CurrentHand( seat ),
 				{ i_tile, TileDrawType::KanTheft },
 				c_allowedToRiichi
 			);
@@ -526,26 +515,15 @@ void BetweenTurns::UserPass
 		for ( size_t seatI = 0; seatI < table.m_players.size(); ++seatI )
 		{
 			Seat const seat = ( Seat )seatI;
-			if ( !HandAssessment( round.GetHand( seat ), *table.m_rules ).Waits().empty() )
+			if ( !HandAssessment( round.CurrentHand( seat ), *table.m_rules ).Waits().empty() )
 			{
 				round.AddFinishedInTenpai( seat );
 				inTenpai.Insert( seat );
 			}
 		}
 
-		auto const [ pointsForEachPlayer, pointsFromEachPlayer ] = table.m_rules->PointsEachPlayerInTenpaiDraw( inTenpai.Size() );
-		for ( size_t seatI = 0; seatI < table.m_players.size(); ++seatI )
-		{
-			Seat const seat = ( Seat )seatI;
-			if ( inTenpai.Contains( seat ) )
-			{
-				table.ModifyPoints( round.GetPlayerID( seat ), pointsForEachPlayer );
-			}
-			else
-			{
-				table.ModifyPoints( round.GetPlayerID( seat ), -pointsFromEachPlayer );
-			}
-		}
+		TablePayments const exhaustiveDrawPayments = table.m_rules->ExhaustiveDrawPayments( inTenpai );
+		round.ApplyEndOfRoundPayments( exhaustiveDrawPayments, table );
 
 		if ( table.m_rules->NoMoreRounds( table, round ) )
 		{
