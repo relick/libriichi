@@ -135,7 +135,7 @@ public:
 
 	friend bool operator==( TileKind const& i_a, TileKind const& i_b ) { return ( i_a.m_suit == i_b.m_suit ) && ( i_a.m_face == i_b.m_face ); }
 	friend bool operator<( TileKind const& i_a, TileKind const& i_b ) { return ( i_a.m_suit == i_b.m_suit ) ? ( i_a.m_face < i_b.m_face ) : ( i_a.m_suit < i_b.m_suit ); }
-	template <typename T> friend class std::hash;
+	template <typename T> friend struct std::hash;
 };
 
 //------------------------------------------------------------------------------
@@ -190,7 +190,7 @@ public:
 	// 'more' properties set = 'higher' in a sorted list
 	friend bool operator==( TileProperties const& i_a, TileProperties const& i_b ) { return i_a.m_flags == i_b.m_flags; }
 	friend bool operator<( TileProperties const& i_a, TileProperties const& i_b ) { return i_a.m_flags < i_b.m_flags; }
-	template <typename T> friend class std::hash;
+	template <typename T> friend struct std::hash;
 };
 
 //------------------------------------------------------------------------------
