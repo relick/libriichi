@@ -151,29 +151,33 @@ private:
 struct BetweenTurns
 	: BetweenTurnsBase
 {
-	BetweenTurns( Table& i_table, TileDraw i_discardedTile, Pair<Seat, Vector<Pair<TileInstance, TileInstance>>> i_canChi, SeatSet i_canPon, SeatSet i_canKan, SeatSet i_canRon );
+	using ChiOptionData = Utils::EnumArray<Vector<ChiOption>, Seats>;
+	using PonOptionData = Utils::EnumArray<Vector<PonOption>, Seats>;
+	using KanOptionData = Utils::EnumArray<Vector<KanOption>, Seats>;
+	using RonOptionData = SeatSet;
+
+	BetweenTurns( Table& i_table, TileDraw i_discardedTile, ChiOptionData i_canChi, PonOptionData i_canPon, KanOptionData i_canKan, RonOptionData i_canRon );
 
 	// TODO-AI indication about AI intent (to allow AI to jump in before user, depending on game implementation)
 
-	// TODO-DEBT: chi option data structure sucks
-	Pair<Seat, Vector<Pair<TileInstance, TileInstance>>> const& CanChi() const { return m_canChi; }
-	SeatSet const& CanPon() const { return m_canPon; }
-	SeatSet const& CanKan() const { return m_canKan; }
+	ChiOptionData const& CanChi() const { return m_canChi; }
+	PonOptionData const& CanPon() const { return m_canPon; }
+	KanOptionData const& CanKan() const { return m_canKan; }
 	SeatSet const& CanRon() const { return m_canRon; }
 
 	// If any calls are made by AI, they will only happen in UserPass or UserRon
 	void UserPass() const;
-	void UserChi( Seat i_user, Pair<TileInstance, TileInstance> const& i_option ) const;
-	void UserPon( Seat i_user ) const;
-	void UserKan( Seat i_user ) const;
+	void UserChi( Seat i_user, ChiOption const& i_option ) const;
+	void UserPon( Seat i_user, PonOption const& i_option ) const;
+	void UserKan( Seat i_user, KanOption const& i_option ) const;
 	void UserRon( SeatSet const& i_users ) const;
 
 private:
 	TileDraw m_discardedTile;
-	Pair<Seat, Vector<Pair<TileInstance, TileInstance>>> m_canChi;
-	SeatSet m_canPon;
-	SeatSet m_canKan;
-	SeatSet m_canRon;
+	ChiOptionData m_canChi;
+	PonOptionData m_canPon;
+	KanOptionData m_canKan;
+	RonOptionData m_canRon;
 };
 
 //------------------------------------------------------------------------------

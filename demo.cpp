@@ -193,7 +193,7 @@ int main()
 						
 						if ( tile.has_value() )
 						{
-							auto kanOptionI = ranges::find_if( turn.KanOptions(), Riichi::EqualsTileKind{ tile.value() }, &Riichi::HandKanOption::m_kanTileKind );
+							auto kanOptionI = ranges::find_if( turn.KanOptions(), Riichi::EqualsTileKind{ tile.value() }, &Riichi::HandKanOption::m_callTileKind );
 							if ( kanOptionI != turn.KanOptions().end() )
 							{
 								turn.Kan( *kanOptionI );
@@ -266,17 +266,17 @@ int main()
 			if ( player1.has_value() )
 			{
 				Riichi::Seat const playerSeat = table.GetRound().GetSeat( player1.value() );
-				if ( betweenTurns.CanChi().first == playerSeat && !betweenTurns.CanChi().second.empty() )
+				if ( !betweenTurns.CanChi()[ playerSeat ].empty() )
 				{
 					std::cout << "/Chi ";
 					passStraightAway = false;
 				}
-				if ( betweenTurns.CanPon().Contains( playerSeat ) )
+				if ( !betweenTurns.CanPon()[ playerSeat ].empty() )
 				{
 					std::cout << "/Pon ";
 					passStraightAway = false;
 				}
-				if ( betweenTurns.CanKan().Contains( playerSeat ) )
+				if ( !betweenTurns.CanKan()[ playerSeat ].empty() )
 				{
 					std::cout << "/Kan ";
 					passStraightAway = false;
@@ -307,25 +307,25 @@ int main()
 				std::getline( std::cin, input );
 				if ( input == "chi" )
 				{
-					if ( betweenTurns.CanChi().first == playerSeat && !betweenTurns.CanChi().second.empty() )
+					if ( !betweenTurns.CanChi()[ playerSeat ].empty() )
 					{
-						betweenTurns.UserChi( playerSeat, betweenTurns.CanChi().second.front() );
+						betweenTurns.UserChi( playerSeat, betweenTurns.CanChi()[ playerSeat ].front() );
 					}
 					break;
 				}
 				else if ( input == "pon" )
 				{
-					if ( betweenTurns.CanPon().Contains( playerSeat ) )
+					if ( !betweenTurns.CanPon()[ playerSeat ].empty() )
 					{
-						betweenTurns.UserPon( playerSeat );
+						betweenTurns.UserPon( playerSeat, betweenTurns.CanPon()[ playerSeat ].front() );
 					}
 					break;
 				}
 				else if ( input == "kan" )
 				{
-					if ( betweenTurns.CanKan().Contains( playerSeat ) )
+					if ( !betweenTurns.CanKan()[ playerSeat ].empty() )
 					{
-						betweenTurns.UserKan( playerSeat );
+						betweenTurns.UserKan( playerSeat, betweenTurns.CanKan()[ playerSeat ].front() );
 					}
 					break;
 				}

@@ -27,9 +27,9 @@ void Hand::Discard
 }
 
 //------------------------------------------------------------------------------
-Vector<Pair<TileInstance, TileInstance>> Hand::ChiOptions
+Vector<ChiOption> Hand::ChiOptions
 (
-	TileKind const& i_tile
+	TileKind i_tile
 )	const
 {
 	if ( i_tile.IsHonour() )
@@ -43,7 +43,7 @@ Vector<Pair<TileInstance, TileInstance>> Hand::ChiOptions
 	// We also want to multiply chi options based on differing Tile values (NOT just TileKinds!)
 	// It works quite well then to reuse a pair of sets and search for the tiles we need in each shape, then fill out options from that as a cartesian product
 
-	Vector<Pair<TileInstance, TileInstance>> options;
+	Vector<ChiOption> options;
 	Set<TileInstance, EqualsTileInstanceIDOp> tiles1;
 	Set<TileInstance, EqualsTileInstanceIDOp> tiles2;
 
@@ -70,7 +70,7 @@ Vector<Pair<TileInstance, TileInstance>> Hand::ChiOptions
 			{
 				for ( TileInstance const& tile2 : tiles2 )
 				{
-					options.push_back( { tile1, tile2 } );
+					options.push_back( { i_tile, false, {}, { tile1, tile2 } } );
 				}
 			}
 		}
@@ -98,27 +98,63 @@ Vector<Pair<TileInstance, TileInstance>> Hand::ChiOptions
 }
 
 //------------------------------------------------------------------------------
-bool Hand::CanPon
+Vector<PonOption> Hand::PonOptions
 (
-	TileKind const& i_tile
+	TileKind i_tile
 )	const
 {
-	size_t const othersCount = std::ranges::count_if( m_freeTiles, EqualsTileKind{ i_tile } );
-	return othersCount >= 2;
+	EqualsTileKind const sharesTileKind{ i_tile };
+	Vector<TileInstance> usableTiles = std::ranges::to<Vector<TileInstance>>(
+		m_freeTiles
+		| std::views::filter( [ & ]( TileInstance const& tile ) { return sharesTileKind( tile ); } )
+	);
+
+	// Need to have at least 2 tiles matching the given kind.
+	Vector<PonOption> options;
+	if ( usableTiles.size() >= 2 )
+	{
+		for ( size_t i = 0; i < usableTiles.size(); ++i )
+		{
+			for ( size_t j = i + 1; j < usableTiles.size(); ++j )
+			{
+				options.push_back( { i_tile, false, {}, { usableTiles[ i ], usableTiles[ j ] } } );
+			}
+		}
+	}
+
+	return options;
 }
 
 //------------------------------------------------------------------------------
-bool Hand::CanCallKan
+Vector<KanOption> Hand::KanOptions
 (
-	TileKind const& i_tile
+	TileKind i_tile
 )	const
 {
-	size_t const othersCount = std::ranges::count_if( m_freeTiles, EqualsTileKind{ i_tile } );
-	return othersCount >= 3;
+	EqualsTileKind const sharesTileKind{ i_tile };
+	Vector<TileInstance> usableTiles = std::ranges::to<Vector<TileInstance>>(
+		m_freeTiles
+		| std::views::filter( [ & ]( TileInstance const& tile ) { return sharesTileKind( tile ); } )
+	);
+
+	// Need to have at least 3 tiles matching the given kind.
+	Vector<KanOption> options;
+	if ( usableTiles.size() >= 3 )
+	{
+		for ( size_t i = 0; i < usableTiles.size(); ++i )
+		{
+			for ( size_t j = i + 1; j < usableTiles.size(); ++j )
+			{
+				options.push_back( { i_tile, false, {}, { usableTiles[ i ], usableTiles[ j ] } } );
+			}
+		}
+	}
+
+	return options;
 }
 
 //------------------------------------------------------------------------------
-Vector<HandKanOption> Hand::KanOptions
+Vector<HandKanOption> Hand::HandKanOptions
 (
 	Option<TileInstance> const& i_drawnTile
 )	const

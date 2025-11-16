@@ -88,9 +88,9 @@ public: // interface for the table states, which mutate the round state
 	void HandKan( HandKanOption const& i_kanOption );
 	TileDraw PassCalls( SeatSet const& i_couldRon ); // draws for next player, returns draw
 	TileDraw HandKanRonPass(); // returns dead wall draw ☠
-	Meld::CalledTile Chi( Seat i_caller, Pair<TileInstance, TileInstance> const& i_meldTiles ); // returns called tile and called from
-	Meld::CalledTile Pon( Seat i_caller ); // returns called tile and called from
-	Pair<TileDraw, Meld::CalledTile> DiscardKan( Seat i_caller ); // returns dead wall draw ☠, called tile and called from
+	Meld::CalledTile Chi( Seat i_caller, ChiOption const& i_chiOption ); // returns called tile and called from
+	Meld::CalledTile Pon( Seat i_caller, PonOption const& i_ponOption ); // returns called tile and called from
+	Pair<TileDraw, Meld::CalledTile> DiscardKan( Seat i_caller, KanOption const& i_kanOption ); // returns dead wall draw ☠, called tile and called from
 	void RiichiBetPaid( Seat i_player ); // adds 1 riichi stick to the pot, and clears the payment-pending status of the given player
 
 	// Round finished actions

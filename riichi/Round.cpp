@@ -615,9 +615,11 @@ TileDraw Round::HandKanRonPass
 Meld::CalledTile Round::Chi
 (
 	Seat i_caller,
-	Pair<TileInstance, TileInstance> const& i_meldTiles
+	ChiOption const& i_chiOption
 )
 {
+	riEnsure( i_chiOption.m_freeHandTilesInvolved.size() == 2, "Must use 2 free hand tiles to chi" );
+
 	PlayerData& current = CurrentPlayer();
 	TileInstance const calledDiscard = current.m_discards.back();
 	Seat const calledFrom = m_currentTurn;
@@ -626,7 +628,11 @@ Meld::CalledTile Round::Chi
 	current.m_visibleDiscards.pop_back();
 
 	PlayerData& caller = Player( i_caller );
-	Meld const& newMeld = caller.m_hand.CallMeld( calledDiscard, calledFrom, i_meldTiles.first, i_meldTiles.second );
+	Meld const& newMeld = caller.m_hand.CallMeld(
+		calledDiscard, calledFrom,
+		i_chiOption.m_freeHandTilesInvolved[ 0 ],
+		i_chiOption.m_freeHandTilesInvolved[ 1 ]
+	);
 
 	bool constexpr c_callMade = true;
 	StartTurn( i_caller, c_callMade );
@@ -637,9 +643,12 @@ Meld::CalledTile Round::Chi
 //------------------------------------------------------------------------------
 Meld::CalledTile Round::Pon
 (
-	Seat i_caller
+	Seat i_caller,
+	PonOption const& i_ponOption
 )
 {
+	riEnsure( i_ponOption.m_freeHandTilesInvolved.size() == 2, "Must use 2 free hand tiles to pon" );
+
 	PlayerData& current = CurrentPlayer();
 	TileInstance const calledDiscard = current.m_discards.back();
 	Seat const calledFrom = m_currentTurn;
@@ -647,13 +656,12 @@ Meld::CalledTile Round::Pon
 	// Disappear it from the visible discards in front of the player
 	current.m_visibleDiscards.pop_back();
 
-	// TODO-RULES: Uhhhh I guess I forgot that you might want to pon and have different options too like a chi
 	PlayerData& caller = Player( i_caller );
-	EqualsTileKind const sharesTileKind{ calledDiscard };
-	auto tile1 = std::ranges::find_if( caller.m_hand.FreeTiles(), sharesTileKind );
-	auto tile2 = std::find_if( tile1 + 1, caller.m_hand.FreeTiles().end(), sharesTileKind );
-
-	Meld const& newMeld = caller.m_hand.CallMeld( calledDiscard, calledFrom, *tile1, *tile2 );
+	Meld const& newMeld = caller.m_hand.CallMeld(
+		calledDiscard, calledFrom,
+		i_ponOption.m_freeHandTilesInvolved[ 0 ],
+		i_ponOption.m_freeHandTilesInvolved[ 1 ]
+	);
 
 	bool constexpr c_callMade = true;
 	StartTurn( i_caller, c_callMade );
@@ -664,9 +672,12 @@ Meld::CalledTile Round::Pon
 //------------------------------------------------------------------------------
 Pair<TileDraw, Meld::CalledTile> Round::DiscardKan
 (
-	Seat i_caller
+	Seat i_caller,
+	KanOption const& i_kanOption
 )
 {
+	riEnsure( i_kanOption.m_freeHandTilesInvolved.size() == 3, "Must use 3 free hand tiles to kan" );
+
 	PlayerData& current = CurrentPlayer();
 	TileInstance const calledDiscard = current.m_discards.back();
 	Seat const calledFrom = m_currentTurn;
@@ -676,26 +687,12 @@ Pair<TileDraw, Meld::CalledTile> Round::DiscardKan
 
 	PlayerData& caller = Player( i_caller );
 
-	// Get the free hand tiles associated with this kan
-	Vector<TileInstance> freeHandTiles;
-	freeHandTiles.reserve( 3 );
-
-	EqualsTileKind const sharesTileKind{ calledDiscard };
-	for ( TileInstance const& tile : caller.m_hand.FreeTiles() )
-	{
-		if ( sharesTileKind( tile ) )
-		{
-			freeHandTiles.push_back( tile );
-		}
-	}
-	riEnsure( freeHandTiles.size() == 3, "Invalid discard kan" );
-
 	// Make the meld
 	Meld const& newMeld = caller.m_hand.CallMeld(
 		calledDiscard, calledFrom,
-		freeHandTiles[ 0 ],
-		freeHandTiles[ 1 ],
-		freeHandTiles[ 2 ]
+		i_kanOption.m_freeHandTilesInvolved[ 0 ],
+		i_kanOption.m_freeHandTilesInvolved[ 1 ],
+		i_kanOption.m_freeHandTilesInvolved[ 2 ]
 	);
 
 	bool constexpr c_callMade = true;

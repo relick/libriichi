@@ -114,23 +114,29 @@ private:
 };
 
 //------------------------------------------------------------------------------
-// Options for calling kan from within a hand i.e. on the player's turn
+// An option for any kind of call, i.e. chi/pon/kan on others, and kan from within a hand on the player's turn
 //------------------------------------------------------------------------------
-struct HandKanOption
+template<typename T_Tag>
+struct CallOption
 {
-	TileKind m_kanTileKind;
+	TileKind m_callTileKind;
 	bool m_closed;
 	Option<TileInstance> m_drawnTileInvolved;
 	Vector<TileInstance> m_freeHandTilesInvolved;
 
-	friend bool operator==( HandKanOption const& i_a, HandKanOption const& i_b )
+	friend bool operator==( CallOption const& i_a, CallOption const& i_b )
 	{
-		return i_a.m_kanTileKind == i_b.m_kanTileKind
+		return i_a.m_callTileKind == i_b.m_callTileKind
 			&& i_a.m_closed == i_b.m_closed;
 	}
 
 	auto Tiles() const { return MaybeAppendTileInstance( m_freeHandTilesInvolved, m_drawnTileInvolved ); }
 };
+
+using ChiOption = CallOption<struct ChiOptionTag>;
+using PonOption = CallOption<struct PonOptionTag>;
+using KanOption = CallOption<struct KanOptionTag>;
+using HandKanOption = CallOption<struct HandKanOptionTag>;
 
 //------------------------------------------------------------------------------
 // A hand is made up of free tiles, and a set of melds
@@ -151,14 +157,14 @@ public:
 	inline Meld const& CallMeld( TileInstance i_calledTile, Seat i_calledFrom, TileInstances... i_freeHandTiles );
 	inline Meld const& CallMeldFromHand( HandKanOption const& i_kanOption );
 
-	// These questions only consider the hand's tiles and not the actual validity of the call in the round
-	Vector<Pair<TileInstance, TileInstance>> ChiOptions( TileKind const& i_tile ) const;
-	bool CanPon( TileKind const& i_tile ) const;
-	bool CanCallKan( TileKind const& i_tile ) const;
+	// These questions only consider the hand's tiles against the given TileKind and not the actual validity of the call in the round
+	Vector<ChiOption> ChiOptions( TileKind i_tile ) const;
+	Vector<PonOption> PonOptions( TileKind i_tile ) const;
+	Vector<KanOption> KanOptions( TileKind i_tile ) const;
 
 	// Will return all free tiles (or the drawn tile) that are involvable in a kan this turn,
 	// even though that will mean up to 4 entries - it simplifies displaying the options to the player this way.
-	Vector<HandKanOption> KanOptions( Option<TileInstance> const& i_drawnTile ) const;
+	Vector<HandKanOption> HandKanOptions( Option<TileInstance> const& i_drawnTile ) const;
 
 	// Goes through all melded tiles, then all free tiles
 	inline auto AllTiles() const;

@@ -75,7 +75,7 @@ Meld const& Hand::CallMeldFromHand
 	riEnsure( allFreeHandTilesErased, "Failed to find expected tiles in hand to form meld with" );
 
 	auto kanTiles = i_kanOption.Tiles();
-	EqualsTileKind const sharesTileKind{ i_kanOption.m_kanTileKind };
+	EqualsTileKind const sharesTileKind{ i_kanOption.m_callTileKind };
 	riEnsure( std::ranges::all_of( kanTiles, sharesTileKind ), "All tiles must share kind for quad!" );
 
 	if ( i_kanOption.m_closed )
