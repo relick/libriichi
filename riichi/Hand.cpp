@@ -145,7 +145,10 @@ Vector<KanOption> Hand::KanOptions
 		{
 			for ( size_t j = i + 1; j < usableTiles.size(); ++j )
 			{
-				options.push_back( { i_tile, false, {}, { usableTiles[ i ], usableTiles[ j ] } } );
+				for ( size_t k = j + 1; k < usableTiles.size(); ++k )
+				{
+					options.push_back( { i_tile, false, {}, { usableTiles[ i ], usableTiles[ j ], usableTiles[ k ] } } );
+				}
 			}
 		}
 	}
