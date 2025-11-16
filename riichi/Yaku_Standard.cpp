@@ -6,10 +6,6 @@
 #include "Tile.hpp"
 #include "Utils.hpp"
 
-#include <numeric>
-#include "range/v3/algorithm.hpp"
-#include "range/v3/view.hpp"
-
 namespace Riichi::StandardYaku
 {
 
@@ -82,7 +78,6 @@ HanValue Pinfu::CalculateValue
 			using enum GroupType;
 		case Triplet:
 		case Quad:
-		case UpgradedQuad:
 		{
 			return NoYaku;
 		}
@@ -157,7 +152,7 @@ HanValue Iipeikou::CalculateValue
 {
 	if ( i_a.Type() == GroupType::Sequence && i_b.Type() == GroupType::Sequence )
 	{
-		return i_a.Tiles() == i_b.Tiles();
+		return std::ranges::equal( i_a.Tiles(), i_b.Tiles(), EqualsTileKindOp{} );
 	}
 	return false;
 }
@@ -209,9 +204,8 @@ HanValue Chankan::CalculateValue
 	YAKU_CALCULATEVALUE_PARAMS()
 )	const
 {
-	// TODO-RULES: In almost all cases, players are not allowed to call ron on an ankan (closed kan). The notable exception involves a kokushi tenpai hand, where the last tile needed for the yakuman is called for an ankan. However, the kokushi exception varies on the rules. In some rules, it is disallowed outright. 
 	// TODO-RULES: If a player is tenpai for suukantsu and a fifth kan is invoked, chankan may not be applied if that fifth kan is an added kan. 
-	if ( i_lastTileDrawType == TileDrawType::KanTheft )
+	if ( i_lastTileDrawType == TileDrawType::UpgradedKanTheft )
 	{
 		return 1;
 	}
@@ -226,7 +220,7 @@ HanValue Bakaze::CalculateValue
 {
 	for ( HandGroup const& group : i_interp.m_groups )
 	{
-		if ( TripletCompatible( group.Type() ) )
+		if ( ConsiderLikeTriplet( group.Type() ) )
 		{
 			if ( ValidTile( group[ 0 ], i_round.Wind() ) )
 			{
@@ -256,7 +250,7 @@ HanValue Jikaze::CalculateValue
 {
 	for ( HandGroup const& group : i_interp.m_groups )
 	{
-		if ( TripletCompatible( group.Type() ) )
+		if ( ConsiderLikeTriplet( group.Type() ) )
 		{
 			if ( ValidTile( group[ 0 ], i_playerSeat ) )
 			{
@@ -299,7 +293,7 @@ HanValue Chantaiyao::CalculateValue
 {
 	for ( HandGroup const& group : i_interp.m_groups )
 	{
-		if ( !ranges::any_of( group.Tiles(), RequiredTile ) )
+		if ( !std::ranges::any_of( group.Tiles(), RequiredTile ) )
 		{
 			return NoYaku;
 		}
@@ -307,7 +301,7 @@ HanValue Chantaiyao::CalculateValue
 
 	// Check final group too
 	if ( !RequiredTile( i_lastTile )
-		&& !ranges::any_of( i_interp.m_ungrouped, RequiredTile ) )
+		&& !std::ranges::any_of( i_interp.m_ungrouped, RequiredTile ) )
 	{
 		return NoYaku;
 	}
@@ -384,8 +378,8 @@ HanValue SanshokuDoujun::CalculateValue
 		return false;
 	}
 
-	return ranges::all_of(
-		ranges::views::zip( i_a.Tiles(), i_b.Tiles(), i_c.Tiles() ),
+	return std::ranges::all_of(
+		std::views::zip( i_a.Tiles(), i_b.Tiles(), i_c.Tiles() ),
 		[]( auto const& i_tileSet )
 		{
 			auto const& [tileA, tileB, tileC] = i_tileSet;
@@ -444,7 +438,7 @@ HanValue Ikkitsuukan::CalculateValue
 		fnEvalGroup( group );
 	}
 
-	if ( ranges::any_of( groupsPerSuit, []( auto const& arr ) { return ranges::all_of( arr, std::identity{} ); } ) )
+	if ( std::ranges::any_of( groupsPerSuit, []( auto const& arr ) { return std::ranges::all_of( arr, std::identity{} ); } ) )
 	{
 		return i_assessment.m_open ? 1 : 2;
 	}
@@ -486,7 +480,7 @@ HanValue Sanankou::CalculateValue
 	int concealedTripleCount = 0;
 	for ( HandGroup const& group : i_interp.m_groups )
 	{
-		if ( !group.Open() && TripletCompatible( group.Type() ) )
+		if ( !group.Open() && ConsiderLikeTriplet( group.Type() ) )
 		{
 			++concealedTripleCount;
 		}
@@ -560,7 +554,8 @@ HanValue SanshokuDoukou::CalculateValue
 
 /*static*/ bool SanshokuDoukou::Sanshoku( HandGroup const& i_a, HandGroup const& i_b, HandGroup const& i_c )
 {
-	if ( !TripletCompatible( i_a.Type() ) || !TripletCompatible( i_b.Type() ) || !TripletCompatible( i_c.Type() ) )
+	if ( !i_a.IsNumbers() || !i_b.IsNumbers() || !i_c.IsNumbers()
+		|| !ConsiderLikeTriplet( i_a.Type() ) || !ConsiderLikeTriplet( i_b.Type() ) || !ConsiderLikeTriplet( i_c.Type() ) )
 	{
 		return false;
 	}
@@ -585,7 +580,7 @@ HanValue Sankantsu::CalculateValue
 	int quadCount = 0;
 	for ( HandGroup const& group : i_interp.m_groups )
 	{
-		if ( group.Type() == GroupType::Quad || group.Type() == GroupType::UpgradedQuad )
+		if ( group.Type() == GroupType::Quad )
 		{
 			++quadCount;
 		}
@@ -612,7 +607,7 @@ HanValue Chiitoitsu::CalculateValue
 
 	// TODO-OPT: Can we do this without filling a container?
 
-	Set<Tile> uniqueTiles;
+	Set<TileKind> uniqueTiles;
 	uniqueTiles.insert( i_lastTile );
 
 	for ( HandGroup const& group : i_interp.m_groups )
@@ -639,7 +634,7 @@ HanValue Honroutou::CalculateValue
 {
 	for ( HandGroup const& group : i_interp.m_groups )
 	{
-		if ( !ranges::all_of( group.Tiles(), ValidTile ) )
+		if ( !std::ranges::all_of( group.Tiles(), ValidTile ) )
 		{
 			return NoYaku;
 		}
@@ -647,7 +642,7 @@ HanValue Honroutou::CalculateValue
 
 	// Check final group too
 	if ( !ValidTile( i_lastTile )
-		|| !ranges::all_of( i_interp.m_ungrouped, ValidTile ) )
+		|| !std::ranges::all_of( i_interp.m_ungrouped, ValidTile ) )
 	{
 		return NoYaku;
 	}
@@ -675,7 +670,7 @@ HanValue Shousangen::CalculateValue
 
 	for ( HandGroup const& group : i_interp.m_groups )
 	{
-		if ( TripletCompatible( group.Type() ) )
+		if ( ConsiderLikeTriplet( group.Type() ) )
 		{
 			if ( group.IsDragons() )
 			{
@@ -747,7 +742,7 @@ HanValue JunchanTaiyao::CalculateValue
 
 	for ( HandGroup const& group : i_interp.m_groups )
 	{
-		if ( !ranges::any_of( group.Tiles(), RequiredTile ) )
+		if ( !std::ranges::any_of( group.Tiles(), RequiredTile ) )
 		{
 			return NoYaku;
 		}
@@ -755,7 +750,7 @@ HanValue JunchanTaiyao::CalculateValue
 
 	// Check final group too
 	if ( !RequiredTile( i_lastTile )
-		&& !ranges::any_of( i_interp.m_ungrouped, RequiredTile ) )
+		&& !std::ranges::any_of( i_interp.m_ungrouped, RequiredTile ) )
 	{
 		return NoYaku;
 	}
@@ -835,7 +830,7 @@ HanValue Ryanpeikou::CalculateValue
 {
 	if ( i_a.Type() == GroupType::Sequence && i_b.Type() == GroupType::Sequence )
 	{
-		return i_a.Tiles() == i_b.Tiles();
+		return std::ranges::equal( i_a.Tiles(), i_b.Tiles(), EqualsTileKindOp{} );
 	}
 	return false;
 }
@@ -887,7 +882,7 @@ HanValue KokushiMusou::CalculateValue
 	// TODO-OPT: Can we do this without filling a container?
 
 	// Sufficient to check that all tiles are terminals/honours and that the distinct tile count >= 13
-	Set<Tile> uniqueTiles;
+	Set<TileKind> uniqueTiles;
 	uniqueTiles.reserve( 14 );
 
 	for ( HandGroup const& group : i_interp.m_groups )
@@ -935,7 +930,7 @@ HanValue Suuankou::CalculateValue
 	int concealedTripleCount = 0;
 	for ( HandGroup const& group : i_interp.m_groups )
 	{
-		if ( !group.Open() && TripletCompatible( group.Type() ) )
+		if ( !group.Open() && ConsiderLikeTriplet( group.Type() ) )
 		{
 			++concealedTripleCount;
 		}
@@ -970,7 +965,7 @@ HanValue Daisangen::CalculateValue
 
 	for ( HandGroup const& group : i_interp.m_groups )
 	{
-		if ( TripletCompatible( group.Type() ) )
+		if ( ConsiderLikeTriplet( group.Type() ) )
 		{
 			if ( group.IsDragons() )
 			{
@@ -1007,7 +1002,7 @@ HanValue Shousuushii::CalculateValue
 
 	for ( HandGroup const& group : i_interp.m_groups )
 	{
-		if ( TripletCompatible( group.Type() ) )
+		if ( ConsiderLikeTriplet( group.Type() ) )
 		{
 			if ( group.IsWinds() )
 			{
@@ -1056,7 +1051,7 @@ HanValue Daisuushii::CalculateValue
 
 	for ( HandGroup const& group : i_interp.m_groups )
 	{
-		if ( TripletCompatible( group.Type() ) )
+		if ( ConsiderLikeTriplet( group.Type() ) )
 		{
 			if ( group.IsWinds() )
 			{
@@ -1106,14 +1101,14 @@ HanValue Chinroutou::CalculateValue
 
 	for ( HandGroup const& group : i_interp.m_groups )
 	{
-		if ( !ranges::all_of( group.Tiles(), RequiredTile ) )
+		if ( !std::ranges::all_of( group.Tiles(), RequiredTile ) )
 		{
 			return NoYaku;
 		}
 	}
 
 	if ( !RequiredTile( i_lastTile )
-		|| !ranges::all_of( i_interp.m_ungrouped, RequiredTile ) )
+		|| !std::ranges::all_of( i_interp.m_ungrouped, RequiredTile ) )
 	{
 		return NoYaku;
 	}
@@ -1146,14 +1141,14 @@ HanValue Ryuuiisou::CalculateValue
 
 	for ( HandGroup const& group : i_interp.m_groups )
 	{
-		if ( !ranges::all_of( group.Tiles(), RequiredTile ) )
+		if ( !std::ranges::all_of( group.Tiles(), RequiredTile ) )
 		{
 			return NoYaku;
 		}
 	}
 
 	if ( !RequiredTile( i_lastTile )
-		|| !ranges::all_of( i_interp.m_ungrouped, RequiredTile ) )
+		|| !std::ranges::all_of( i_interp.m_ungrouped, RequiredTile ) )
 	{
 		return NoYaku;
 	}
@@ -1226,7 +1221,7 @@ HanValue ChuurenPoutou::CalculateValue
 
 	// If every value is 0 or less (technically, there should be exactly one value with -1, the others all 0)
 	// then we have the yakuman
-	if ( ranges::all_of( requiredOfEachValue, []( int n ) { return n <= 0; } ) )
+	if ( std::ranges::all_of( requiredOfEachValue, []( int n ) { return n <= 0; } ) )
 	{
 		return Yakuman;
 	}
@@ -1243,7 +1238,7 @@ HanValue Suukantsu::CalculateValue
 	int kanCount = 0;
 	for ( HandGroup const& group : i_interp.m_groups )
 	{
-		if ( group.Type() == GroupType::Quad || group.Type() == GroupType::UpgradedQuad )
+		if ( group.Type() == GroupType::Quad )
 		{
 			++kanCount;
 		}

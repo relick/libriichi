@@ -61,11 +61,10 @@ public:
 	
 	// General data access
 	Player const& GetPlayer( PlayerID i_playerID ) const;
-	template<typename T_Visitor>
-	void VisitPlayers( T_Visitor&& i_visitor )  const;
+	inline auto AllPlayers() const;
 	Points GetPoints( PlayerID i_playerID ) const;
 	Points ModifyPoints( PlayerID i_playerID, Points i_amount );
-	std::ostream& PrintStandings( std::ostream& io_out, std::span<Pair<PlayerID, Points> const> i_changes = {} ) const;
+	std::ostream& PrintStandings( std::ostream& io_out, Span<Pair<PlayerID, Points> const> i_changes = {} ) const;
 
 	// Simulation
 	bool Playing() const;

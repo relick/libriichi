@@ -113,19 +113,28 @@ struct Rules
 	virtual TablePayments RonPayments( HandScore const& i_handScore, Seat i_winner, Seat i_loser ) const = 0; // paid on ron win
 	virtual TablePayments ExhaustiveDrawPayments( SeatSet const& i_playersInTenpai ) const = 0; // paid on exhaustive draw
 
-
 	// Common to all rulesets
-	template<typename T_Visitor>
-	void VisitInterpreters( T_Visitor&& i_visitor ) const;
-
-	template<typename T_Visitor>
-	void VisitYaku( T_Visitor&& i_visitor ) const;
+	inline auto Interpreters() const { return m_interpreters | DerefConst; }
+	inline auto YakuEvaluators() const { return m_yakuEvaluators | DerefConst; }
 
 protected:
+	template<std::derived_from<HandInterpreter> T_Interpreter, typename... Args>
+		requires std::constructible_from<T_Interpreter, Args...>
+	void AddInterpreter( Args&&... i_args )
+	{
+		m_interpreters.push_back( std::make_unique<T_Interpreter>( std::forward<Args>( i_args )... ) );
+	}
+
+	template<std::derived_from<YakuEvaluator> T_Evaluator, typename... Args>
+		requires std::constructible_from<T_Evaluator, Args...>
+	void AddYakuEvaluator( Args&&... i_args )
+	{
+		m_yakuEvaluators.push_back( std::make_unique<T_Evaluator>( std::forward<Args>( i_args )... ) );
+	}
+
+private:
 	Vector<std::unique_ptr<HandInterpreter>> m_interpreters;
-	Vector<std::unique_ptr<Yaku>> m_yaku;
+	Vector<std::unique_ptr<YakuEvaluator>> m_yakuEvaluators;
 };
 
 }
-
-#include "Rules.inl"

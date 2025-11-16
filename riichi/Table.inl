@@ -6,16 +6,11 @@ namespace Riichi
 {
 
 //------------------------------------------------------------------------------
-template<typename T_Visitor>
-void Table::VisitPlayers
+auto Table::AllPlayers
 (
-	T_Visitor&& i_visitor
-)	 const
+) const
 {
-	for ( auto const& player : m_players )
-	{
-		i_visitor( player );
-	}
+	return std::views::all( m_players );
 }
 
 }

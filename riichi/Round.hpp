@@ -85,12 +85,12 @@ public: // interface for the table states, which mutate the round state
 	// Turn actions
 	TileInstance Discard( Option<TileInstance> const& i_handTileToDiscard ); // returns discarded tile
 	TileInstance Riichi( Option<TileInstance> const& i_handTileToDiscard ); // returns discarded tile
-	Hand::KanResult HandKan( Option<TileInstance> const& i_handTileToKan ); // returns if kan was upgraded pon
+	void HandKan( HandKanOption const& i_kanOption );
 	TileDraw PassCalls( SeatSet const& i_couldRon ); // draws for next player, returns draw
 	TileDraw HandKanRonPass(); // returns dead wall draw ☠
-	Pair<Seat, TileInstance> Chi( Seat i_caller, Pair<TileInstance, TileInstance> const& i_meldTiles ); // returns called tile and called from
-	Pair<Seat, TileInstance> Pon( Seat i_caller ); // returns called tile and called from
-	Pair<TileDraw, Pair<Seat, TileInstance>> DiscardKan( Seat i_caller ); // returns dead wall draw ☠, called tile and called from
+	Meld::CalledTile Chi( Seat i_caller, Pair<TileInstance, TileInstance> const& i_meldTiles ); // returns called tile and called from
+	Meld::CalledTile Pon( Seat i_caller ); // returns called tile and called from
+	Pair<TileDraw, Meld::CalledTile> DiscardKan( Seat i_caller ); // returns dead wall draw ☠, called tile and called from
 	void RiichiBetPaid( Seat i_player ); // adds 1 riichi stick to the pot, and clears the payment-pending status of the given player
 
 	// Round finished actions

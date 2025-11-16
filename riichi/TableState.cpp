@@ -3,8 +3,6 @@
 #include "Rules.hpp"
 #include "Table.hpp"
 
-#include "range/v3/algorithm.hpp"
-
 namespace Riichi::TableStates
 {
 
@@ -61,7 +59,7 @@ void BetweenTurnsBase::TransitionToTurn
 			riichiDiscards = std::move( validRiichiDiscards );
 		}
 
-		Vector<Hand::DrawKanResult> kanOptions = round.CurrentHand( round.CurrentTurn() ).DrawKanOptions( i_tileDraw.has_value() ? Option<TileInstance>( i_tileDraw.value().m_tile ) : Option<TileInstance>( std::nullopt ) );
+		Vector<HandKanOption> kanOptions = round.CurrentHand( round.CurrentTurn() ).KanOptions( i_tileDraw ? Option<TileInstance>( i_tileDraw->m_tile ) : Option<TileInstance>() );
 		table.Transition(
 			TableStates::Turn_User{ table, round.CurrentTurn(), canTsumo, std::move( riichiDiscards ), isRiichi, std::move( kanOptions ) },
 			std::move( i_tableEvent )
@@ -239,7 +237,7 @@ void BaseTurn::TransitionToBetweenTurns
 
 	// TODO-RULES: call options (particularly chi) should be controllable by rules
 	Seat const nextPlayer = NextPlayer( round.CurrentTurn(), table.m_players.size() );
-	Pair<Seat, Vector<Pair<Tile, Tile>>> canChi{nextPlayer, round.CurrentHand( nextPlayer ).ChiOptions( i_discardedTile.Tile() )};
+	Pair<Seat, Vector<Pair<TileInstance, TileInstance>>> canChi{nextPlayer, round.CurrentHand( nextPlayer ).ChiOptions( i_discardedTile.Tile() )};
 	if ( round.CalledRiichi( nextPlayer ) )
 	{
 		canChi.second.clear();
@@ -323,7 +321,7 @@ Turn_User::Turn_User
 	bool i_canTsumo,
 	Vector<TileInstance> i_riichiDiscards,
 	bool i_isRiichi,
-	Vector<Hand::DrawKanResult> i_kanOptions
+	Vector<HandKanOption> i_kanOptions
 )
 	: BaseTurn{ i_table, i_seat }
 	, m_canTsumo{ i_canTsumo }
@@ -415,8 +413,8 @@ void Turn_User::Riichi
 
 	riEnsure(
 		i_handTileToDiscard.has_value()
-		? ranges::contains( m_riichiDiscards, i_handTileToDiscard.value() )
-		: ranges::contains( m_riichiDiscards, round.CurrentTileDraw( round.CurrentTurn() ).value().m_tile )
+		? std::ranges::any_of( m_riichiDiscards, EqualsTileInstanceID{ i_handTileToDiscard.value() } )
+		: std::ranges::any_of( m_riichiDiscards, EqualsTileInstanceID{ round.CurrentTileDraw( round.CurrentTurn() ).value().m_tile } )
 		, "Invalid tile to riichi with"
 	);
 
@@ -433,47 +431,49 @@ void Turn_User::Riichi
 //------------------------------------------------------------------------------
 void Turn_User::Kan
 (
-	TileInstance const& i_tile
+	HandKanOption const& i_kanOption
 )	const
 {
 	Table& table = m_table.get();
 
-	riEnsure( ranges::any_of( m_kanOptions, [ & ]( Hand::DrawKanResult const& i_option ) -> bool
-		{
-			return i_option.kanTile == i_tile;
-		}), "This user cannot kan with provided tile");
+	riEnsure( std::ranges::contains( m_kanOptions, i_kanOption ), "This user cannot kan with provided option" );
 
 	Round& round = table.m_rounds.back();
-	Hand::KanResult const kanResult = round.HandKan( i_tile );
+	Seat const player = round.CurrentTurn();
+	Option<TileDraw> const drawnTile = round.CurrentTileDraw( player );
+
+	round.HandKan( i_kanOption );
+
+	TileInstance const kanTile = i_kanOption.Tiles().front();
+	TileDraw const kanTileTheft{ kanTile, i_kanOption.m_closed ? TileDrawType::ClosedKanTheft : TileDrawType::UpgradedKanTheft };
 
 	SeatSet canRon;
-	if ( kanResult.m_upgradedFromPon )
+	for ( size_t seatI = 0; seatI < table.m_players.size(); ++seatI )
 	{
-		for ( size_t seatI = 0; seatI < table.m_players.size(); ++seatI )
+		Seat const seat = ( Seat )seatI;
+		if ( seat == player )
 		{
-			Seat const seat = ( Seat )seatI;
-			if ( seat == round.CurrentTurn() )
-			{
-				continue;
-			}
-			bool constexpr c_allowedToRiichi = false;
-			auto const [ validWaits, canRiichi ] = table.m_rules->WaitsWithYaku(
-				round,
-				seat,
-				round.CurrentHand( seat ),
-				{ i_tile, TileDrawType::KanTheft },
-				c_allowedToRiichi
-			);
-			if ( !validWaits.empty() && !round.Furiten( seat, validWaits ) )
-			{
-				canRon.Insert( seat );
-			}
+			continue;
+		}
+		bool constexpr c_allowedToRiichi = false;
+		auto const [ validWaits, canRiichi ] = table.m_rules->WaitsWithYaku(
+			round,
+			seat,
+			round.CurrentHand( seat ),
+			kanTileTheft,
+			c_allowedToRiichi
+		);
+		if ( !validWaits.empty() && !round.Furiten( seat, validWaits ) )
+		{
+			canRon.Insert( seat );
 		}
 	}
 
 	table.Transition(
-		TableStates::RonAKanChance{table, { i_tile, TileDrawType::KanTheft }, std::move( canRon )},
-		TableEvent{ TableEvent::Tag<TableEventType::HandKan>(), i_tile, !kanResult.m_open }
+		TableStates::RonAKanChance{ table, kanTileTheft, std::move( canRon ) },
+		i_kanOption.m_closed
+		? TableEvent{ TableEvent::Tag<TableEventType::ClosedKan>(), kanTile.Tile().Kind() }
+		: TableEvent{ TableEvent::Tag<TableEventType::UpgradedKan>(), kanTile }
 	);
 }
 
@@ -482,7 +482,7 @@ BetweenTurns::BetweenTurns
 (
 	Table& i_table,
 	TileDraw i_discardedTile,
-	Pair<Seat, Vector<Pair<Tile, Tile>>> i_canChi,
+	Pair<Seat, Vector<Pair<TileInstance, TileInstance>>> i_canChi,
 	SeatSet i_canPon,
 	SeatSet i_canKan,
 	SeatSet i_canRon
@@ -555,17 +555,17 @@ void BetweenTurns::UserPass
 void BetweenTurns::UserChi
 (
 	Seat i_user,
-	Pair<Tile, Tile> const& i_option
+	Pair<TileInstance, TileInstance> const& i_option
 )	const
 {
 	Table& table = m_table.get();
 
 	Round& round = table.m_rounds.back();
-	Pair<Seat, TileInstance> const calledTile = round.Chi( i_user, i_option );
+	Meld::CalledTile const calledTile = round.Chi( i_user, i_option );
 
 	TransitionToTurn(
 		std::nullopt,
-		TableEvent{ TableEvent::Tag<TableEventType::Call>(), TableEvents::CallType::Chi, calledTile.second, calledTile.first }
+		TableEvent{ TableEvent::Tag<TableEventType::Call>(), TableEvents::CallType::Chi, calledTile }
 	);
 }
 
@@ -578,11 +578,11 @@ void BetweenTurns::UserPon
 	Table& table = m_table.get();
 
 	Round& round = table.m_rounds.back();
-	Pair<Seat, TileInstance> const calledTile = round.Pon( i_user );
+	Meld::CalledTile const calledTile = round.Pon( i_user );
 
 	TransitionToTurn(
 		std::nullopt,
-		TableEvent{ TableEvent::Tag<TableEventType::Call>(), TableEvents::CallType::Pon, calledTile.second, calledTile.first }
+		TableEvent{ TableEvent::Tag<TableEventType::Call>(), TableEvents::CallType::Pon, calledTile }
 	);
 }
 
@@ -599,7 +599,7 @@ void BetweenTurns::UserKan
 
 	TransitionToTurn(
 		deadWallDraw,
-		TableEvent{ TableEvent::Tag<TableEventType::Call>(), TableEvents::CallType::Kan, calledTile.second, calledTile.first }
+		TableEvent{ TableEvent::Tag<TableEventType::Call>(), TableEvents::CallType::Kan, calledTile }
 	);
 }
 

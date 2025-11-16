@@ -6,9 +6,6 @@
 #include "HandInterpreter_Standard.hpp"
 #include "Yaku_Standard.hpp"
 
-#include "range/v3/action.hpp"
-#include "range/v3/algorithm.hpp"
-
 namespace Riichi
 {
 
@@ -17,52 +14,52 @@ StandardYonmaCore::StandardYonmaCore
 (
 )
 {
-	m_interpreters.emplace_back( std::make_unique<StandardInterpreter>() );
+	AddInterpreter<StandardInterpreter>();
 
 	{
 		using namespace StandardYaku;
-		m_yaku.emplace_back( std::make_unique<MenzenchinTsumohou>() );
-		m_yaku.emplace_back( std::make_unique<Riichi>() );
-		m_yaku.emplace_back( std::make_unique<Ippatsu>() );
-		m_yaku.emplace_back( std::make_unique<Pinfu>() );
-		m_yaku.emplace_back( std::make_unique<Iipeikou>() );
-		m_yaku.emplace_back( std::make_unique<HaiteiRaoyue>() );
-		m_yaku.emplace_back( std::make_unique<HouteiRaoyui>() );
-		m_yaku.emplace_back( std::make_unique<RinshanKaihou>() );
-		m_yaku.emplace_back( std::make_unique<Chankan>() );
-		m_yaku.emplace_back( std::make_unique<Tanyao<>>() );
-		m_yaku.emplace_back( std::make_unique<Yakuhai_Haku>() );
-		m_yaku.emplace_back( std::make_unique<Yakuhai_Hatsu>() );
-		m_yaku.emplace_back( std::make_unique<Yakuhai_Chun>() );
-		m_yaku.emplace_back( std::make_unique<Bakaze>() );
-		m_yaku.emplace_back( std::make_unique<Jikaze>() );
-		m_yaku.emplace_back( std::make_unique<DoubleRiichi>() );
-		m_yaku.emplace_back( std::make_unique<Chantaiyao>() );
-		m_yaku.emplace_back( std::make_unique<SanshokuDoujun>() );
-		m_yaku.emplace_back( std::make_unique<Ikkitsuukan>() );
-		m_yaku.emplace_back( std::make_unique<Toitoi>() );
-		m_yaku.emplace_back( std::make_unique<Sanankou>() );
-		m_yaku.emplace_back( std::make_unique<SanshokuDoukou>() );
-		m_yaku.emplace_back( std::make_unique<Sankantsu>() );
-		m_yaku.emplace_back( std::make_unique<Chiitoitsu>() );
-		m_yaku.emplace_back( std::make_unique<Honroutou>() );
-		m_yaku.emplace_back( std::make_unique<Shousangen>() );
-		m_yaku.emplace_back( std::make_unique<Honitsu>() );
-		m_yaku.emplace_back( std::make_unique<JunchanTaiyao>() );
-		m_yaku.emplace_back( std::make_unique<Ryanpeikou>() );
-		m_yaku.emplace_back( std::make_unique<Chinitsu>() );
-		m_yaku.emplace_back( std::make_unique<KokushiMusou>() );
-		m_yaku.emplace_back( std::make_unique<Suuankou>() );
-		m_yaku.emplace_back( std::make_unique<Daisangen>() );
-		m_yaku.emplace_back( std::make_unique<Shousuushii>() );
-		m_yaku.emplace_back( std::make_unique<Daisuushii>() );
-		m_yaku.emplace_back( std::make_unique<Tsuuiisou>() );
-		m_yaku.emplace_back( std::make_unique<Chinroutou>() );
-		m_yaku.emplace_back( std::make_unique<Ryuuiisou>() );
-		m_yaku.emplace_back( std::make_unique<ChuurenPoutou>() );
-		m_yaku.emplace_back( std::make_unique<Suukantsu>() );
-		m_yaku.emplace_back( std::make_unique<Tenhou>() );
-		m_yaku.emplace_back( std::make_unique<Chihou>() );
+		AddYakuEvaluator<MenzenchinTsumohou>();
+		AddYakuEvaluator<Riichi>();
+		AddYakuEvaluator<Ippatsu>();
+		AddYakuEvaluator<Pinfu>();
+		AddYakuEvaluator<Iipeikou>();
+		AddYakuEvaluator<HaiteiRaoyue>();
+		AddYakuEvaluator<HouteiRaoyui>();
+		AddYakuEvaluator<RinshanKaihou>();
+		AddYakuEvaluator<Chankan>();
+		AddYakuEvaluator<Tanyao<>>();
+		AddYakuEvaluator<Yakuhai_Haku>();
+		AddYakuEvaluator<Yakuhai_Hatsu>();
+		AddYakuEvaluator<Yakuhai_Chun>();
+		AddYakuEvaluator<Bakaze>();
+		AddYakuEvaluator<Jikaze>();
+		AddYakuEvaluator<DoubleRiichi>();
+		AddYakuEvaluator<Chantaiyao>();
+		AddYakuEvaluator<SanshokuDoujun>();
+		AddYakuEvaluator<Ikkitsuukan>();
+		AddYakuEvaluator<Toitoi>();
+		AddYakuEvaluator<Sanankou>();
+		AddYakuEvaluator<SanshokuDoukou>();
+		AddYakuEvaluator<Sankantsu>();
+		AddYakuEvaluator<Chiitoitsu>();
+		AddYakuEvaluator<Honroutou>();
+		AddYakuEvaluator<Shousangen>();
+		AddYakuEvaluator<Honitsu>();
+		AddYakuEvaluator<JunchanTaiyao>();
+		AddYakuEvaluator<Ryanpeikou>();
+		AddYakuEvaluator<Chinitsu>();
+		AddYakuEvaluator<KokushiMusou>();
+		AddYakuEvaluator<Suuankou>();
+		AddYakuEvaluator<Daisangen>();
+		AddYakuEvaluator<Shousuushii>();
+		AddYakuEvaluator<Daisuushii>();
+		AddYakuEvaluator<Tsuuiisou>();
+		AddYakuEvaluator<Chinroutou>();
+		AddYakuEvaluator<Ryuuiisou>();
+		AddYakuEvaluator<ChuurenPoutou>();
+		AddYakuEvaluator<Suukantsu>();
+		AddYakuEvaluator<Tenhou>();
+		AddYakuEvaluator<Chihou>();
 	}
 
 	// Set up properties, namely akadora
@@ -111,6 +108,13 @@ Pair<Set<TileKind>, Vector<TileInstance>> StandardYonmaCore::WaitsWithYaku
 	bool i_considerForRiichi
 ) const
 {
+	// Closed kan theft is not allowed for a win
+	// TODO-RULES: some rulesets allow closed kan theft for thirteen orphans
+	if ( i_lastTile.m_type == TileDrawType::ClosedKanTheft )
+	{
+		return {};
+	}
+
 	bool riichiAddsYaku = false;
 	Vector<TileInstance> validDiscardsForRiichi;
 
@@ -126,11 +130,11 @@ Pair<Set<TileKind>, Vector<TileInstance>> StandardYonmaCore::WaitsWithYaku
 			return;
 		}
 
-		for ( auto const& yaku : m_yaku )
+		for ( YakuEvaluator const& yaku : YakuEvaluators() )
 		{
-			if ( yaku->UsesInterpreter( i_interp.m_interpreter ) )
+			if ( yaku.UsesInterpreter( i_interp.m_interpreter ) )
 			{
-				if ( yaku->CalculateValue(
+				if ( yaku.CalculateValue(
 					i_round,
 					i_playerSeat,
 					i_hand,
@@ -148,9 +152,9 @@ Pair<Set<TileKind>, Vector<TileInstance>> StandardYonmaCore::WaitsWithYaku
 
 	if ( i_considerForRiichi )
 	{
-		for ( auto const& yaku : m_yaku )
+		for ( YakuEvaluator const& yaku : YakuEvaluators() )
 		{
-			if ( yaku->AddsYakuToRiichi() )
+			if ( yaku.AddsYakuToRiichi() )
 			{
 				riichiAddsYaku = true;
 				break;
@@ -160,15 +164,15 @@ Pair<Set<TileKind>, Vector<TileInstance>> StandardYonmaCore::WaitsWithYaku
 		// TODO-DEBT TODO-OPT: I've decided the easiest code to write here is to assess all discard options to see if there are any waits
 		// but this is probably the worst way to do it
 
-		for ( size_t tileI = 0; tileI < i_hand.FreeTiles().size(); ++tileI )
+		for ( TileInstance const& tile : i_hand.FreeTiles() )
 		{
 			Hand alteredHand = i_hand;
-			alteredHand.Discard( i_hand.FreeTiles()[ tileI ], i_lastTile );
+			alteredHand.Discard( tile, i_lastTile );
 			HandAssessment const assessment( alteredHand, *this );
 
 			for ( HandInterpretation const& interp : assessment.Interpretations() )
 			{
-				fnAddDiscardsForRiichi( assessment, interp, i_hand.FreeTiles()[ tileI ] );
+				fnAddDiscardsForRiichi( assessment, interp, tile );
 			}
 		}
 
@@ -187,11 +191,11 @@ Pair<Set<TileKind>, Vector<TileInstance>> StandardYonmaCore::WaitsWithYaku
 			continue;
 		}
 
-		for ( auto const& yaku : m_yaku )
+		for ( YakuEvaluator const& yaku : YakuEvaluators() )
 		{
-			if ( yaku->UsesInterpreter( interp.m_interpreter ) )
+			if ( yaku.UsesInterpreter( interp.m_interpreter ) )
 			{
-				if ( yaku->CalculateValue(
+				if ( yaku.CalculateValue(
 					i_round,
 					i_playerSeat,
 					i_hand,
@@ -201,7 +205,7 @@ Pair<Set<TileKind>, Vector<TileInstance>> StandardYonmaCore::WaitsWithYaku
 					i_lastTile.m_type
 				).IsValid() )
 				{
-					ranges::actions::insert( waits, interp.m_waits );
+					std::ranges::for_each( interp.m_waits, [ & ]( TileKind kind ) { waits.insert( kind ); } );
 				}
 			}
 		}
@@ -234,11 +238,11 @@ HandScore StandardYonmaCore::CalculateBasicPoints
 
 		Han total = 0;
 		Vector<Pair<char const*, HanValue>> interpScore;
-		for ( auto const& yaku : m_yaku )
+		for ( YakuEvaluator const& yaku : YakuEvaluators() )
 		{
-			if ( yaku->UsesInterpreter( interp.m_interpreter ) )
+			if ( yaku.UsesInterpreter( interp.m_interpreter ) )
 			{
-				HanValue const value = yaku->CalculateValue(
+				HanValue const value = yaku.CalculateValue(
 					i_round,
 					i_playerSeat,
 					i_hand,
@@ -250,7 +254,7 @@ HandScore StandardYonmaCore::CalculateBasicPoints
 
 				if ( value.IsValid() )
 				{
-					interpScore.push_back( { yaku->Name(), value } );
+					interpScore.push_back( { yaku.Name(), value } );
 					total += value.Get();
 				}
 			}
@@ -274,7 +278,7 @@ HandScore StandardYonmaCore::CalculateBasicPoints
 
 	auto fnHandHasYaku = [ & ]( char const* i_yakuName )
 	{
-		return ranges::any_of( maxScore, [ & ]( auto const& yaku ) { return std::strcmp( yaku.first, i_yakuName ) == 0; } );
+		return std::ranges::any_of( maxScore, [ & ]( auto const& yaku ) { return std::strcmp( yaku.first, i_yakuName ) == 0; } );
 	};
 
 	// Handle Dora
@@ -292,30 +296,31 @@ HandScore StandardYonmaCore::CalculateBasicPoints
 		size_t const uradoraBegin = doraEnd;
 		size_t const uradoraEnd = doraTiles.size();
 
-		auto fnAssessTile = [ & ]( Tile const& i_tile )
-		{
-			for ( size_t i = doraBegin; i < doraEnd; ++i )
+		std::ranges::for_each(
+			MaybeAppendTileInstance( i_hand.AllTiles(), i_lastTile.m_tile ),
+			[ & ]( TileInstance const& i_tile )
 			{
-				if ( doraTiles[ i ] == i_tile )
+				EqualsTileKind const sharesTileKind{ i_tile };
+				for ( size_t i = doraBegin; i < doraEnd; ++i )
 				{
-					++doraValue;
+					if ( sharesTileKind( doraTiles[ i ] ) )
+					{
+						++doraValue;
+					}
+				}
+				for ( size_t i = uradoraBegin; i < uradoraEnd; ++i )
+				{
+					if ( sharesTileKind( doraTiles[ i ] ) )
+					{
+						++uradoraValue;
+					}
+				}
+				if ( i_tile.Tile().HasProperty<Akadora>() )
+				{
+					++akadoraValue;
 				}
 			}
-			for ( size_t i = uradoraBegin; i < uradoraEnd; ++i )
-			{
-				if ( doraTiles[ i ] == i_tile )
-				{
-					++uradoraValue;
-				}
-			}
-			if ( i_tile.HasProperty<Akadora>() )
-			{
-				++akadoraValue;
-			}
-		};
-
-		i_hand.VisitTiles( fnAssessTile );
-		fnAssessTile( i_lastTile.m_tile.Tile() );
+		);
 
 		if ( doraValue > 0 )
 		{
@@ -340,7 +345,7 @@ HandScore StandardYonmaCore::CalculateBasicPoints
 	// Koutsu/kantsu
 	for ( HandGroup const& group : maxInterp->m_groups )
 	{
-		if ( TripletCompatible( group.Type() ) )
+		if ( ConsiderLikeTriplet( group.Type() ) )
 		{
 			fu += 2 // all triplet/quad groups get at least 2 fu
 				* ( group.Open() ? 1 : 2 ) // doubled if closed
@@ -419,20 +424,21 @@ HandScore StandardYonmaCore::CalculateBasicPoints
 	using enum TileDrawType;
 	case SelfDraw:
 	case DeadWallDraw:
-	case KanTheft:
 	{
 		// Tsumo
-		// TODO-RULES: kan theft may not get fu
-		if ( assessment.m_open || !wonWithPinfu )
+		// TODO-RULES: dead wall draw may not get fu
+		if ( !wonWithPinfu )
 		{
 			fu += 2;
 		}
 		break;
 	}
 	case DiscardDraw:
+	case ClosedKanTheft:
+	case UpgradedKanTheft:
 	{
 		// Ron
-		if ( !assessment.m_open || fu == 20 )
+		if ( !assessment.m_open )
 		{
 			fu += 10;
 		}
@@ -455,6 +461,12 @@ HandScore StandardYonmaCore::CalculateBasicPoints
 		}
 	}
 
+	// "open pinfu" set to 30
+	if ( assessment.m_open && fu == 20 )
+	{
+		fu = 30;
+	}
+
 	Points const basePoints = [ & ]()
 	{
 		if ( max >= 5 )
@@ -462,19 +474,18 @@ HandScore StandardYonmaCore::CalculateBasicPoints
 			// Counted mangan
 			// TODO-RULES: double/triple yakuman
 			static Points constexpr c_hanTable[] = {
-				0,
-				0,
-				0,
-				0,
-				0,
-				2000,
-				3000,
-				4000,
-				6000,
-				8000,
+				2000, // 5 han mangan
+				3000, // 6 han haneman
+				3000, // 7 han haneman
+				4000, // 8 han baiman
+				4000, // 9 han baiman
+				4000, // 10 han baiman
+				6000, // 11 han sanbaiman
+				6000, // 12 han sanbaiman
+				8000, // 13 han yakuman
 			};
 
-			return c_hanTable[ std::min<Han>( max, 13 ) ];
+			return c_hanTable[ std::min<Han>( max, 13 ) - 5 ];
 		}
 
 		Points base = fu * 4;
@@ -500,13 +511,12 @@ bool StandardYonmaCore::NoMoreRoundsCore
 )	const
 {
 	// TODO-RULES: allow for negative points play
-
-	bool anyPlayersOutOfPoints = false;
-	i_table.VisitPlayers( [ &anyPlayersOutOfPoints ]( Pair<Player, Points> const& i_player ) { anyPlayersOutOfPoints |= i_player.second < 0; } );
-
-	if ( anyPlayersOutOfPoints )
+	for ( Pair<Player, Points> const& player : i_table.AllPlayers() )
 	{
-		return true;
+		if ( player.second < 0 )
+		{
+			return true;
+		}
 	}
 
 	// TODO-RULES: extension rounds if not enough points earned

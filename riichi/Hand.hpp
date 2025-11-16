@@ -7,7 +7,6 @@
 #include "Utils.hpp"
 
 #include <algorithm>
-#include "range/v3/view.hpp"
 
 namespace Riichi
 {
@@ -22,22 +21,115 @@ enum class GroupType : EnumValueType
 	// Kan only:
 	// We never assess a quad inside a hand interpretation (other than to offer the option to the player)
 	Quad,
-	UpgradedQuad, // Pon -> Kan
 };
 //------------------------------------------------------------------------------
-inline bool TripletCompatible( GroupType i_type ) { return i_type == GroupType::Triplet || i_type == GroupType::Quad || i_type == GroupType::UpgradedQuad; }
+inline bool ConsiderLikeTriplet( GroupType i_type ) { return i_type >= GroupType::Triplet; }
+
+template<TileInstanceRange TileInstances = DefaultTileInstanceRange>
+inline auto MaybeAppendTileInstance( TileInstances&& i_baseRange, Option<TileInstance> i_tile )
+{
+	return Utils::ConcatRanges<TileInstance>( std::forward<TileInstances>( i_baseRange ), Utils::MaybeSingleView{ i_tile } );
+}
 
 //------------------------------------------------------------------------------
 // Meld is made up of tiles that may have come from a different seat to the owner of the meld
 // A meld can also be closed (e.g. closed kan), in which it is locked in but doesn't affect open-ness of the hand
 //------------------------------------------------------------------------------
-struct Meld
+class Meld
 {
-	using MeldTile = Pair<TileInstance, Option<Seat>>;
+public:
+	struct CalledTile
+	{
+		TileInstance m_tile;
+		Seat m_from;
+	};
 
-	Vector<MeldTile> m_tiles;
+	template<TileInstanceRange TileInstances = DefaultTileInstanceRange>
+	static Meld MakeSequence( CalledTile i_calledTile, TileInstances&& i_tilesFromHand )
+	{
+		riEnsure( i_tilesFromHand.size() == 2, "2 hand tiles required for sequence" );
+		return { GroupType::Sequence, i_calledTile, std::ranges::to<Vector<TileInstance>>( i_tilesFromHand ) };
+	}
+	template<TileInstanceRange TileInstances = DefaultTileInstanceRange>
+	static Meld MakeTriplet( CalledTile i_calledTile, TileInstances&& i_tilesFromHand )
+	{
+		riEnsure( i_tilesFromHand.size() == 2, "2 hand tiles required for triplet" );
+		return { GroupType::Triplet, i_calledTile, std::ranges::to<Vector<TileInstance>>( i_tilesFromHand ) };
+	}
+	template<TileInstanceRange TileInstances = DefaultTileInstanceRange>
+	static Meld MakeClosedQuad( TileInstances&& i_tilesFromHand )
+	{
+		riEnsure( i_tilesFromHand.size() == 4, "4 hand tiles required for closed quad" );
+		return { GroupType::Quad, std::nullopt, std::ranges::to<Vector<TileInstance>>( i_tilesFromHand ) };
+	}
+	template<TileInstanceRange TileInstances = DefaultTileInstanceRange>
+	static Meld MakeOpenQuad( CalledTile i_calledTile, TileInstances&& i_tilesFromHand )
+	{
+		riEnsure( i_tilesFromHand.size() == 3, "3 hand tiles required for open quad" );
+		return { GroupType::Quad, i_calledTile, std::ranges::to<Vector<TileInstance>>( i_tilesFromHand ) };
+	}
+	Meld& UpgradeTripletToQuad( TileInstance i_tileFromHand )
+	{
+		riEnsure( Triplet() && Open(), "Can only upgrade triplets to quads" );
+		m_tilesFromHand.push_back( std::move( i_tileFromHand ) );
+		return *this;
+	}
+
+	bool Sequence() const { return m_type == GroupType::Sequence; }
+	bool Triplet() const { return m_type == GroupType::Triplet && !UpgradedQuad(); }
+	bool Quad() const { return m_type == GroupType::Quad || UpgradedQuad(); }
+	bool UpgradedQuad() const { return m_type == GroupType::Triplet && m_tilesFromHand.size() == 3; }
+
+	bool Open() const { return m_calledTile.has_value(); }
+	TileInstance GetCalledTile() const { riEnsure( Open(), "Cannot get called tile data for closed meld" ); return m_calledTile->m_tile; }
+	Seat CalledTileFrom() const { riEnsure( Open(), "Cannot get called tile data for closed meld" ); return m_calledTile->m_from; }
+	TileKind SharedTileKind() const { riEnsure( !Sequence(), "Cannot get shared kind of sequence meld" ); return m_tilesFromHand.front().Tile().Kind(); }
+	auto Tiles() const
+	{
+		return Open()
+			? MaybeAppendTileInstance( m_tilesFromHand, GetCalledTile() )
+			: MaybeAppendTileInstance( m_tilesFromHand, std::nullopt )
+			;
+	}
+	TileInstance UpgradedQuadTile() const { riEnsure( UpgradedQuad(), "Cannot get upgraded quad tile if not upgraded quad" ); return m_tilesFromHand.back(); }
+
+private:
+	Meld( GroupType i_type, Option<CalledTile> i_calledTile, Vector<TileInstance> i_tilesFromHand )
+		: m_type{i_type}
+		, m_calledTile{ std::move( i_calledTile ) }
+		, m_tilesFromHand{ std::move( i_tilesFromHand ) }
+	{}
+
+	friend struct HandAssessment;
+	GroupType AssessmentType() const
+	{
+		// Only upgraded quads are strange and have a differing m_type from what needs to be returned here
+		if ( Quad() ) { return GroupType::Quad; }
+		return m_type;
+	}
+
 	GroupType m_type{ GroupType::Sequence };
-	bool m_open{ true };
+	Option<CalledTile> m_calledTile;
+	Vector<TileInstance> m_tilesFromHand;
+};
+
+//------------------------------------------------------------------------------
+// Options for calling kan from within a hand i.e. on the player's turn
+//------------------------------------------------------------------------------
+struct HandKanOption
+{
+	TileKind m_kanTileKind;
+	bool m_closed;
+	Option<TileInstance> m_drawnTileInvolved;
+	Vector<TileInstance> m_freeHandTilesInvolved;
+
+	friend bool operator==( HandKanOption const& i_a, HandKanOption const& i_b )
+	{
+		return i_a.m_kanTileKind == i_b.m_kanTileKind
+			&& i_a.m_closed == i_b.m_closed;
+	}
+
+	auto Tiles() const { return MaybeAppendTileInstance( m_freeHandTilesInvolved, m_drawnTileInvolved ); }
 };
 
 //------------------------------------------------------------------------------
@@ -52,29 +144,24 @@ public:
 
 	Vector<TileInstance> const& FreeTiles() const { return m_freeTiles; }
 	Vector<Meld> const& Melds() const { return m_melds; }
-	void AddFreeTiles( Vector<TileInstance> const& i_newTiles );
+	template<TileInstanceRange TileInstances = DefaultTileInstanceRange>
+	inline void AddFreeTiles( TileInstances&& i_newTiles );
 	void Discard( TileInstance const& i_toDiscard, Option<TileDraw> const& i_drawToAdd );
-	void MakeMeld( Pair<Seat, TileInstance> const& i_meldTile, Pair<TileInstance, TileInstance> const& i_otherTiles, GroupType i_meldType );
-	struct KanResult
-	{
-		bool m_upgradedFromPon{ false };
-		bool m_open{ false };
-	};
-	KanResult MakeKan( TileInstance const& i_meldTile, bool i_drawnTile, Option<Seat> i_calledFrom );
+	template<std::same_as<TileInstance>... TileInstances>
+	inline Meld const& CallMeld( TileInstance i_calledTile, Seat i_calledFrom, TileInstances... i_freeHandTiles );
+	inline Meld const& CallMeldFromHand( HandKanOption const& i_kanOption );
 
 	// These questions only consider the hand's tiles and not the actual validity of the call in the round
-	Vector<Pair<Tile, Tile>> ChiOptions( TileKind const& i_tile ) const;
+	Vector<Pair<TileInstance, TileInstance>> ChiOptions( TileKind const& i_tile ) const;
 	bool CanPon( TileKind const& i_tile ) const;
 	bool CanCallKan( TileKind const& i_tile ) const;
-	struct DrawKanResult
-	{
-		TileInstance kanTile;
-		bool closed;
-	};
-	Vector<DrawKanResult> DrawKanOptions( Option<TileInstance> const& i_drawnTile ) const;
 
-	template<typename T_Visitor>
-	void VisitTiles( T_Visitor&& i_visitor ) const;
+	// Will return all free tiles (or the drawn tile) that are involvable in a kan this turn,
+	// even though that will mean up to 4 entries - it simplifies displaying the options to the player this way.
+	Vector<HandKanOption> KanOptions( Option<TileInstance> const& i_drawnTile ) const;
+
+	// Goes through all melded tiles, then all free tiles
+	inline auto AllTiles() const;
 
 	friend std::ostream& operator<<( std::ostream& io_out, Hand const& i_hand );
 };
@@ -123,6 +210,9 @@ public:
 	bool IsWinds() const;
 	Suit CommonSuit() const;
 	Face CommonNumber() const;
+
+	// Projections
+	static Tile const& First( HandGroup const& i_group ) { return i_group[ 0 ]; }
 };
 
 //------------------------------------------------------------------------------
@@ -154,7 +244,7 @@ struct HandAssessment
 	bool HasAnyNumbersOfSuit( Suit i_suit ) const { return HasAnySimplesOfSuit( i_suit ) || HasAnyTerminalsOfSuit( i_suit ); }
 	bool HasSimplesOfAllSuits() const { return std::ranges::all_of( m_containsSuitSimples, std::identity{} ); }
 	bool HasTerminalsOfAllSuits() const { return std::ranges::all_of( m_containsSuitTerminals, std::identity{} ); }
-	bool HasNumbersOfAllSuits() const { return std::ranges::all_of( ranges::view::zip( m_containsSuitSimples, m_containsSuitTerminals ), []( auto const& p ) { return p.first || p.second; } ); }
+	bool HasNumbersOfAllSuits() const { return std::ranges::all_of( std::views::zip( m_containsSuitSimples, m_containsSuitTerminals ), []( auto const& p ) { return std::get<0>( p ) || std::get<1>( p ); }); }
 
 	bool HasAnyDragons() const { return m_containsDragons; }
 	bool HasAnyWinds() const { return m_containsWinds; }
@@ -165,11 +255,11 @@ struct HandAssessment
 	explicit HandAssessment( Hand const& i_hand, Rules const& i_rules );
 
 	Vector<HandInterpretation> const& Interpretations() const { return m_interpretations; }
-	Set<Tile> const& Waits() const { return m_overallWaits; }
+	Set<TileKind> const& Waits() const { return m_overallWaits; }
 
 private:
 	Vector<HandInterpretation> m_interpretations;
-	Set<Tile> m_overallWaits;
+	Set<TileKind> m_overallWaits;
 };
 
 }

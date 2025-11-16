@@ -7,7 +7,6 @@
 #include "Tile.hpp"
 
 #include <numeric>
-#include "range/v3/algorithm.hpp"
 
 namespace Riichi::StandardYaku
 {
@@ -28,7 +27,7 @@ HanValue Tanyao<t_KuitanEnabled>::CalculateValue
 		}
 	}
 
-	if ( InvalidTile( i_lastTile ) || ranges::any_of( i_interp.m_ungrouped, InvalidTile ) )
+	if ( InvalidTile( i_lastTile ) || std::ranges::any_of( i_interp.m_ungrouped, InvalidTile ) )
 	{
 		return NoYaku;
 	}
@@ -63,7 +62,7 @@ HanValue DragonYakuhai<t_YakuhaiName, t_Dragon>::CalculateValue
 {
 	for ( HandGroup const& group : i_interp.m_groups )
 	{
-		if ( TripletCompatible( group.Type() ) )
+		if ( ConsiderLikeTriplet( group.Type() ) )
 		{
 			if ( ValidTile( group[ 0 ] ) )
 			{

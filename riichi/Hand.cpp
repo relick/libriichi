@@ -5,22 +5,9 @@
 #include "Utils.hpp"
 
 #include <algorithm>
-#include "range/v3/action.hpp"
-#include "range/v3/algorithm.hpp"
-#include "range/v3/view.hpp"
 
 namespace Riichi
 {
-
-//------------------------------------------------------------------------------
-void Hand::AddFreeTiles
-(
-	Vector<TileInstance> const& i_newTiles
-)
-{
-	m_freeTiles.insert( m_freeTiles.end(), i_newTiles.begin(), i_newTiles.end() );
-	std::sort( m_freeTiles.begin(), m_freeTiles.end(), OrderTileInstanceByTile{} ); // TODO-QOL: players may not always want their hand sorted
-}
 
 //------------------------------------------------------------------------------
 void Hand::Discard
@@ -29,105 +16,18 @@ void Hand::Discard
 	Option<TileDraw> const& i_drawToAdd
 )
 {
-	bool const success = Utils::EraseOne( m_freeTiles, i_toDiscard );
+	bool const success = Utils::EraseOneIf( m_freeTiles, EqualsTileInstanceID{ i_toDiscard } );
 	riEnsure( success, "Failed to discard tile - invalid?" );
 
 	if ( i_drawToAdd.has_value() )
 	{
 		m_freeTiles.push_back( i_drawToAdd.value().m_tile );
-		std::sort( m_freeTiles.begin(), m_freeTiles.end(), OrderTileInstanceByTile{} ); // TODO-QOL: players may not always want their hand sorted
+		std::sort( m_freeTiles.begin(), m_freeTiles.end(), CompareTileKindOp{} ); // TODO-QOL: players may not always want their hand sorted
 	}
 }
 
 //------------------------------------------------------------------------------
-void Hand::MakeMeld
-(
-	Pair<Seat, TileInstance> const& i_meldTile,
-	Pair<TileInstance, TileInstance> const& i_otherTiles,
-	GroupType i_meldType
-)
-{
-	riEnsure( i_meldType < GroupType::Quad, "Must call MakeKan instead of MakeMeld for quads" );
-
-	Utils::EraseOne( m_freeTiles, i_otherTiles.first );
-
-	Utils::EraseOne( m_freeTiles, i_otherTiles.second );
-
-	Meld newMeld;
-	newMeld.m_tiles.push_back( { i_meldTile.second, i_meldTile.first } );
-	newMeld.m_tiles.push_back( { i_otherTiles.first, std::nullopt } );
-	newMeld.m_tiles.push_back( { i_otherTiles.second, std::nullopt } );
-	newMeld.m_type = i_meldType;
-	newMeld.m_open = true;
-
-	m_melds.push_back( std::move( newMeld ) );
-}
-
-//------------------------------------------------------------------------------
-Hand::KanResult Hand::MakeKan
-(
-	TileInstance const& i_meldTile,
-	bool i_drawnTile,
-	Option<Seat> i_calledFrom
-)
-{
-	// First check existing triplet melds
-	TileKind const& meldTileKind = i_meldTile.Tile().Kind();
-	for ( Meld& meld : m_melds )
-	{
-		if ( meld.m_type == GroupType::Triplet && meld.m_tiles.front().first.Tile() == meldTileKind )
-		{
-			// Meld comes from our own hand
-			riEnsure( !i_calledFrom.has_value(), "Cannot call kan on already open meld" );
-
-			meld.m_tiles.push_back( { i_meldTile, std::nullopt } );
-			meld.m_type = GroupType::UpgradedQuad;
-			return { true, true, };
-		}
-	}
-
-	// Then check hand
-
-	riEnsure( i_calledFrom.has_value() != i_drawnTile, "Kan tile cannot be drawn tile and called from at the same time" );
-
-	Meld newMeld;
-	if ( i_calledFrom.has_value() )
-	{
-		// Called from another player, add it in now
-		newMeld.m_tiles.push_back( { i_meldTile, i_calledFrom } );
-	}
-	else if ( i_drawnTile )
-	{
-		// It is our drawn tile, add it in now
-		newMeld.m_tiles.push_back( { i_meldTile, std::nullopt } );
-	}
-
-	// Find the remaining 3
-	std::erase_if(
-		m_freeTiles,
-		[ & ]( TileInstance const& i_tile )
-		{
-			if ( i_tile.Tile() == meldTileKind )
-			{
-				newMeld.m_tiles.push_back( { i_tile, std::nullopt } );
-				return true;
-			}
-			return false;
-		}
-	);
-
-	riEnsure( newMeld.m_tiles.size() == 4, "Did not find 4 tiles for kan" );
-
-	newMeld.m_type = GroupType::Quad;
-	newMeld.m_open = i_calledFrom.has_value();
-
-	m_melds.push_back( std::move( newMeld ) );
-
-	return { false, i_calledFrom.has_value(), };
-}
-
-//------------------------------------------------------------------------------
-Vector<Pair<Tile, Tile>> Hand::ChiOptions
+Vector<Pair<TileInstance, TileInstance>> Hand::ChiOptions
 (
 	TileKind const& i_tile
 )	const
@@ -143,30 +43,32 @@ Vector<Pair<Tile, Tile>> Hand::ChiOptions
 	// We also want to multiply chi options based on differing Tile values (NOT just TileKinds!)
 	// It works quite well then to reuse a pair of sets and search for the tiles we need in each shape, then fill out options from that as a cartesian product
 
-	Vector<Pair<Tile, Tile>> options;
-	Set<Tile> tiles1;
-	Set<Tile> tiles2;
+	Vector<Pair<TileInstance, TileInstance>> options;
+	Set<TileInstance, EqualsTileInstanceIDOp> tiles1;
+	Set<TileInstance, EqualsTileInstanceIDOp> tiles2;
 
 	auto fnSearchForTiles = [ & ]( TileKind const& i_search1, TileKind const& i_search2 )
 	{
+		EqualsTileKind const sharesSearch1Kind{ i_search1 };
+		EqualsTileKind const sharesSearch2Kind{ i_search2 };
 		for ( TileInstance const& tile : m_freeTiles )
 		{
-			if ( tile.Tile() == i_search1 )
+			if ( sharesSearch1Kind( tile ) )
 			{
-				tiles1.insert( tile.Tile() );
+				tiles1.insert( tile );
 			}
-			else if ( tile.Tile() == i_search2 )
+			else if ( sharesSearch2Kind( tile ) )
 			{
-				tiles2.insert( tile.Tile() );
+				tiles2.insert( tile );
 			}
 		}
 
 		if ( !tiles1.empty() && !tiles2.empty() )
 		{
 			// Found shape, cartesian product the options
-			for ( Tile const& tile1 : tiles1 )
+			for ( TileInstance const& tile1 : tiles1 )
 			{
-				for ( Tile const& tile2 : tiles2 )
+				for ( TileInstance const& tile2 : tiles2 )
 				{
 					options.push_back( { tile1, tile2 } );
 				}
@@ -201,7 +103,7 @@ bool Hand::CanPon
 	TileKind const& i_tile
 )	const
 {
-	size_t const othersCount = ranges::count_if( m_freeTiles, [ & ]( TileInstance const& tile ) { return tile.Tile() == i_tile; } );
+	size_t const othersCount = std::ranges::count_if( m_freeTiles, EqualsTileKind{ i_tile } );
 	return othersCount >= 2;
 }
 
@@ -211,36 +113,48 @@ bool Hand::CanCallKan
 	TileKind const& i_tile
 )	const
 {
-	size_t const othersCount = ranges::count_if( m_freeTiles, [ & ]( TileInstance const& tile ) { return tile.Tile() == i_tile; } );
+	size_t const othersCount = std::ranges::count_if( m_freeTiles, EqualsTileKind{ i_tile } );
 	return othersCount >= 3;
 }
 
 //------------------------------------------------------------------------------
-Vector<Hand::DrawKanResult> Hand::DrawKanOptions
+Vector<HandKanOption> Hand::KanOptions
 (
 	Option<TileInstance> const& i_drawnTile
 )	const
 {
-	Vector<DrawKanResult> results;
+	Vector<HandKanOption> results;
 
-	if ( i_drawnTile.has_value() )
+	bool constexpr c_closedKan = true;
+	bool constexpr c_isDrawnTile = true;
+
+	if ( i_drawnTile )
 	{
-		TileKind const& drawnTileKind = i_drawnTile.value().Tile().Kind();
-		for ( Meld const& meld : m_melds )
+		EqualsTileKind const sharesDrawnTileKind{ *i_drawnTile };
+
+		// Find possible closed kan with the drawn tile
 		{
-			if ( meld.m_type == GroupType::Triplet && meld.m_tiles.front().first.Tile() == drawnTileKind )
+			HandKanOption closedKan{ sharesDrawnTileKind.kind, c_closedKan, i_drawnTile };
+			for ( TileInstance const& freeTile : m_freeTiles )
 			{
-				results.push_back( { i_drawnTile.value(), false } );
-				break;
+				if ( sharesDrawnTileKind( freeTile ) )
+				{
+					closedKan.m_freeHandTilesInvolved.push_back( freeTile );
+				}
+			}
+			if ( closedKan.m_freeHandTilesInvolved.size() == 3 )
+			{
+				results.push_back( std::move( closedKan ) );
 			}
 		}
 
-		if ( results.empty() )
+		// Find possible upgraded kan with the drawn tile
+		for ( Meld const& meld : m_melds )
 		{
-			size_t const othersCount = ranges::count_if( m_freeTiles, [ & ]( auto const& freeTile ) { return freeTile.Tile() == drawnTileKind; });
-			if ( othersCount >= 3 )
+			if ( meld.Triplet() && sharesDrawnTileKind( meld.SharedTileKind() ) )
 			{
-				results.push_back( { i_drawnTile.value(), true } );
+				results.push_back( { sharesDrawnTileKind.kind, !c_closedKan, i_drawnTile } );
+				break;
 			}
 		}
 	}
@@ -249,11 +163,32 @@ Vector<Hand::DrawKanResult> Hand::DrawKanOptions
 	// n^2 but code is simple and n is small
 	for ( auto tileI = m_freeTiles.begin(); tileI != m_freeTiles.end(); ++tileI )
 	{
-		TileKind const& thisTileKind = tileI->Tile().Kind();
-		size_t const tilesOfThisKind = std::count_if( tileI, m_freeTiles.end(), [ & ]( auto const& freeTile ) { return freeTile.Tile() == thisTileKind; } );
-		if ( tilesOfThisKind >= 4 )
+		EqualsTileKind const sharesFreeTileKind{ *tileI };
+
+		// Find possible closed kan with this tile
 		{
-			results.push_back( { *tileI, true } );
+			HandKanOption closedKan{ sharesFreeTileKind.kind, c_closedKan, std::nullopt };
+			for ( auto otherTileI = tileI; otherTileI != m_freeTiles.end(); ++otherTileI )
+			{
+				if ( sharesFreeTileKind( *otherTileI ) )
+				{
+					closedKan.m_freeHandTilesInvolved.push_back( *otherTileI );
+				}
+			}
+			if ( closedKan.m_freeHandTilesInvolved.size() == 4 )
+			{
+				results.push_back( std::move( closedKan ) );
+			}
+		}
+
+		// Find possible upgraded kan with this tile
+		for ( Meld const& meld : m_melds )
+		{
+			if ( meld.Triplet() && sharesFreeTileKind( meld.SharedTileKind() ) )
+			{
+				results.push_back( { sharesFreeTileKind.kind, !c_closedKan, std::nullopt, { *tileI } } );
+				break;
+			}
 		}
 	}
 
@@ -273,7 +208,7 @@ std::ostream& operator<<( std::ostream& io_out, Hand const& i_hand )
 		}
 	};
 
-	auto fnPrintTiles = [ & ]( auto const& i_tiles )
+	auto fnPrintTiles = [ & ]( auto&& i_tiles )
 	{
 		Option<Suit> lastSuit;
 		for ( TileInstance const& tileInstance : i_tiles )
@@ -305,14 +240,14 @@ std::ostream& operator<<( std::ostream& io_out, Hand const& i_hand )
 	};
 
 	Vector<TileInstance> sortedTiles = i_hand.m_freeTiles;
-	std::sort( sortedTiles.begin(), sortedTiles.end(), OrderTileInstanceByTile{} );
+	std::sort( sortedTiles.begin(), sortedTiles.end(), CompareTileKindOp{} );
 
 	fnPrintTiles( sortedTiles );
 
 	for ( Meld const& meld : i_hand.m_melds )
 	{
 		io_out << ' ';
-		fnPrintTiles( ranges::views::keys( meld.m_tiles ) );
+		fnPrintTiles( meld.Tiles() );
 	}
 
 	return io_out;
@@ -337,27 +272,26 @@ HandGroup::HandGroup
 	case Pair:
 	{
 		riEnsure( m_tiles.size() == 2, "Pair group didn't have 2 tiles" );
-		riEnsure( ranges::adjacent_find( m_tiles, std::not_equal_to{} ) == m_tiles.end(), "Pair group didn't have matching tiles" );
+		riEnsure( std::ranges::all_of( m_tiles, EqualsTileKind{ m_tiles.front() } ), "Pair group didn't have matching tiles" );
 		break;
 	}
 	case Sequence:
 	{
 		riEnsure( m_tiles.size() == 3, "Sequence group didn't have 3 tiles" );
-		riEnsure( ranges::all_of( m_tiles, []( Tile const& i_t ) { return i_t.IsNumber(); }), "Sequence group has a non-suit tile");
-		riEnsure( ranges::adjacent_find( m_tiles, std::not_equal_to{}, []( Tile const& i_t ) { return i_t.Suit(); } ) == m_tiles.end(), "Sequence group didn't have matching suits" );
+		riEnsure( std::ranges::all_of( m_tiles, []( Tile const& i_t ) { return i_t.IsNumber(); } ), "Sequence group has a non-suit tile" );
+		riEnsure( std::ranges::all_of( m_tiles, [ & ]( Tile const& i_t ) { return m_tiles.front().Suit() == i_t.Suit(); } ), "Sequence group didn't have matching suits" );
 		break;
 	}
 	case Triplet:
 	{
 		riEnsure( m_tiles.size() == 3, "Triplet group didn't have 3 tiles" );
-		riEnsure( ranges::adjacent_find( m_tiles, std::not_equal_to{} ) == m_tiles.end(), "Triplet group didn't have matching tiles" );
+		riEnsure( std::ranges::all_of( m_tiles, EqualsTileKind{ m_tiles.front() } ), "Triplet group didn't have matching tiles" );
 		break;
 	}
 	case Quad:
-	case UpgradedQuad:
 	{
 		riEnsure( m_tiles.size() == 4, "Quad group didn't have 4 tiles" );
-		riEnsure( ranges::adjacent_find( m_tiles, std::not_equal_to{} ) == m_tiles.end(), "Quad group didn't have matching tiles" );
+		riEnsure( std::ranges::all_of( m_tiles, EqualsTileKind{ m_tiles.front() } ), "Quad group didn't have matching tiles" );
 		break;
 	}
 	}
@@ -366,7 +300,7 @@ HandGroup::HandGroup
 	// Do a quick sort, though only need to for sequences
 	if ( m_type == GroupType::Sequence )
 	{
-		std::sort( m_tiles.begin(), m_tiles.end() );
+		std::sort( m_tiles.begin(), m_tiles.end(), CompareTileKindOp{} );
 	}
 }
 
@@ -435,25 +369,23 @@ HandAssessment::HandAssessment
 	// Make any meld-specific assessments
 	for ( Meld const& meld : i_hand.Melds() )
 	{
-		m_open |= meld.m_open;
+		m_open |= meld.Open();
 	}
 
 	// Now assess individual tiles
-	i_hand.VisitTiles(
-		[ this ]( Tile const& tile )
+	for (TileInstance const& tile : i_hand.AllTiles() )
+	{
+		if ( tile.Tile().IsNumber() )
 		{
-			if ( tile.IsNumber() )
-			{
-				m_containsSuitSimples[ tile.Suit() ] |= tile.IsSimple();
-				m_containsSuitTerminals[ tile.Suit() ] |= tile.IsTerminal();
-			}
-			else
-			{
-				m_containsDragons |= tile.IsDragon();
-				m_containsWinds |= tile.IsWind();
-			}
+			m_containsSuitSimples[ tile.Tile().Suit() ] |= tile.Tile().IsSimple();
+			m_containsSuitTerminals[ tile.Tile().Suit() ] |= tile.Tile().IsTerminal();
 		}
-	);
+		else
+		{
+			m_containsDragons |= tile.Tile().IsDragon();
+			m_containsWinds |= tile.Tile().IsWind();
+		}
+	}
 
 
 	// Finally, make possible hand interpretations
@@ -461,34 +393,27 @@ HandAssessment::HandAssessment
 	HandInterpretation fixedPart;
 	for ( Meld const& meld : i_hand.Melds() )
 	{
-		Vector<Tile> meldTiles;
-		meldTiles.reserve( meld.m_tiles.size() );
-		std::ranges::transform( meld.m_tiles, std::back_inserter( meldTiles ), []( auto const& p ) { return p.first.Tile(); } );
 		fixedPart.m_groups.emplace_back(
-			std::move( meldTiles ),
-			meld.m_type,
-			meld.m_open
+			std::ranges::to<Vector<Tile>>( std::views::transform( meld.Tiles(), &TileInstance::GetTile ) ),
+			meld.AssessmentType(),
+			meld.Open()
 		);
 	}
 
 	// Then sort the remaining free tiles
-	Vector<Tile> sortedFreeTiles;
-	sortedFreeTiles.reserve( i_hand.FreeTiles().size() );
-	std::ranges::transform( i_hand.FreeTiles(), std::back_inserter( sortedFreeTiles ), []( TileInstance const& t ) { return t.Tile(); } );
-	std::sort( sortedFreeTiles.begin(), sortedFreeTiles.end() );
+	Vector<Tile> sortedFreeTiles = std::ranges::to<Vector<Tile>>( std::views::transform( i_hand.FreeTiles(), &TileInstance::GetTile ) );
+	std::ranges::sort( sortedFreeTiles, CompareTileKindOp{} );
 
 	// And visit all the interpreters
-	i_rules.VisitInterpreters(
-		[ this, &fixedPart, &sortedFreeTiles ]( HandInterpreter const& i_interpreter )
-		{
-			fixedPart.m_interpreter = i_interpreter.Name();
-			i_interpreter.AddInterpretations( m_interpretations, fixedPart, sortedFreeTiles );
-		}
-	);
+	for ( HandInterpreter const& interpreter : i_rules.Interpreters() )
+	{
+		fixedPart.m_interpreter = interpreter.Name();
+		interpreter.AddInterpretations( m_interpretations, fixedPart, sortedFreeTiles );
+	}
 
 	for ( HandInterpretation const& interpretation : m_interpretations )
 	{
-		ranges::actions::insert( m_overallWaits, interpretation.m_waits );
+		std::ranges::for_each( interpretation.m_waits, [ this ]( TileKind kind ) { m_overallWaits.insert( kind ); } );
 	}
 }
 

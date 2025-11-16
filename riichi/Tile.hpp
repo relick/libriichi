@@ -76,32 +76,32 @@ protected:
 	Face m_face;
 
 public:
-	TileKind( Suit i_suit, Face i_number )
+	constexpr TileKind( Suit i_suit, Face i_number )
 		: m_suit{ i_suit }, m_face{ i_number }
 	{
 		riEnsure( Suits::InRange( i_suit ), "Failed to give a real suit to the 'suit + number' TileKind constructor" );
 		riEnsure( IsNumber(), "Failed to give a number to the 'suit + number' TileKind constructor");
 	}
-	TileKind( Face i_honour )
+	constexpr TileKind( Face i_honour )
 		: m_suit{ Suit::None }, m_face{ i_honour }
 	{
 		riEnsure( IsHonour(), "Failed to give an honour to the 'honour' TileKind constructor" );
 	}
 
-	Suit Suit() const { return m_suit; }
-	Face Face() const { return m_face; }
+	inline constexpr Suit Suit() const { return m_suit; }
+	inline constexpr Face Face() const { return m_face; }
 
-	inline bool IsNumber() const { return Numbers::InRange( m_face ); }
-	inline bool IsSimple() const { return Simples::InRange( m_face ); }
-	inline bool IsTerminal() const { return m_face == Face::One || m_face == Face::Nine; }
+	inline constexpr bool IsNumber() const { return Numbers::InRange( m_face ); }
+	inline constexpr bool IsSimple() const { return Simples::InRange( m_face ); }
+	inline constexpr bool IsTerminal() const { return m_face == Face::One || m_face == Face::Nine; }
 
-	inline bool IsHonour() const { return Honours::InRange( m_face ); }
-	inline bool IsDragon() const { return Dragons::InRange( m_face ); }
-	inline bool IsWind() const { return Winds::InRange( m_face ); }
+	inline constexpr bool IsHonour() const { return Honours::InRange( m_face ); }
+	inline constexpr bool IsDragon() const { return Dragons::InRange( m_face ); }
+	inline constexpr bool IsWind() const { return Winds::InRange( m_face ); }
 
-	inline bool IsHonourOrTerminal() const { return IsHonour() || IsTerminal(); }
+	inline constexpr bool IsHonourOrTerminal() const { return IsHonour() || IsTerminal(); }
 
-	inline TileKind Next() const
+	inline constexpr TileKind Next() const
 	{
 		if ( IsDragon() )
 		{
@@ -117,7 +117,7 @@ public:
 		}
 	}
 
-	inline TileKind Prev() const
+	inline constexpr TileKind Prev() const
 	{
 		if ( IsDragon() )
 		{
@@ -133,8 +133,8 @@ public:
 		}
 	}
 
-	friend bool operator==( TileKind const& i_a, TileKind const& i_b ) { return ( i_a.m_suit == i_b.m_suit ) && ( i_a.m_face == i_b.m_face ); }
-	friend bool operator<( TileKind const& i_a, TileKind const& i_b ) { return ( i_a.m_suit == i_b.m_suit ) ? ( i_a.m_face < i_b.m_face ) : ( i_a.m_suit < i_b.m_suit ); }
+	friend constexpr bool operator==( TileKind const& i_a, TileKind const& i_b ) { return ( i_a.m_suit == i_b.m_suit ) && ( i_a.m_face == i_b.m_face ); }
+	friend constexpr bool operator<( TileKind const& i_a, TileKind const& i_b ) { return ( i_a.m_suit == i_b.m_suit ) ? ( i_a.m_face < i_b.m_face ) : ( i_a.m_suit < i_b.m_suit ); }
 	template <typename T> friend struct std::hash;
 };
 
@@ -144,9 +144,8 @@ public:
 namespace Detail
 {
 static inline uint8_t s_flagCount = 0;
-static inline bool s_registeringProperties = false;
 inline uint8_t MakeTilePropertyFlag() { ++s_flagCount; riEnsure( s_flagCount < 8, "Too many properties registered" ); return ( 1 << ( s_flagCount - 1 ) ); }
-inline bool RegisteringTileProperties() { return s_registeringProperties; }
+inline bool RegisteringTileProperties( bool i_flip ) { static bool s_registeringProperties = false; if ( i_flip ) { s_registeringProperties = !s_registeringProperties; } return s_registeringProperties; }
 }
 
 template<typename T_Tag>
@@ -155,7 +154,7 @@ struct TileProperty
 	static uint8_t BitFlag()
 	{
 		static uint8_t s_flag = 0;
-		if ( Detail::RegisteringTileProperties() )
+		if ( Detail::RegisteringTileProperties( false ) )
 		{
 			s_flag = Detail::MakeTilePropertyFlag();
 		}
@@ -167,10 +166,10 @@ struct TileProperty
 template<typename... T_Tags>
 inline void RegisterTileProperties( TileProperty<T_Tags>... i_properties )
 {
-	Detail::s_registeringProperties = true;
 	Detail::s_flagCount = 0;
+	Detail::RegisteringTileProperties( true );
 	( i_properties.BitFlag(), ... );
-	Detail::s_registeringProperties = false;
+	Detail::RegisteringTileProperties( true );
 }
 
 class TileProperties
@@ -178,19 +177,21 @@ class TileProperties
 protected:
 	uint8_t m_flags{ 0 };
 
+	// 'more' properties set = 'higher' in a sorted list
+	friend constexpr bool operator==( TileProperties const& i_a, TileProperties const& i_b ) { return i_a.m_flags == i_b.m_flags; }
+	friend constexpr bool operator<( TileProperties const& i_a, TileProperties const& i_b ) { return i_a.m_flags < i_b.m_flags; }
+	template <typename T> friend struct std::hash;
+
 public:
+	constexpr TileProperties() = default;
+
 	template<typename... T_Tags>
 	TileProperties( TileProperty<T_Tags>... i_properties )
-		: m_flags{ uint8_t( ( 0 | ... | i_properties.BitFlag() ) ) }
+		: m_flags{ uint8_t( ( i_properties.BitFlag() | ... ) ) }
 	{}
 
 	template<typename T_Property>
-	bool HasProperty() const { return ( m_flags & T_Property::BitFlag() ) != 0; }
-
-	// 'more' properties set = 'higher' in a sorted list
-	friend bool operator==( TileProperties const& i_a, TileProperties const& i_b ) { return i_a.m_flags == i_b.m_flags; }
-	friend bool operator<( TileProperties const& i_a, TileProperties const& i_b ) { return i_a.m_flags < i_b.m_flags; }
-	template <typename T> friend struct std::hash;
+	constexpr bool HasProperty() const { return ( m_flags & T_Property::BitFlag() ) != 0; }
 };
 
 //------------------------------------------------------------------------------
@@ -207,60 +208,27 @@ class Tile
 	, public TileProperties
 {
 public:
-	Tile( Riichi::Suit i_suit, Riichi::Face i_number, TileProperties i_properties = {} )
+	constexpr Tile( Riichi::Suit i_suit, Riichi::Face i_number, TileProperties i_properties = {} )
 		: TileKind{ i_suit, i_number }, TileProperties{ i_properties }
 	{}
-	Tile( Riichi::Face i_honour, TileProperties i_properties = {} )
+	constexpr Tile( Riichi::Face i_honour, TileProperties i_properties = {} )
 		: TileKind{ i_honour }, TileProperties{ i_properties }
 	{}
-	Tile( TileKind i_kind, TileProperties i_properties = {} )
+	constexpr Tile( TileKind i_kind, TileProperties i_properties = {} )
 		: TileKind{ i_kind }, TileProperties{ i_properties }
 	{}
 
-	inline Tile Next() const
+	inline constexpr Tile Next() const
 	{
-		return { TileKind::Next(), *this };
+		return Tile{ TileKind::Next(), *this };
 	}
 
-	inline Tile Prev() const
+	inline constexpr Tile Prev() const
 	{
-		return { TileKind::Prev(), *this };
+		return Tile{ TileKind::Prev(), *this };
 	}
-
-	inline TileKind const& Kind() const { return *this; }
-	inline TileProperties const& Properties() const { return *this; }
-
-	friend bool operator==( Tile const& i_a, Tile const& i_b )
-	{
-		return ( i_a.Kind() == i_b.Kind() ) && ( i_a.Properties() == i_b.Properties() );
-	}
-	friend bool operator<( Tile const& i_a, Tile const& i_b )
-	{
-		if ( i_a.Kind() == i_b.Kind() )
-		{
-			return i_a.Properties() < i_b.Properties();
-		}
-		
-		return i_a.Kind() < i_b.Kind();
-	}
-
-	// Also allowed to compare tiles directly to kinds or properties, just to check that aspect of them
-	friend bool operator==( Tile const& i_a, TileKind const& i_b )
-	{
-		return ( TileKind const& )i_a.Kind() == i_b;
-	}
-	friend bool operator==( TileKind const& i_a, Tile const& i_b )
-	{
-		return i_b == i_a;
-	}
-	friend bool operator==( Tile const& i_a, TileProperties const& i_b )
-	{
-		return i_a.Properties() == i_b;
-	}
-	friend bool operator==( TileProperties const& i_a, Tile const& i_b )
-	{
-		return i_b == i_a;
-	}
+	
+	inline constexpr TileKind const& Kind() const { return *this; }
 };
 
 //------------------------------------------------------------------------------
@@ -273,40 +241,100 @@ public:
 class TileInstance
 {
 protected:
-	uint32_t m_id{ UINT32_MAX };
+	uint32_t m_id;
 	Tile m_tile;
 
 public:
-	TileInstance( Tile i_tile, uint32_t i_tileID = UINT32_MAX )
+	explicit constexpr TileInstance( Tile i_tile, uint32_t i_tileID )
 		: m_id{ i_tileID }, m_tile{ i_tile }
 	{}
 
-	Tile const& Tile() const { return m_tile; }
+	// Projections:
+	static inline constexpr Tile const& GetTile( TileInstance const& i_a ) { return i_a.Tile(); }
+	static inline constexpr uint32_t GetID( TileInstance const& i_a ) { return i_a.ID(); }
 
-	bool HasID() const { return m_id != UINT32_MAX; }
-	uint32_t ID() const { return m_id; }
+	constexpr Tile const& Tile() const { return m_tile; }
 
-	// Instance IDs are meant to be unique identifiers, and tile instances are meant to be
-	// constant once the game begins, so if IDs match then we consider that to mean equality.
-	friend bool operator==( TileInstance const& i_a, TileInstance const& i_b )
+	constexpr uint32_t ID() const { return m_id; }
+};
+
+template<typename R>
+concept TileInstanceRange = Utils::RangeWithValueType<R, TileInstance>;
+using DefaultTileInstanceRange = std::initializer_list<TileInstance>;
+
+//------------------------------------------------------------------------------
+inline constexpr TileKind const& GetKind( TileKind const& i_a ) { return i_a; }
+inline constexpr TileKind const& GetKind( Tile const& i_a ) { return i_a.Kind(); }
+inline constexpr TileKind const& GetKind( TileInstance const& i_a ) { return i_a.Tile().Kind(); }
+
+template<typename T>
+concept AnyTileType = requires( T a )
+{
+	{ GetKind( a ) } -> std::same_as<TileKind const&>;
+};
+
+//------------------------------------------------------------------------------
+struct EqualsTileKindOp
+{
+	// Binary ops for containers
+	// Comparisons between any types of tile
+	template<AnyTileType T_TileTypeA, AnyTileType T_TileTypeB>
+	constexpr bool operator()( T_TileTypeA const& i_a, T_TileTypeB const& i_b ) const
 	{
-		if ( i_a.HasID() && i_b.HasID() )
-		{
-			return i_a.m_id == i_b.m_id;
-		}
-		return i_a.m_tile == i_b.m_tile;
+		return GetKind( i_a ) == GetKind( i_b );
+	}
+};
+struct EqualsTileKind
+	: EqualsTileKindOp
+{
+	// Unary ops for search algorithms
+	TileKind kind;
+
+	// Implicitly construct from any type of tile
+	template<AnyTileType T_TileType>
+	constexpr EqualsTileKind( T_TileType const& i_tile ) : kind{ GetKind( i_tile ) } {}
+
+	// Compare against any type of tile
+	template<AnyTileType T_TileType>
+	constexpr bool operator()( T_TileType const& i_a ) const
+	{
+		return EqualsTileKindOp::operator()( kind, i_a );
 	}
 };
 
 //------------------------------------------------------------------------------
-struct OrderTileInstanceByTile
+struct EqualsTileInstanceIDOp
 {
+	// Binary op for containers
 	bool operator()( TileInstance const& i_a, TileInstance const& i_b ) const
 	{
-		return i_a.Tile() < i_b.Tile();
+		return i_a.ID() == i_b.ID();
 	}
 };
-struct OrderTileInstanceByID
+struct EqualsTileInstanceID
+	: EqualsTileInstanceIDOp
+{
+	// Unary op for search algorithms
+	TileInstance instance;
+
+	constexpr EqualsTileInstanceID( TileInstance const& i_tile ) : instance{ i_tile } {}
+
+	bool operator()( TileInstance const& i_a ) const
+	{
+		return EqualsTileInstanceIDOp::operator()( instance, i_a );
+	}
+};
+
+//------------------------------------------------------------------------------
+struct CompareTileKindOp
+{
+	template<AnyTileType T_TileTypeA, AnyTileType T_TileTypeB>
+	constexpr bool operator()( T_TileTypeA const& i_a, T_TileTypeB const& i_b ) const
+	{
+		return GetKind( i_a ) < GetKind( i_b );
+	}
+};
+struct CompareTileInstanceIDOp
 {
 	bool operator()( TileInstance const& i_a, TileInstance const& i_b ) const
 	{
@@ -323,7 +351,8 @@ enum class TileDrawType : EnumValueType
 	SelfDraw,
 	DiscardDraw,
 	DeadWallDraw,
-	KanTheft,
+	UpgradedKanTheft,
+	ClosedKanTheft,
 };
 
 //------------------------------------------------------------------------------
@@ -351,14 +380,10 @@ struct std::hash<Riichi::TileKind>
 
 //------------------------------------------------------------------------------
 template<>
-struct std::hash<Riichi::Tile>
+struct std::hash<Riichi::TileInstance>
 {
-	std::size_t operator()( Riichi::Tile const& i_tile ) const noexcept
+	std::size_t operator()( Riichi::TileInstance const& i_tile ) const noexcept
 	{
-		using namespace Riichi;
-
-		std::size_t h1 = std::hash<Riichi::TileKind>{}( i_tile );
-		std::size_t h2 = std::hash<uint8_t>{}( i_tile.m_flags );
-		return h1 ^ ( h2 << 1 );
+		return std::hash<uint32_t>{}( i_tile.ID() );
 	}
 };

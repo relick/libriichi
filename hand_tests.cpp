@@ -8,13 +8,17 @@
 
 int main()
 {
-	Riichi::StandardYonma<Riichi::Seat::East> yonma;
+	using namespace Riichi;
 
-	Riichi::Hand nineGatesHand;
-	for ( Riichi::Face num : Riichi::Numbers{} )
+	uint32_t tileInstanceID = 0;
+
+	StandardYonma<Seat::East> yonma;
+
+	Hand nineGatesHand;
+	for ( Face num : Numbers{} )
 	{
-		Riichi::Tile const tile{ Riichi::Suit::Manzu, num };
-		if ( tile.IsTerminal() )
+		TileInstance const tile{ { Suit::Manzu, num }, tileInstanceID++, };
+		if ( tile.Tile().IsTerminal() )
 		{
 			nineGatesHand.AddFreeTiles( { tile, tile, tile } );
 		}
@@ -24,123 +28,123 @@ int main()
 		}
 	}
 
-	Riichi::HandAssessment nineGatesAssessment( nineGatesHand, yonma );
+	HandAssessment nineGatesAssessment( nineGatesHand, yonma );
 
-	Riichi::Hand threeFourHand;
-	threeFourHand.AddFreeTiles( { Riichi::Tile{ Riichi::Suit::Manzu, Riichi::Face::One }, } );
-	threeFourHand.AddFreeTiles( { Riichi::Tile{ Riichi::Suit::Manzu, Riichi::Face::One }, } );
-	threeFourHand.AddFreeTiles( { Riichi::Tile{ Riichi::Suit::Manzu, Riichi::Face::Two }, } );
-	threeFourHand.AddFreeTiles( { Riichi::Tile{ Riichi::Suit::Manzu, Riichi::Face::Two }, } );
-	threeFourHand.AddFreeTiles( { Riichi::Tile{ Riichi::Suit::Manzu, Riichi::Face::Two }, } );
-	threeFourHand.AddFreeTiles( { Riichi::Tile{ Riichi::Suit::Manzu, Riichi::Face::Three }, } );
-	threeFourHand.AddFreeTiles( { Riichi::Tile{ Riichi::Suit::Manzu, Riichi::Face::Three }, } );
-	threeFourHand.AddFreeTiles( { Riichi::Tile{ Riichi::Suit::Manzu, Riichi::Face::Three }, } );
-	threeFourHand.AddFreeTiles( { Riichi::Tile{ Riichi::Suit::Manzu, Riichi::Face::Nine }, } );
-	threeFourHand.AddFreeTiles( { Riichi::Tile{ Riichi::Suit::Manzu, Riichi::Face::Nine }, } );
-	threeFourHand.AddFreeTiles( { Riichi::Tile{ Riichi::Suit::Manzu, Riichi::Face::Five }, } );
-	threeFourHand.AddFreeTiles( { Riichi::Tile{ Riichi::Suit::Manzu, Riichi::Face::Five }, } );
-	threeFourHand.AddFreeTiles( { Riichi::Tile{ Riichi::Suit::Manzu, Riichi::Face::Five }, } );
+	Hand threeFourHand;
+	threeFourHand.AddFreeTiles( { TileInstance{ { Suit::Manzu, Face::One }, tileInstanceID++, } } );
+	threeFourHand.AddFreeTiles( { TileInstance{ { Suit::Manzu, Face::One }, tileInstanceID++, } } );
+	threeFourHand.AddFreeTiles( { TileInstance{ { Suit::Manzu, Face::Two }, tileInstanceID++, } } );
+	threeFourHand.AddFreeTiles( { TileInstance{ { Suit::Manzu, Face::Two }, tileInstanceID++, } } );
+	threeFourHand.AddFreeTiles( { TileInstance{ { Suit::Manzu, Face::Two }, tileInstanceID++, } } );
+	threeFourHand.AddFreeTiles( { TileInstance{ { Suit::Manzu, Face::Three }, tileInstanceID++, } } );
+	threeFourHand.AddFreeTiles( { TileInstance{ { Suit::Manzu, Face::Three }, tileInstanceID++, } } );
+	threeFourHand.AddFreeTiles( { TileInstance{ { Suit::Manzu, Face::Three }, tileInstanceID++, } } );
+	threeFourHand.AddFreeTiles( { TileInstance{ { Suit::Manzu, Face::Nine }, tileInstanceID++, } } );
+	threeFourHand.AddFreeTiles( { TileInstance{ { Suit::Manzu, Face::Nine }, tileInstanceID++, } } );
+	threeFourHand.AddFreeTiles( { TileInstance{ { Suit::Manzu, Face::Five }, tileInstanceID++, } } );
+	threeFourHand.AddFreeTiles( { TileInstance{ { Suit::Manzu, Face::Five }, tileInstanceID++, } } );
+	threeFourHand.AddFreeTiles( { TileInstance{ { Suit::Manzu, Face::Five }, tileInstanceID++, } } );
 
-	Riichi::HandAssessment threeFourAssessment( threeFourHand, yonma );
+	HandAssessment threeFourAssessment( threeFourHand, yonma );
 
-	Riichi::Hand allPairs;
-	allPairs.AddFreeTiles( { Riichi::Tile{ Riichi::Suit::Manzu, Riichi::Face::Two }, } );
-	allPairs.AddFreeTiles( { Riichi::Tile{ Riichi::Suit::Manzu, Riichi::Face::Two }, } );
-	allPairs.AddFreeTiles( { Riichi::Tile{ Riichi::Suit::Manzu, Riichi::Face::Three }, } );
-	allPairs.AddFreeTiles( { Riichi::Tile{ Riichi::Suit::Manzu, Riichi::Face::Three }, } );
-	allPairs.AddFreeTiles( { Riichi::Tile{ Riichi::Suit::Pinzu, Riichi::Face::Two }, } );
-	allPairs.AddFreeTiles( { Riichi::Tile{ Riichi::Suit::Pinzu, Riichi::Face::Two }, } );
-	allPairs.AddFreeTiles( { Riichi::Tile{ Riichi::Suit::Pinzu, Riichi::Face::Three }, } );
-	allPairs.AddFreeTiles( { Riichi::Tile{ Riichi::Suit::Pinzu, Riichi::Face::Three }, } );
-	allPairs.AddFreeTiles( { Riichi::Tile{ Riichi::Suit::Souzu, Riichi::Face::Two }, } );
-	allPairs.AddFreeTiles( { Riichi::Tile{ Riichi::Suit::Souzu, Riichi::Face::Two }, } );
-	allPairs.AddFreeTiles( { Riichi::Tile{ Riichi::Suit::Souzu, Riichi::Face::Three }, } );
-	allPairs.AddFreeTiles( { Riichi::Tile{ Riichi::Suit::Souzu, Riichi::Face::Three }, } );
-	allPairs.AddFreeTiles( { Riichi::Tile{ Riichi::Suit::Souzu, Riichi::Face::Three }, } );
+	Hand allPairs;
+	allPairs.AddFreeTiles( { TileInstance{ { Suit::Manzu, Face::Two }, tileInstanceID++, } } );
+	allPairs.AddFreeTiles( { TileInstance{ { Suit::Manzu, Face::Two }, tileInstanceID++, } } );
+	allPairs.AddFreeTiles( { TileInstance{ { Suit::Manzu, Face::Three }, tileInstanceID++, } } );
+	allPairs.AddFreeTiles( { TileInstance{ { Suit::Manzu, Face::Three }, tileInstanceID++, } } );
+	allPairs.AddFreeTiles( { TileInstance{ { Suit::Pinzu, Face::Two }, tileInstanceID++, } } );
+	allPairs.AddFreeTiles( { TileInstance{ { Suit::Pinzu, Face::Two }, tileInstanceID++, } } );
+	allPairs.AddFreeTiles( { TileInstance{ { Suit::Pinzu, Face::Three }, tileInstanceID++, } } );
+	allPairs.AddFreeTiles( { TileInstance{ { Suit::Pinzu, Face::Three }, tileInstanceID++, } } );
+	allPairs.AddFreeTiles( { TileInstance{ { Suit::Souzu, Face::Two }, tileInstanceID++, } } );
+	allPairs.AddFreeTiles( { TileInstance{ { Suit::Souzu, Face::Two }, tileInstanceID++, } } );
+	allPairs.AddFreeTiles( { TileInstance{ { Suit::Souzu, Face::Three }, tileInstanceID++, } } );
+	allPairs.AddFreeTiles( { TileInstance{ { Suit::Souzu, Face::Three }, tileInstanceID++, } } );
+	allPairs.AddFreeTiles( { TileInstance{ { Suit::Souzu, Face::Three }, tileInstanceID++, } } );
 
-	Riichi::HandAssessment allPairsAssessment( allPairs, yonma );
+	HandAssessment allPairsAssessment( allPairs, yonma );
 
-	Riichi::Hand seqTrip;
-	seqTrip.AddFreeTiles( { Riichi::Tile{ Riichi::Suit::Manzu, Riichi::Face::One }, } );
-	seqTrip.AddFreeTiles( { Riichi::Tile{ Riichi::Suit::Manzu, Riichi::Face::One }, } );
-	seqTrip.AddFreeTiles( { Riichi::Tile{ Riichi::Suit::Manzu, Riichi::Face::One }, } );
-	seqTrip.AddFreeTiles( { Riichi::Tile{ Riichi::Suit::Manzu, Riichi::Face::Two }, } );
-	seqTrip.AddFreeTiles( { Riichi::Tile{ Riichi::Suit::Manzu, Riichi::Face::Six }, } );
-	seqTrip.AddFreeTiles( { Riichi::Tile{ Riichi::Suit::Manzu, Riichi::Face::Six }, } );
-	seqTrip.AddFreeTiles( { Riichi::Tile{ Riichi::Suit::Manzu, Riichi::Face::Six }, } );
-	seqTrip.AddFreeTiles( { Riichi::Tile{ Riichi::Suit::Pinzu, Riichi::Face::Six }, } );
-	seqTrip.AddFreeTiles( { Riichi::Tile{ Riichi::Suit::Pinzu, Riichi::Face::Six }, } );
-	seqTrip.AddFreeTiles( { Riichi::Tile{ Riichi::Suit::Pinzu, Riichi::Face::Six }, } );
-	seqTrip.AddFreeTiles( { Riichi::Tile{ Riichi::Suit::Souzu, Riichi::Face::Six }, } );
-	seqTrip.AddFreeTiles( { Riichi::Tile{ Riichi::Suit::Souzu, Riichi::Face::Six }, } );
-	seqTrip.AddFreeTiles( { Riichi::Tile{ Riichi::Suit::Souzu, Riichi::Face::Six }, } );
+	Hand seqTrip;
+	seqTrip.AddFreeTiles( { TileInstance{ { Suit::Manzu, Face::One }, tileInstanceID++, } } );
+	seqTrip.AddFreeTiles( { TileInstance{ { Suit::Manzu, Face::One }, tileInstanceID++, } } );
+	seqTrip.AddFreeTiles( { TileInstance{ { Suit::Manzu, Face::One }, tileInstanceID++, } } );
+	seqTrip.AddFreeTiles( { TileInstance{ { Suit::Manzu, Face::Two }, tileInstanceID++, } } );
+	seqTrip.AddFreeTiles( { TileInstance{ { Suit::Manzu, Face::Six }, tileInstanceID++, } } );
+	seqTrip.AddFreeTiles( { TileInstance{ { Suit::Manzu, Face::Six }, tileInstanceID++, } } );
+	seqTrip.AddFreeTiles( { TileInstance{ { Suit::Manzu, Face::Six }, tileInstanceID++, } } );
+	seqTrip.AddFreeTiles( { TileInstance{ { Suit::Pinzu, Face::Six }, tileInstanceID++, } } );
+	seqTrip.AddFreeTiles( { TileInstance{ { Suit::Pinzu, Face::Six }, tileInstanceID++, } } );
+	seqTrip.AddFreeTiles( { TileInstance{ { Suit::Pinzu, Face::Six }, tileInstanceID++, } } );
+	seqTrip.AddFreeTiles( { TileInstance{ { Suit::Souzu, Face::Six }, tileInstanceID++, } } );
+	seqTrip.AddFreeTiles( { TileInstance{ { Suit::Souzu, Face::Six }, tileInstanceID++, } } );
+	seqTrip.AddFreeTiles( { TileInstance{ { Suit::Souzu, Face::Six }, tileInstanceID++, } } );
 
-	Riichi::HandAssessment seqTripAssessment( seqTrip, yonma );
+	HandAssessment seqTripAssessment( seqTrip, yonma );
 
-	Riichi::Hand multiInterpFewGroups;
-	seqTrip.AddFreeTiles( { Riichi::Tile{ Riichi::Suit::Manzu, Riichi::Face::Two }, } );
-	seqTrip.AddFreeTiles( { Riichi::Tile{ Riichi::Suit::Manzu, Riichi::Face::Three }, } );
-	seqTrip.AddFreeTiles( { Riichi::Tile{ Riichi::Suit::Manzu, Riichi::Face::Seven }, } );
-	seqTrip.AddFreeTiles( { Riichi::Tile{ Riichi::Suit::Manzu, Riichi::Face::Eight }, } );
-	seqTrip.AddFreeTiles( { Riichi::Tile{ Riichi::Suit::Manzu, Riichi::Face::Nine }, } );
-	seqTrip.AddFreeTiles( { Riichi::Tile{ Riichi::Suit::Manzu, Riichi::Face::Nine }, } );
-	seqTrip.AddFreeTiles( { Riichi::Tile{ Riichi::Suit::Manzu, Riichi::Face::Nine }, } );
-	seqTrip.AddFreeTiles( { Riichi::Tile{ Riichi::Suit::Pinzu, Riichi::Face::Six }, } );
-	seqTrip.AddFreeTiles( { Riichi::Tile{ Riichi::Suit::Souzu, Riichi::Face::Two }, } );
-	seqTrip.AddFreeTiles( { Riichi::Tile{ Riichi::Suit::Souzu, Riichi::Face::Six }, } );
-	seqTrip.AddFreeTiles( { Riichi::Tile{ Riichi::Suit::Souzu, Riichi::Face::Eight }, } );
-	seqTrip.AddFreeTiles( { Riichi::Tile{ Riichi::Face::Chun } } );
-	seqTrip.AddFreeTiles( { Riichi::Tile{ Riichi::Face::Chun } } );
+	Hand multiInterpFewGroups;
+	seqTrip.AddFreeTiles( { TileInstance{ { Suit::Manzu, Face::Two }, tileInstanceID++, } } );
+	seqTrip.AddFreeTiles( { TileInstance{ { Suit::Manzu, Face::Three }, tileInstanceID++, } } );
+	seqTrip.AddFreeTiles( { TileInstance{ { Suit::Manzu, Face::Seven }, tileInstanceID++, } } );
+	seqTrip.AddFreeTiles( { TileInstance{ { Suit::Manzu, Face::Eight }, tileInstanceID++, } } );
+	seqTrip.AddFreeTiles( { TileInstance{ { Suit::Manzu, Face::Nine }, tileInstanceID++, } } );
+	seqTrip.AddFreeTiles( { TileInstance{ { Suit::Manzu, Face::Nine }, tileInstanceID++, } } );
+	seqTrip.AddFreeTiles( { TileInstance{ { Suit::Manzu, Face::Nine }, tileInstanceID++, } } );
+	seqTrip.AddFreeTiles( { TileInstance{ { Suit::Pinzu, Face::Six }, tileInstanceID++, } } );
+	seqTrip.AddFreeTiles( { TileInstance{ { Suit::Souzu, Face::Two }, tileInstanceID++, } } );
+	seqTrip.AddFreeTiles( { TileInstance{ { Suit::Souzu, Face::Six }, tileInstanceID++, } } );
+	seqTrip.AddFreeTiles( { TileInstance{ { Suit::Souzu, Face::Eight }, tileInstanceID++, } } );
+	seqTrip.AddFreeTiles( { TileInstance{ { Face::Chun }, tileInstanceID++, } } );
+	seqTrip.AddFreeTiles( { TileInstance{ { Face::Chun }, tileInstanceID++, } } );
 
-	Riichi::Hand multiInterpNoWaits;
-	seqTrip.AddFreeTiles( { Riichi::Tile{ Riichi::Suit::Manzu, Riichi::Face::Three }, } );
-	seqTrip.AddFreeTiles( { Riichi::Tile{ Riichi::Suit::Manzu, Riichi::Face::Four }, } );
-	seqTrip.AddFreeTiles( { Riichi::Tile{ Riichi::Suit::Manzu, Riichi::Face::Five }, } );
-	seqTrip.AddFreeTiles( { Riichi::Tile{ Riichi::Suit::Pinzu, Riichi::Face::Two }, } );
-	seqTrip.AddFreeTiles( { Riichi::Tile{ Riichi::Suit::Pinzu, Riichi::Face::Five }, } );
-	seqTrip.AddFreeTiles( { Riichi::Tile{ Riichi::Suit::Pinzu, Riichi::Face::Six }, } );
-	seqTrip.AddFreeTiles( { Riichi::Tile{ Riichi::Suit::Pinzu, Riichi::Face::Seven }, } );
-	seqTrip.AddFreeTiles( { Riichi::Tile{ Riichi::Suit::Souzu, Riichi::Face::Seven }, } );
-	seqTrip.AddFreeTiles( { Riichi::Tile{ Riichi::Suit::Souzu, Riichi::Face::Eight }, } );
-	seqTrip.AddFreeTiles( { Riichi::Tile{ Riichi::Suit::Souzu, Riichi::Face::Eight }, } );
-	seqTrip.AddFreeTiles( { Riichi::Tile{ Riichi::Suit::Souzu, Riichi::Face::Eight }, } );
-	seqTrip.AddFreeTiles( { Riichi::Tile{ Riichi::Suit::Souzu, Riichi::Face::Nine }, } );
-	seqTrip.AddFreeTiles( { Riichi::Tile{ Riichi::Face::Chun } } );
+	Hand multiInterpNoWaits;
+	seqTrip.AddFreeTiles( { TileInstance{ { Suit::Manzu, Face::Three }, tileInstanceID++, } } );
+	seqTrip.AddFreeTiles( { TileInstance{ { Suit::Manzu, Face::Four }, tileInstanceID++, } } );
+	seqTrip.AddFreeTiles( { TileInstance{ { Suit::Manzu, Face::Five }, tileInstanceID++, } } );
+	seqTrip.AddFreeTiles( { TileInstance{ { Suit::Pinzu, Face::Two }, tileInstanceID++, } } );
+	seqTrip.AddFreeTiles( { TileInstance{ { Suit::Pinzu, Face::Five }, tileInstanceID++, } } );
+	seqTrip.AddFreeTiles( { TileInstance{ { Suit::Pinzu, Face::Six }, tileInstanceID++, } } );
+	seqTrip.AddFreeTiles( { TileInstance{ { Suit::Pinzu, Face::Seven }, tileInstanceID++, } } );
+	seqTrip.AddFreeTiles( { TileInstance{ { Suit::Souzu, Face::Seven }, tileInstanceID++, } } );
+	seqTrip.AddFreeTiles( { TileInstance{ { Suit::Souzu, Face::Eight }, tileInstanceID++, } } );
+	seqTrip.AddFreeTiles( { TileInstance{ { Suit::Souzu, Face::Eight }, tileInstanceID++, } } );
+	seqTrip.AddFreeTiles( { TileInstance{ { Suit::Souzu, Face::Eight }, tileInstanceID++, } } );
+	seqTrip.AddFreeTiles( { TileInstance{ { Suit::Souzu, Face::Nine }, tileInstanceID++, } } );
+	seqTrip.AddFreeTiles( { TileInstance{ { Face::Chun }, tileInstanceID++, } } );
 
-	Riichi::Hand multiInterpSomeWaits;
-	seqTrip.AddFreeTiles( { Riichi::Tile{ Riichi::Suit::Manzu, Riichi::Face::Three }, } );
-	seqTrip.AddFreeTiles( { Riichi::Tile{ Riichi::Suit::Manzu, Riichi::Face::Four }, } );
-	seqTrip.AddFreeTiles( { Riichi::Tile{ Riichi::Suit::Manzu, Riichi::Face::Five }, } );
-	seqTrip.AddFreeTiles( { Riichi::Tile{ Riichi::Suit::Pinzu, Riichi::Face::Three }, } );
-	seqTrip.AddFreeTiles( { Riichi::Tile{ Riichi::Suit::Pinzu, Riichi::Face::Four }, } );
-	seqTrip.AddFreeTiles( { Riichi::Tile{ Riichi::Suit::Pinzu, Riichi::Face::Five }, } );
-	seqTrip.AddFreeTiles( { Riichi::Tile{ Riichi::Suit::Pinzu, Riichi::Face::Five }, } );
-	seqTrip.AddFreeTiles( { Riichi::Tile{ Riichi::Suit::Pinzu, Riichi::Face::Five }, } );
-	seqTrip.AddFreeTiles( { Riichi::Tile{ Riichi::Suit::Souzu, Riichi::Face::Three }, } );
-	seqTrip.AddFreeTiles( { Riichi::Tile{ Riichi::Suit::Souzu, Riichi::Face::Four }, } );
-	seqTrip.AddFreeTiles( { Riichi::Tile{ Riichi::Suit::Souzu, Riichi::Face::Six }, } );
-	seqTrip.AddFreeTiles( { Riichi::Tile{ Riichi::Suit::Souzu, Riichi::Face::Seven }, } );
-	seqTrip.AddFreeTiles( { Riichi::Tile{ Riichi::Suit::Souzu, Riichi::Face::Eight }, } );
+	Hand multiInterpSomeWaits;
+	seqTrip.AddFreeTiles( { TileInstance{ { Suit::Manzu, Face::Three }, tileInstanceID++, } } );
+	seqTrip.AddFreeTiles( { TileInstance{ { Suit::Manzu, Face::Four }, tileInstanceID++, } } );
+	seqTrip.AddFreeTiles( { TileInstance{ { Suit::Manzu, Face::Five }, tileInstanceID++, } } );
+	seqTrip.AddFreeTiles( { TileInstance{ { Suit::Pinzu, Face::Three }, tileInstanceID++, } } );
+	seqTrip.AddFreeTiles( { TileInstance{ { Suit::Pinzu, Face::Four }, tileInstanceID++, } } );
+	seqTrip.AddFreeTiles( { TileInstance{ { Suit::Pinzu, Face::Five }, tileInstanceID++, } } );
+	seqTrip.AddFreeTiles( { TileInstance{ { Suit::Pinzu, Face::Five }, tileInstanceID++, } } );
+	seqTrip.AddFreeTiles( { TileInstance{ { Suit::Pinzu, Face::Five }, tileInstanceID++, } } );
+	seqTrip.AddFreeTiles( { TileInstance{ { Suit::Souzu, Face::Three }, tileInstanceID++, } } );
+	seqTrip.AddFreeTiles( { TileInstance{ { Suit::Souzu, Face::Four }, tileInstanceID++, } } );
+	seqTrip.AddFreeTiles( { TileInstance{ { Suit::Souzu, Face::Six }, tileInstanceID++, } } );
+	seqTrip.AddFreeTiles( { TileInstance{ { Suit::Souzu, Face::Seven }, tileInstanceID++, } } );
+	seqTrip.AddFreeTiles( { TileInstance{ { Suit::Souzu, Face::Eight }, tileInstanceID++, } } );
 
-	Riichi::ShuffleRNG shuffleRNG{ std::random_device()( ) };
+	ShuffleRNG shuffleRNG{ std::random_device()( ) };
 	while ( true )
 	{
-		Riichi::Vector<Riichi::TileInstance> tileSet = yonma.Tileset();
+		Vector<TileInstance> tileSet = yonma.Tileset();
 		ranges::shuffle( tileSet, shuffleRNG );
 		tileSet.erase( tileSet.begin() + 13, tileSet.end() );
 
-		Riichi::Hand hand;
+		Hand hand;
 		hand.AddFreeTiles( tileSet );
 
-		Riichi::HandAssessment ass( hand, yonma );
+		HandAssessment ass( hand, yonma );
 		bool const unequalGroups = ranges::adjacent_find( ass.Interpretations(),
-			[]( Riichi::HandInterpretation const& i_a, Riichi::HandInterpretation const& i_b ) -> bool
+			[]( HandInterpretation const& i_a, HandInterpretation const& i_b ) -> bool
 			{
 				return i_a.m_groups.size() != i_b.m_groups.size() && i_b.m_groups.size() >= 3 && i_a.m_groups.size() >= 3;
 			}
 		) != ass.Interpretations().end();
 		bool const hasWaits = ranges::find_if( ass.Interpretations(),
-			[]( Riichi::HandInterpretation const& i_i ) -> bool
+			[]( HandInterpretation const& i_i ) -> bool
 			{
 				return !i_i.m_waits.empty();
 			}

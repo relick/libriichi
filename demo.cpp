@@ -190,13 +190,15 @@ int main()
 					if ( input.size() > 4 && turn.CanKan() )
 					{
 						Riichi::Option<Riichi::Tile> const tile = fnParseTile( input.substr( 4 ) );
-						if ( tile.has_value() && ranges::any_of( turn.KanOptions(), [ & ]( auto const& i_option ) -> bool
-							{
-								return i_option.kanTile == tile.value();
-							} ) )
+						
+						if ( tile.has_value() )
 						{
-							turn.Kan( tile.value() );
-							break;
+							auto kanOptionI = ranges::find_if( turn.KanOptions(), Riichi::EqualsTileKind{ tile.value() }, &Riichi::HandKanOption::m_kanTileKind );
+							if ( kanOptionI != turn.KanOptions().end() )
+							{
+								turn.Kan( *kanOptionI );
+								break;
+							}
 						}
 					}
 				}
@@ -213,17 +215,21 @@ int main()
 					if ( input.size() > 7 && turn.CanRiichi() )
 					{
 						Riichi::Option<Riichi::Tile> const tile = fnParseTile( input.substr( 7 ) );
-						if ( tile.has_value() && ranges::contains( turn.RiichiOptions(), tile.value() ) )
+						if ( tile.has_value() && ranges::any_of( turn.RiichiOptions(), Riichi::EqualsTileKind{ tile.value() } ) )
 						{
-							if ( tile == turn.GetCurrentTileDraw() )
+							if ( turn.GetCurrentTileDraw().has_value() && tile->Kind() == turn.GetCurrentTileDraw()->Tile().Kind() )
 							{
-								turn.Riichi( std::nullopt );
+								turn.Discard( std::nullopt );
 								break;
 							}
-							else if ( ranges::contains( turn.GetCurrentHand().FreeTiles(), tile.value() ) )
+							else
 							{
-								turn.Riichi( tile );
-								break;
+								auto freeTileI = ranges::find_if( turn.GetCurrentHand().FreeTiles(), Riichi::EqualsTileKind{ tile.value() } );
+								if ( freeTileI != turn.GetCurrentHand().FreeTiles().end() )
+								{
+									turn.Discard( *freeTileI );
+									break;
+								}
 							}
 						}
 					}
@@ -233,15 +239,19 @@ int main()
 					Riichi::Option<Riichi::Tile> const tile = fnParseTile( input );
 					if ( tile.has_value() )
 					{
-						if ( tile == turn.GetCurrentTileDraw() )
+						if ( turn.GetCurrentTileDraw().has_value() && tile->Kind() == turn.GetCurrentTileDraw()->Tile().Kind() )
 						{
 							turn.Discard( std::nullopt );
 							break;
 						}
-						else if ( ranges::contains( turn.GetCurrentHand().FreeTiles(), tile.value() ) )
+						else
 						{
-							turn.Discard( tile );
-							break;
+							auto freeTileI = ranges::find_if( turn.GetCurrentHand().FreeTiles(), Riichi::EqualsTileKind{ tile.value() } );
+							if ( freeTileI != turn.GetCurrentHand().FreeTiles().end() )
+							{
+								turn.Discard( *freeTileI );
+								break;
+							}
 						}
 					}
 				}

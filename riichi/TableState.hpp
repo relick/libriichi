@@ -126,51 +126,51 @@ struct Turn_AI
 struct Turn_User
 	: BaseTurn
 {
-	Turn_User( Table& i_table, Seat i_seat, bool i_canTsumo, Vector<TileInstance> i_riichiDiscards, bool i_isRiichi, Vector<Hand::DrawKanResult> i_kanOptions );
+	Turn_User( Table& i_table, Seat i_seat, bool i_canTsumo, Vector<TileInstance> i_riichiDiscards, bool i_isRiichi, Vector<HandKanOption> i_kanOptions );
 
 	bool CanTsumo() const { return m_canTsumo; }
 	bool CanRiichi() const { return !m_riichiDiscards.empty(); }
 	Vector<TileInstance> const& RiichiOptions() const { return m_riichiDiscards; }
 	bool IsRiichi() const { return m_isRiichi; } // if true, only valid options are tsumo and discard
 	bool CanKan() const { return !m_kanOptions.empty(); }
-	Vector<Hand::DrawKanResult> const& KanOptions() const { return m_kanOptions; }
+	Vector<HandKanOption> const& KanOptions() const { return m_kanOptions; }
 
 	void Tsumo() const;
 	void Discard( Option<TileInstance> const& i_handTileToDiscard ) const; // nullopt will discard drawn tile
 	void Riichi( Option<TileInstance> const& i_handTileToDiscard ) const; // nullopt will discard drawn tile
-	void Kan( TileInstance const& i_tile ) const; // Will meld the 4 matching tiles if a closed kan
+	void Kan( HandKanOption const& i_kanOption ) const; // Will meld the 4 matching tiles if a closed kan
 
 private:
 	bool m_canTsumo;
 	Vector<TileInstance> m_riichiDiscards;
 	bool m_isRiichi;
-	Vector<Hand::DrawKanResult> m_kanOptions;
+	Vector<HandKanOption> m_kanOptions;
 };
 
 //------------------------------------------------------------------------------
 struct BetweenTurns
 	: BetweenTurnsBase
 {
-	BetweenTurns( Table& i_table, TileDraw i_discardedTile, Pair<Seat, Vector<Pair<Tile, Tile>>> i_canChi, SeatSet i_canPon, SeatSet i_canKan, SeatSet i_canRon );
+	BetweenTurns( Table& i_table, TileDraw i_discardedTile, Pair<Seat, Vector<Pair<TileInstance, TileInstance>>> i_canChi, SeatSet i_canPon, SeatSet i_canKan, SeatSet i_canRon );
 
 	// TODO-AI indication about AI intent (to allow AI to jump in before user, depending on game implementation)
 
 	// TODO-DEBT: chi option data structure sucks
-	Pair<Seat, Vector<Pair<Tile, Tile>>> const& CanChi() const { return m_canChi; }
+	Pair<Seat, Vector<Pair<TileInstance, TileInstance>>> const& CanChi() const { return m_canChi; }
 	SeatSet const& CanPon() const { return m_canPon; }
 	SeatSet const& CanKan() const { return m_canKan; }
 	SeatSet const& CanRon() const { return m_canRon; }
 
 	// If any calls are made by AI, they will only happen in UserPass or UserRon
 	void UserPass() const;
-	void UserChi( Seat i_user, Pair<Tile, Tile> const& i_option ) const;
+	void UserChi( Seat i_user, Pair<TileInstance, TileInstance> const& i_option ) const;
 	void UserPon( Seat i_user ) const;
 	void UserKan( Seat i_user ) const;
 	void UserRon( SeatSet const& i_users ) const;
 
 private:
 	TileDraw m_discardedTile;
-	Pair<Seat, Vector<Pair<Tile, Tile>>> m_canChi;
+	Pair<Seat, Vector<Pair<TileInstance, TileInstance>>> m_canChi;
 	SeatSet m_canPon;
 	SeatSet m_canKan;
 	SeatSet m_canRon;

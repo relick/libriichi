@@ -23,7 +23,8 @@ enum class TableEventType : EnumValueType
 	// Turn possibilities
 	Discard,
 	Riichi, // also a discard
-	HandKan,
+	ClosedKan,
+	UpgradedKan,
 
 	// Round end possibilities
 	Tsumo,
@@ -45,7 +46,8 @@ inline constexpr char const* ToString( TableEventType i_type )
 		"Call",
 		"Discard",
 		"Riichi",
-		"HandKan",
+		"ClosedKan",
+		"UpgradedKan",
 		"Tsumo",
 		"Ron",
 		"WallDepleted",
@@ -87,18 +89,16 @@ enum class CallType : EnumValueType
 class Call
 {
 	CallType m_callType;
-	TileInstance m_calledTile;
-	Seat m_takenFrom;
+	Meld::CalledTile m_calledTile;
 public:
-	explicit Call( CallType i_callType, TileInstance const& i_calledTile, Seat i_takenFrom )
+	explicit Call( CallType i_callType, Meld::CalledTile i_calledTile )
 		: m_callType{ i_callType }
 		, m_calledTile{ i_calledTile }
-		, m_takenFrom{ i_takenFrom }
 	{}
 
 	CallType GetCallType() const { return m_callType; }
-	TileInstance const& CalledTile() const { return m_calledTile; }
-	Seat TakenFrom() const { return m_takenFrom; }
+	TileInstance const& CalledTile() const { return m_calledTile.m_tile; }
+	Seat TakenFrom() const { return m_calledTile.m_from; }
 };
 
 //------------------------------------------------------------------------------
@@ -118,18 +118,27 @@ public:
 using Riichi = Discard;
 
 //------------------------------------------------------------------------------
-class HandKan
+class ClosedKan
+{
+	TileKind m_kanTileKind;
+public:
+	explicit ClosedKan( TileKind const& i_kanTileKind )
+		: m_kanTileKind{ i_kanTileKind }
+	{}
+
+	TileKind const& KanTileKind() const { return m_kanTileKind; }
+};
+
+//------------------------------------------------------------------------------
+class UpgradedKan
 {
 	TileInstance m_kanTile;
-	bool m_closed;
 public:
-	explicit HandKan( TileInstance const& i_kanTile, bool i_closed )
+	explicit UpgradedKan( TileInstance const& i_kanTile )
 		: m_kanTile{ i_kanTile }
-		, m_closed{ i_closed }
 	{}
 
 	TileInstance const& KanTile() const { return m_kanTile; }
-	bool Closed() const { return m_closed; }
 };
 
 //------------------------------------------------------------------------------
@@ -190,7 +199,8 @@ using TableEvent = NamedUnion<
 	TableEvents::Call,
 	TableEvents::Discard,
 	TableEvents::Riichi,
-	TableEvents::HandKan,
+	TableEvents::ClosedKan,
+	TableEvents::UpgradedKan,
 	TableEvents::Tsumo,
 	TableEvents::Ron,
 	TableEvents::WallDepleted,

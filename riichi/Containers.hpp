@@ -2,6 +2,8 @@
 
 #include <array>
 #include <optional>
+#include <span>
+#include <tuple>
 #include <unordered_map>
 #include <unordered_set>
 #include <variant>
@@ -34,5 +36,11 @@ using Union = std::variant<Ts...>;
 
 template<typename T>
 using Vector = std::vector<T>;
+
+template<typename T, std::size_t Extent = std::dynamic_extent>
+using Span = std::span<T, Extent>;
+
+template<typename... Ts>
+using Tuple = std::tuple<Ts...>;
 
 }

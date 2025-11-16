@@ -3,8 +3,6 @@
 #include "Hand.hpp"
 
 #include <algorithm>
-#include "range/v3/action.hpp"
-#include "range/v3/algorithm.hpp"
 
 namespace Riichi
 {
@@ -32,7 +30,6 @@ namespace Riichi
 		}
 		case GroupType::Triplet:
 		case GroupType::Quad:
-		case GroupType::UpgradedQuad:
 		{
 			rank |= 1 << tripleCount++;
 			break;
@@ -181,7 +178,7 @@ namespace Riichi
 		return;
 	}
 
-	bool const needPair = !ranges::any_of( i_soFar.m_groups, []( HandGroup const& group ) { return group.Type() == GroupType::Pair; } );
+	bool const needPair = !std::ranges::any_of( i_soFar.m_groups, []( HandGroup const& group ) { return group.Type() == GroupType::Pair; } );
 
 	bool madeGroups = false;
 	// TODO-DEBT: This code needs tidying up, and in general the recursive nature could be optimised to avoid copying vectors
@@ -191,7 +188,7 @@ namespace Riichi
 		Tile const& nextTile = i_sortedRemaining[ tileI + 1 ];
 
 		// Try to make pair
-		if ( needPair && nextTile == tile )
+		if ( needPair && nextTile.Kind() == tile.Kind() )
 		{
 			HandInterpretation withPair = i_soFar;
 			withPair.m_groups.push_back( HandGroup( { tile, nextTile }, GroupType::Pair, false ) );
@@ -209,7 +206,7 @@ namespace Riichi
 
 		// Try to make triplet
 		Tile const& nextNextTile = i_sortedRemaining[ tileI + 2 ];
-		if ( nextTile == tile && nextNextTile == tile )
+		if ( nextTile.Kind() == tile.Kind() && nextNextTile.Kind() == tile.Kind() )
 		{
 			HandInterpretation withTriplet = i_soFar;
 			withTriplet.m_groups.push_back( HandGroup( { tile, nextTile, nextNextTile }, GroupType::Triplet, false ) );
@@ -336,7 +333,7 @@ void SevenPairsInterpreter::AddInterpretations
 		Tile const& tile2 = i_sortedFreeTiles[ tileI + 1 ];
 
 		// Matching and unique
-		if ( tile1 == tile2 && !ranges::any_of( interp.m_groups, [ & ]( HandGroup const& group ) { return group[ 0 ] == tile1; } ) )
+		if ( tile1.Kind() == tile2.Kind() && !std::ranges::any_of( interp.m_groups, EqualsTileKind{ tile1 }, &HandGroup::First ) )
 		{
 			interp.m_groups.push_back( HandGroup{ {tile1, tile2}, GroupType::Pair, false } );
 			tileI++;
@@ -347,7 +344,7 @@ void SevenPairsInterpreter::AddInterpretations
 		}
 	}
 	
-	if ( interp.m_ungrouped.size() == 1 && !ranges::any_of( interp.m_groups, [ & ]( HandGroup const& group ) { return group[ 0 ] == interp.m_ungrouped[ 0 ]; } ) )
+	if ( interp.m_ungrouped.size() == 1 && !std::ranges::any_of( interp.m_groups, EqualsTileKind{ interp.m_ungrouped[ 0 ] }, &HandGroup::First ) )
 	{
 		interp.m_waits.insert( interp.m_ungrouped[ 0 ] );
 		interp.m_waitType = WaitType::Tanki;
@@ -381,7 +378,7 @@ void ThirteenOrphansInterpreter::AddInterpretations
 
 	// TODO-OPT: Can we do this without filling a container?
 
-	Vector<Tile> requiredTiles{
+	Vector<TileKind> requiredTiles{
 		{ Suit::Manzu, Face::One },
 		{ Suit::Manzu, Face::Nine },
 		{ Suit::Pinzu, Face::One },
@@ -405,7 +402,7 @@ void ThirteenOrphansInterpreter::AddInterpretations
 			io_interps.push_back( std::move( interp ) );
 			return;
 		}
-		std::erase( requiredTiles, tile );
+		std::erase( requiredTiles, tile.Kind() );
 	}
 	
 	if ( requiredTiles.size() > 1 )
@@ -427,7 +424,7 @@ void ThirteenOrphansInterpreter::AddInterpretations
 	{
 		riEnsure( requiredTiles.size() == 0, "Did not have a valid number of unique tiles when assessing 13 orphans" );
 		// We have 1 of every tile, so this is a 13 tile wait. Luckily we have a full set of 13 tiles in our ungrouped list! :)
-		ranges::actions::insert( interp.m_waits, interp.m_ungrouped );
+		std::ranges::for_each( interp.m_ungrouped, [ & ]( TileKind kind ) { interp.m_waits.insert( kind ); } );
 	}
 
 	io_interps.push_back( std::move( interp ) );

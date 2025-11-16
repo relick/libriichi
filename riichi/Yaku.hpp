@@ -38,9 +38,9 @@ public:
 };
 
 //------------------------------------------------------------------------------
-struct Yaku
+struct YakuEvaluator
 {
-	virtual ~Yaku() = default;
+	virtual ~YakuEvaluator() = default;
 
 	virtual char const* Name() const = 0;
 	virtual char const* InterpreterName() const = 0;
@@ -78,7 +78,7 @@ struct NameString
 //------------------------------------------------------------------------------
 template<NameString t_YakuName, NameString t_InterpreterName>
 struct NamedYaku
-	: public Yaku
+	: public YakuEvaluator
 {
 	char const* Name() const final { return t_YakuName.m_str; }
 	char const* InterpreterName() const final { return t_InterpreterName.m_str; }

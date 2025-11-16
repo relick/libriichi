@@ -3,7 +3,6 @@
 #include "Table.hpp"
 
 #include <numeric>
-#include "range/v3/algorithm.hpp"
 
 namespace Riichi
 {
@@ -94,7 +93,7 @@ bool Round::Furiten
 {
 	PlayerData const& player = Player( i_player );
 	return player.m_tempFuriten
-		|| ranges::any_of( player.m_discards, [ & ]( TileInstance const& i_tile ) { return i_waits.contains( i_tile.Tile() ); } );
+		|| std::ranges::any_of( player.m_discards, [ & ]( TileInstance const& i_tile ) { return i_waits.contains( i_tile.Tile() ); } );
 }
 
 //------------------------------------------------------------------------------
@@ -185,7 +184,7 @@ bool Round::CallsMade
 (
 )	const
 {
-	return ranges::any_of( m_players,
+	return std::ranges::any_of( m_players,
 		[]( PlayerData const& player )
 		{
 			return !player.m_hand.Melds().empty();
@@ -235,7 +234,7 @@ bool Round::AnyWinners
 (
 )	const
 {
-	return ranges::any_of( m_players, []( PlayerData const& i_player ) { return i_player.m_endOfRound && i_player.m_endOfRound->m_winScores; } );
+	return std::ranges::any_of( m_players, []( PlayerData const& i_player ) { return i_player.m_endOfRound && i_player.m_endOfRound->m_winScores; } );
 }
 
 //------------------------------------------------------------------------------
@@ -243,7 +242,7 @@ bool Round::AnyFinishedInTenpai
 (
 )	const
 {
-	return ranges::any_of( m_players, []( PlayerData const& i_player ) { return i_player.m_endOfRound && i_player.m_endOfRound->m_finishedInTenpai; } );
+	return std::ranges::any_of( m_players, []( PlayerData const& i_player ) { return i_player.m_endOfRound && i_player.m_endOfRound->m_finishedInTenpai; } );
 }
 
 //------------------------------------------------------------------------------
@@ -365,13 +364,14 @@ Round::Round
 	{
 		m_players.emplace_back( playerID );
 	}
-	ranges::shuffle( m_players, i_shuffleRNG );
+	std::ranges::shuffle( m_players, i_shuffleRNG );
 	m_initialPlayerID = m_players.front().m_playerID;
 
 	// Shuffle the tiles to build the wall
 	m_wall = i_rules.Tileset();
-	riEnsure( ranges::all_of( m_wall, []( TileInstance const& i_tile ) { return i_tile.HasID(); } ), "Not all tiles were assigned IDs in ruleset" );
-	ranges::shuffle( m_wall, i_shuffleRNG );
+	std::ranges::sort( m_wall, CompareTileInstanceIDOp{} );
+	riEnsure( std::ranges::unique( m_wall, EqualsTileInstanceIDOp{} ).empty(), "Not all tiles were assigned unique IDs in ruleset");
+	std::ranges::shuffle( m_wall, i_shuffleRNG );
 
 	// Then break the wall
 	BreakWall( i_shuffleRNG );
@@ -404,7 +404,7 @@ Round::Round
 	bool const repeatRound = i_rules.RepeatRound( i_previousRound );
 	if ( !repeatRound )
 	{
-		ranges::rotate( m_players, m_players.begin() + 1 );
+		std::ranges::rotate( m_players, m_players.begin() + 1 );
 	}
 
 	// Increment round wind if we've done a full circuit
@@ -430,7 +430,7 @@ Round::Round
 
 	// Shuffle the tiles to build the wall
 	m_wall = i_rules.Tileset();
-	ranges::shuffle( m_wall, i_shuffleRNG );
+	std::ranges::shuffle( m_wall, i_shuffleRNG );
 
 	// Then break the wall
 	BreakWall( i_shuffleRNG );
@@ -464,7 +464,7 @@ void Round::BreakWall
 	m_breakPointFromDealerRight = m_wall.size() - breakingWallStartTile;
 
 	// Tada! Put into position ready for draws
-	ranges::rotate( m_wall, m_wall.begin() + m_breakPointFromDealerRight );
+	std::ranges::rotate( m_wall, m_wall.begin() + m_breakPointFromDealerRight );
 }
 
 //------------------------------------------------------------------------------
@@ -482,11 +482,11 @@ TileDraw Round::DealHands
 	}
 
 	m_players.front().m_hand.AddFreeTiles( DealTiles( 1 ) );
-	m_players.front().m_draw = SelfDraw();
 	for ( size_t playerI = 1; playerI < m_players.size(); ++playerI )
 	{
 		m_players[ playerI ].m_hand.AddFreeTiles( DealTiles( 1 ) );
 	}
+	m_players.front().m_draw = SelfDraw();
 
 	return m_players.front().m_draw.value();
 }
@@ -556,20 +556,38 @@ TileDraw Round::PassCalls
 	bool constexpr c_callMade = false;
 	PlayerData& newPlayer = StartTurn( NextPlayer( m_currentTurn, m_players.size() ), c_callMade );
 
+	riEnsure( !newPlayer.m_draw, "Should not already have a drawn tile" );
 	newPlayer.m_draw = SelfDraw();
 	return newPlayer.m_draw.value();
 }
 
 //------------------------------------------------------------------------------
-Hand::KanResult Round::HandKan
+void Round::HandKan
 (
-	Option<TileInstance> const& i_handTileToKan
+	HandKanOption const& i_kanOption
 )
 {
 	PlayerData& player = CurrentPlayer();
-	Hand::KanResult res = player.m_hand.MakeKan( i_handTileToKan.value_or( player.m_draw.value().m_tile ), i_handTileToKan.has_value(), std::nullopt );
-	player.m_draw.reset();
-	return res;
+
+	Meld const& resultingMeld = player.m_hand.CallMeldFromHand( i_kanOption );
+	riEnsure( resultingMeld.Quad()
+		&& ( !resultingMeld.Open() == i_kanOption.m_closed )
+		&& ( resultingMeld.UpgradedQuad() == !i_kanOption.m_closed ),
+		"Failed to make expected quad from kan option" );
+
+	// Handle the drawn tile now. It will be replaced with the dead wall draw soon
+	if ( i_kanOption.m_drawnTileInvolved )
+	{
+		// Drawn tile is now part of the kan
+		riEnsure( i_kanOption.m_drawnTileInvolved->ID() == player.m_draw->m_tile.ID(), "Unexpected drawn tile when calling kan" );
+		player.m_draw.reset();
+	}
+	else
+	{
+		// Need to add the drawn tile that wasn't involved in the kan to the hand
+		player.m_hand.AddFreeTiles( { player.m_draw->m_tile } );
+		player.m_draw.reset();
+	}
 }
 
 //------------------------------------------------------------------------------
@@ -577,80 +595,115 @@ TileDraw Round::HandKanRonPass
 (
 )
 {
+	// Invalidate riichi ippatsu as call made
+	for ( PlayerData& player : m_players )
+	{
+		if ( player.m_riichi )
+		{
+			player.m_riichi->m_ippatsuValid = false;
+		}
+	}
+
 	PlayerData& player = CurrentPlayer();
 
+	riEnsure( !player.m_draw, "Should not already have a drawn tile" );
 	player.m_draw = DeadWallDraw();
 	return player.m_draw.value();
 }
 
 //------------------------------------------------------------------------------
-Pair<Seat, TileInstance> Round::Chi
+Meld::CalledTile Round::Chi
 (
 	Seat i_caller,
 	Pair<TileInstance, TileInstance> const& i_meldTiles
 )
 {
 	PlayerData& current = CurrentPlayer();
-	Pair<Seat, TileInstance> const ret{ m_currentTurn, current.m_discards.back() };
+	TileInstance const calledDiscard = current.m_discards.back();
+	Seat const calledFrom = m_currentTurn;
 
 	// Disappear it from the visible discards in front of the player
 	current.m_visibleDiscards.pop_back();
 
 	PlayerData& caller = Player( i_caller );
-	caller.m_hand.MakeMeld( ret, { i_meldTiles.first, i_meldTiles.second }, GroupType::Sequence );
+	Meld const& newMeld = caller.m_hand.CallMeld( calledDiscard, calledFrom, i_meldTiles.first, i_meldTiles.second );
 
 	bool constexpr c_callMade = true;
 	StartTurn( i_caller, c_callMade );
 
-	return ret;
+	return { newMeld.GetCalledTile(), newMeld.CalledTileFrom() };
 }
 
 //------------------------------------------------------------------------------
-Pair<Seat, TileInstance> Round::Pon
+Meld::CalledTile Round::Pon
 (
 	Seat i_caller
 )
 {
 	PlayerData& current = CurrentPlayer();
-	Pair<Seat, TileInstance> const ret{ m_currentTurn, current.m_discards.back() };
+	TileInstance const calledDiscard = current.m_discards.back();
+	Seat const calledFrom = m_currentTurn;
 
 	// Disappear it from the visible discards in front of the player
 	current.m_visibleDiscards.pop_back();
 
 	// TODO-RULES: Uhhhh I guess I forgot that you might want to pon and have different options too like a chi
 	PlayerData& caller = Player( i_caller );
-	auto tile1 = std::find_if( caller.m_hand.FreeTiles().begin(), caller.m_hand.FreeTiles().end(), [ & ]( auto const& freeTile ) { return freeTile.Tile() == ret.second.Tile().Kind(); } );
-	auto tile2 = std::find_if( tile1 + 1, caller.m_hand.FreeTiles().end(), [ & ]( auto const& freeTile ) { return freeTile.Tile() == ret.second.Tile().Kind(); } );
+	EqualsTileKind const sharesTileKind{ calledDiscard };
+	auto tile1 = std::ranges::find_if( caller.m_hand.FreeTiles(), sharesTileKind );
+	auto tile2 = std::find_if( tile1 + 1, caller.m_hand.FreeTiles().end(), sharesTileKind );
 
-	caller.m_hand.MakeMeld( ret, { *tile1, *tile2 }, GroupType::Triplet );
+	Meld const& newMeld = caller.m_hand.CallMeld( calledDiscard, calledFrom, *tile1, *tile2 );
 
 	bool constexpr c_callMade = true;
 	StartTurn( i_caller, c_callMade );
 
-	return ret;
+	return { newMeld.GetCalledTile(), newMeld.CalledTileFrom() };
 }
 
 //------------------------------------------------------------------------------
-Pair<TileDraw, Pair<Seat, TileInstance>> Round::DiscardKan
+Pair<TileDraw, Meld::CalledTile> Round::DiscardKan
 (
 	Seat i_caller
 )
 {
 	PlayerData& current = CurrentPlayer();
-	Pair<Seat, TileInstance> const ret{ m_currentTurn, current.m_discards.back() };
+	TileInstance const calledDiscard = current.m_discards.back();
+	Seat const calledFrom = m_currentTurn;
 
 	// Disappear it from the visible discards in front of the player
 	current.m_visibleDiscards.pop_back();
 
 	PlayerData& caller = Player( i_caller );
-	caller.m_hand.MakeKan( ret.second, false, ret.first );
+
+	// Get the free hand tiles associated with this kan
+	Vector<TileInstance> freeHandTiles;
+	freeHandTiles.reserve( 3 );
+
+	EqualsTileKind const sharesTileKind{ calledDiscard };
+	for ( TileInstance const& tile : caller.m_hand.FreeTiles() )
+	{
+		if ( sharesTileKind( tile ) )
+		{
+			freeHandTiles.push_back( tile );
+		}
+	}
+	riEnsure( freeHandTiles.size() == 3, "Invalid discard kan" );
+
+	// Make the meld
+	Meld const& newMeld = caller.m_hand.CallMeld(
+		calledDiscard, calledFrom,
+		freeHandTiles[ 0 ],
+		freeHandTiles[ 1 ],
+		freeHandTiles[ 2 ]
+	);
 
 	bool constexpr c_callMade = true;
 	StartTurn( i_caller, c_callMade );
 
 	caller.m_draw = DeadWallDraw();
 
-	return { caller.m_draw.value(), ret };
+	return { caller.m_draw.value(), { newMeld.GetCalledTile(), newMeld.CalledTileFrom() } };
 }
 
 //------------------------------------------------------------------------------

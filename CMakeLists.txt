@@ -18,9 +18,6 @@ target_compile_options (libriichi_common_flags INTERFACE
 	>
 )
 
-# General settings
-set (CMAKE_TRY_COMPILE_TARGET_TYPE "STATIC_LIBRARY")
-
 # Library
 add_library(libriichi STATIC)
 target_sources(libriichi PUBLIC FILE_SET HEADERS FILES
@@ -28,6 +25,9 @@ target_sources(libriichi PUBLIC FILE_SET HEADERS FILES
 	riichi/Base.hpp
 	riichi/Containers.hpp
 	riichi/Random.hpp
+	riichi/DebugUtils.hpp
+	riichi/EnumUtils.hpp
+	riichi/RangeUtils.hpp
 	riichi/Utils.hpp
 
 	# Riichi Mahjong Engine
@@ -39,7 +39,6 @@ target_sources(libriichi PUBLIC FILE_SET HEADERS FILES
 	riichi/Player.hpp
 	riichi/PlayerCount.hpp
 	riichi/Round.hpp
-	riichi/Rules.inl
 	riichi/Seat.hpp
 	riichi/Table.hpp
 	riichi/Table.inl
@@ -87,4 +86,4 @@ target_link_libraries (libriichi_tests PRIVATE libriichi libriichi_common_flags)
 
 add_test(NAME tests COMMAND libriichi_tests)
 
-set_property(TARGET libriichi libriichi_demo libriichi_hand_tests libriichi_tests PROPERTY CXX_STANDARD 20)
+set_property(TARGET libriichi libriichi_demo libriichi_hand_tests libriichi_tests PROPERTY CXX_STANDARD 23)

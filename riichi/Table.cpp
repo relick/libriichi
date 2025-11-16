@@ -77,7 +77,7 @@ Points Table::ModifyPoints
 std::ostream& Table::PrintStandings
 (
 	std::ostream& io_out,
-	std::span<Pair<PlayerID, Points> const> i_changes
+	Span<Pair<PlayerID, Points> const> i_changes
 )	const
 {
 	io_out << "Standings:\n";

@@ -15,7 +15,7 @@ using Han = uint8_t;
 // Hand
 //------------------------------------------------------------------------------
 enum class GroupType : EnumValueType;
-struct Meld;
+class Meld;
 class Hand;
 enum class WaitType : EnumValueType;
 struct HandInterpretation;
