@@ -7,6 +7,22 @@
 #include <string>
 #include "range/v3/algorithm.hpp"
 
+struct DiscardAIAgent
+	: public Riichi::AI::Agent
+{
+	Riichi::AI::TurnDecisionData MakeTurnDecision
+	(
+		Riichi::AI::DecisionToken i_token,
+		Riichi::Table const& i_table,
+		Riichi::Round const& i_round,
+		Riichi::TableStates::BaseTurn const& i_turnData
+	)
+	{
+		// It just discards, all the time!
+		return Riichi::AI::TurnDecisionData( Riichi::AI::TurnDecisionData::Tag<Riichi::AI::TurnDecision::Discard>(), std::nullopt );
+	}
+};
+
 int main()
 {
 	// Able to define rules + scoring of a game in some generic and extensible way
@@ -26,25 +42,15 @@ int main()
 	std::cin >> input;
 	if ( input == "ai" )
 	{
-		table.AddPlayer( Riichi::Player{
-			Riichi::PlayerType::AI
-		} );
+		table.AddPlayer( Riichi::Player{ std::make_unique<DiscardAIAgent>() });
 	}
 	else
 	{
-		player1 = table.AddPlayer( Riichi::Player{
-			Riichi::PlayerType::User
-		} );
+		player1 = table.AddPlayer( Riichi::Player{} );
 	}
-	table.AddPlayer( Riichi::Player{
-		Riichi::PlayerType::AI
-	} );
-	table.AddPlayer( Riichi::Player{
-		Riichi::PlayerType::AI
-	} );
-	table.AddPlayer( Riichi::Player{
-		Riichi::PlayerType::AI
-	} );
+	table.AddPlayer( Riichi::Player{ std::make_unique<DiscardAIAgent>() } );
+	table.AddPlayer( Riichi::Player{ std::make_unique<DiscardAIAgent>() } );
+	table.AddPlayer( Riichi::Player{ std::make_unique<DiscardAIAgent>() } );
 
 	auto fnParseTile = []( std::string const& i_input ) -> Riichi::Option<Riichi::Tile>
 	{

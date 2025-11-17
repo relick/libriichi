@@ -1,8 +1,9 @@
 #pragma once
 
 #include "Base.hpp"
+#include "AI.hpp"
 
-#include <any>
+#include <memory>
 
 namespace Riichi
 {
@@ -17,12 +18,18 @@ enum class PlayerType : EnumValueType
 //------------------------------------------------------------------------------
 class Player
 {
-	PlayerType m_type;
+	std::unique_ptr<AI::Agent> m_aiAgent;
 public:
-	PlayerType Type() const { return m_type; }
+	PlayerType Type() const { return m_aiAgent ? PlayerType::AI : PlayerType::User; }
+	AI::Agent& Agent() const { riEnsure( Type() == PlayerType::AI, "Must only call Player::Agent() on AI players" ); return *m_aiAgent; }
 
-	Player( PlayerType i_type )
-		: m_type{ i_type }
+	// User has no params
+	Player()
+	{}
+
+	// AI requires an agent to be provided
+	Player( std::unique_ptr<AI::Agent>&& i_agent )
+		: m_aiAgent{ std::move( i_agent ) }
 	{}
 };
 
@@ -30,8 +37,8 @@ public:
 class PlayerID
 {
 	size_t m_index{ SIZE_MAX };
-	uint32_t m_tableIdent{ UINT32_MAX };
-	explicit PlayerID( size_t i_tableIndex, uint32_t i_tableIdent )
+	TableIdent m_tableIdent;
+	explicit PlayerID( size_t i_tableIndex, TableIdent i_tableIdent )
 		: m_index{ i_tableIndex }
 		, m_tableIdent{ i_tableIdent }
 	{}

@@ -30,7 +30,7 @@ class Table
 	friend TableStates::RonAKanChance;
 
 private:
-	uint32_t m_ident{ 0 }; // TODO-DEBT: come up with some way to generate idents
+	TableIdent m_ident{ 0 }; // TODO-DEBT: come up with some way to generate idents
 
 	std::unique_ptr<Rules> m_rules;
 	Vector<PlayerID> m_playerIDs;

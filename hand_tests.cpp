@@ -10,14 +10,14 @@ int main()
 {
 	using namespace Riichi;
 
-	uint32_t tileInstanceID = 0;
+	TileInstanceIDGenerator generateID;
 
 	StandardYonma<Seat::East> yonma;
 
 	Hand nineGatesHand;
 	for ( Face num : Numbers{} )
 	{
-		TileInstance const tile{ { Suit::Manzu, num }, tileInstanceID++, };
+		TileInstance const tile{ { Suit::Manzu, num }, generateID(), };
 		if ( tile.Tile().IsTerminal() )
 		{
 			nineGatesHand.AddFreeTiles( { tile, tile, tile } );
@@ -31,100 +31,100 @@ int main()
 	HandAssessment nineGatesAssessment( nineGatesHand, yonma );
 
 	Hand threeFourHand;
-	threeFourHand.AddFreeTiles( { TileInstance{ { Suit::Manzu, Face::One }, tileInstanceID++, } } );
-	threeFourHand.AddFreeTiles( { TileInstance{ { Suit::Manzu, Face::One }, tileInstanceID++, } } );
-	threeFourHand.AddFreeTiles( { TileInstance{ { Suit::Manzu, Face::Two }, tileInstanceID++, } } );
-	threeFourHand.AddFreeTiles( { TileInstance{ { Suit::Manzu, Face::Two }, tileInstanceID++, } } );
-	threeFourHand.AddFreeTiles( { TileInstance{ { Suit::Manzu, Face::Two }, tileInstanceID++, } } );
-	threeFourHand.AddFreeTiles( { TileInstance{ { Suit::Manzu, Face::Three }, tileInstanceID++, } } );
-	threeFourHand.AddFreeTiles( { TileInstance{ { Suit::Manzu, Face::Three }, tileInstanceID++, } } );
-	threeFourHand.AddFreeTiles( { TileInstance{ { Suit::Manzu, Face::Three }, tileInstanceID++, } } );
-	threeFourHand.AddFreeTiles( { TileInstance{ { Suit::Manzu, Face::Nine }, tileInstanceID++, } } );
-	threeFourHand.AddFreeTiles( { TileInstance{ { Suit::Manzu, Face::Nine }, tileInstanceID++, } } );
-	threeFourHand.AddFreeTiles( { TileInstance{ { Suit::Manzu, Face::Five }, tileInstanceID++, } } );
-	threeFourHand.AddFreeTiles( { TileInstance{ { Suit::Manzu, Face::Five }, tileInstanceID++, } } );
-	threeFourHand.AddFreeTiles( { TileInstance{ { Suit::Manzu, Face::Five }, tileInstanceID++, } } );
+	threeFourHand.AddFreeTiles( { TileInstance{ { Suit::Manzu, Face::One }, generateID(), } } );
+	threeFourHand.AddFreeTiles( { TileInstance{ { Suit::Manzu, Face::One }, generateID(), } } );
+	threeFourHand.AddFreeTiles( { TileInstance{ { Suit::Manzu, Face::Two }, generateID(), } } );
+	threeFourHand.AddFreeTiles( { TileInstance{ { Suit::Manzu, Face::Two }, generateID(), } } );
+	threeFourHand.AddFreeTiles( { TileInstance{ { Suit::Manzu, Face::Two }, generateID(), } } );
+	threeFourHand.AddFreeTiles( { TileInstance{ { Suit::Manzu, Face::Three }, generateID(), } } );
+	threeFourHand.AddFreeTiles( { TileInstance{ { Suit::Manzu, Face::Three }, generateID(), } } );
+	threeFourHand.AddFreeTiles( { TileInstance{ { Suit::Manzu, Face::Three }, generateID(), } } );
+	threeFourHand.AddFreeTiles( { TileInstance{ { Suit::Manzu, Face::Nine }, generateID(), } } );
+	threeFourHand.AddFreeTiles( { TileInstance{ { Suit::Manzu, Face::Nine }, generateID(), } } );
+	threeFourHand.AddFreeTiles( { TileInstance{ { Suit::Manzu, Face::Five }, generateID(), } } );
+	threeFourHand.AddFreeTiles( { TileInstance{ { Suit::Manzu, Face::Five }, generateID(), } } );
+	threeFourHand.AddFreeTiles( { TileInstance{ { Suit::Manzu, Face::Five }, generateID(), } } );
 
 	HandAssessment threeFourAssessment( threeFourHand, yonma );
 
 	Hand allPairs;
-	allPairs.AddFreeTiles( { TileInstance{ { Suit::Manzu, Face::Two }, tileInstanceID++, } } );
-	allPairs.AddFreeTiles( { TileInstance{ { Suit::Manzu, Face::Two }, tileInstanceID++, } } );
-	allPairs.AddFreeTiles( { TileInstance{ { Suit::Manzu, Face::Three }, tileInstanceID++, } } );
-	allPairs.AddFreeTiles( { TileInstance{ { Suit::Manzu, Face::Three }, tileInstanceID++, } } );
-	allPairs.AddFreeTiles( { TileInstance{ { Suit::Pinzu, Face::Two }, tileInstanceID++, } } );
-	allPairs.AddFreeTiles( { TileInstance{ { Suit::Pinzu, Face::Two }, tileInstanceID++, } } );
-	allPairs.AddFreeTiles( { TileInstance{ { Suit::Pinzu, Face::Three }, tileInstanceID++, } } );
-	allPairs.AddFreeTiles( { TileInstance{ { Suit::Pinzu, Face::Three }, tileInstanceID++, } } );
-	allPairs.AddFreeTiles( { TileInstance{ { Suit::Souzu, Face::Two }, tileInstanceID++, } } );
-	allPairs.AddFreeTiles( { TileInstance{ { Suit::Souzu, Face::Two }, tileInstanceID++, } } );
-	allPairs.AddFreeTiles( { TileInstance{ { Suit::Souzu, Face::Three }, tileInstanceID++, } } );
-	allPairs.AddFreeTiles( { TileInstance{ { Suit::Souzu, Face::Three }, tileInstanceID++, } } );
-	allPairs.AddFreeTiles( { TileInstance{ { Suit::Souzu, Face::Three }, tileInstanceID++, } } );
+	allPairs.AddFreeTiles( { TileInstance{ { Suit::Manzu, Face::Two }, generateID(), } } );
+	allPairs.AddFreeTiles( { TileInstance{ { Suit::Manzu, Face::Two }, generateID(), } } );
+	allPairs.AddFreeTiles( { TileInstance{ { Suit::Manzu, Face::Three }, generateID(), } } );
+	allPairs.AddFreeTiles( { TileInstance{ { Suit::Manzu, Face::Three }, generateID(), } } );
+	allPairs.AddFreeTiles( { TileInstance{ { Suit::Pinzu, Face::Two }, generateID(), } } );
+	allPairs.AddFreeTiles( { TileInstance{ { Suit::Pinzu, Face::Two }, generateID(), } } );
+	allPairs.AddFreeTiles( { TileInstance{ { Suit::Pinzu, Face::Three }, generateID(), } } );
+	allPairs.AddFreeTiles( { TileInstance{ { Suit::Pinzu, Face::Three }, generateID(), } } );
+	allPairs.AddFreeTiles( { TileInstance{ { Suit::Souzu, Face::Two }, generateID(), } } );
+	allPairs.AddFreeTiles( { TileInstance{ { Suit::Souzu, Face::Two }, generateID(), } } );
+	allPairs.AddFreeTiles( { TileInstance{ { Suit::Souzu, Face::Three }, generateID(), } } );
+	allPairs.AddFreeTiles( { TileInstance{ { Suit::Souzu, Face::Three }, generateID(), } } );
+	allPairs.AddFreeTiles( { TileInstance{ { Suit::Souzu, Face::Three }, generateID(), } } );
 
 	HandAssessment allPairsAssessment( allPairs, yonma );
 
 	Hand seqTrip;
-	seqTrip.AddFreeTiles( { TileInstance{ { Suit::Manzu, Face::One }, tileInstanceID++, } } );
-	seqTrip.AddFreeTiles( { TileInstance{ { Suit::Manzu, Face::One }, tileInstanceID++, } } );
-	seqTrip.AddFreeTiles( { TileInstance{ { Suit::Manzu, Face::One }, tileInstanceID++, } } );
-	seqTrip.AddFreeTiles( { TileInstance{ { Suit::Manzu, Face::Two }, tileInstanceID++, } } );
-	seqTrip.AddFreeTiles( { TileInstance{ { Suit::Manzu, Face::Six }, tileInstanceID++, } } );
-	seqTrip.AddFreeTiles( { TileInstance{ { Suit::Manzu, Face::Six }, tileInstanceID++, } } );
-	seqTrip.AddFreeTiles( { TileInstance{ { Suit::Manzu, Face::Six }, tileInstanceID++, } } );
-	seqTrip.AddFreeTiles( { TileInstance{ { Suit::Pinzu, Face::Six }, tileInstanceID++, } } );
-	seqTrip.AddFreeTiles( { TileInstance{ { Suit::Pinzu, Face::Six }, tileInstanceID++, } } );
-	seqTrip.AddFreeTiles( { TileInstance{ { Suit::Pinzu, Face::Six }, tileInstanceID++, } } );
-	seqTrip.AddFreeTiles( { TileInstance{ { Suit::Souzu, Face::Six }, tileInstanceID++, } } );
-	seqTrip.AddFreeTiles( { TileInstance{ { Suit::Souzu, Face::Six }, tileInstanceID++, } } );
-	seqTrip.AddFreeTiles( { TileInstance{ { Suit::Souzu, Face::Six }, tileInstanceID++, } } );
+	seqTrip.AddFreeTiles( { TileInstance{ { Suit::Manzu, Face::One }, generateID(), } } );
+	seqTrip.AddFreeTiles( { TileInstance{ { Suit::Manzu, Face::One }, generateID(), } } );
+	seqTrip.AddFreeTiles( { TileInstance{ { Suit::Manzu, Face::One }, generateID(), } } );
+	seqTrip.AddFreeTiles( { TileInstance{ { Suit::Manzu, Face::Two }, generateID(), } } );
+	seqTrip.AddFreeTiles( { TileInstance{ { Suit::Manzu, Face::Six }, generateID(), } } );
+	seqTrip.AddFreeTiles( { TileInstance{ { Suit::Manzu, Face::Six }, generateID(), } } );
+	seqTrip.AddFreeTiles( { TileInstance{ { Suit::Manzu, Face::Six }, generateID(), } } );
+	seqTrip.AddFreeTiles( { TileInstance{ { Suit::Pinzu, Face::Six }, generateID(), } } );
+	seqTrip.AddFreeTiles( { TileInstance{ { Suit::Pinzu, Face::Six }, generateID(), } } );
+	seqTrip.AddFreeTiles( { TileInstance{ { Suit::Pinzu, Face::Six }, generateID(), } } );
+	seqTrip.AddFreeTiles( { TileInstance{ { Suit::Souzu, Face::Six }, generateID(), } } );
+	seqTrip.AddFreeTiles( { TileInstance{ { Suit::Souzu, Face::Six }, generateID(), } } );
+	seqTrip.AddFreeTiles( { TileInstance{ { Suit::Souzu, Face::Six }, generateID(), } } );
 
 	HandAssessment seqTripAssessment( seqTrip, yonma );
 
 	Hand multiInterpFewGroups;
-	seqTrip.AddFreeTiles( { TileInstance{ { Suit::Manzu, Face::Two }, tileInstanceID++, } } );
-	seqTrip.AddFreeTiles( { TileInstance{ { Suit::Manzu, Face::Three }, tileInstanceID++, } } );
-	seqTrip.AddFreeTiles( { TileInstance{ { Suit::Manzu, Face::Seven }, tileInstanceID++, } } );
-	seqTrip.AddFreeTiles( { TileInstance{ { Suit::Manzu, Face::Eight }, tileInstanceID++, } } );
-	seqTrip.AddFreeTiles( { TileInstance{ { Suit::Manzu, Face::Nine }, tileInstanceID++, } } );
-	seqTrip.AddFreeTiles( { TileInstance{ { Suit::Manzu, Face::Nine }, tileInstanceID++, } } );
-	seqTrip.AddFreeTiles( { TileInstance{ { Suit::Manzu, Face::Nine }, tileInstanceID++, } } );
-	seqTrip.AddFreeTiles( { TileInstance{ { Suit::Pinzu, Face::Six }, tileInstanceID++, } } );
-	seqTrip.AddFreeTiles( { TileInstance{ { Suit::Souzu, Face::Two }, tileInstanceID++, } } );
-	seqTrip.AddFreeTiles( { TileInstance{ { Suit::Souzu, Face::Six }, tileInstanceID++, } } );
-	seqTrip.AddFreeTiles( { TileInstance{ { Suit::Souzu, Face::Eight }, tileInstanceID++, } } );
-	seqTrip.AddFreeTiles( { TileInstance{ { Face::Chun }, tileInstanceID++, } } );
-	seqTrip.AddFreeTiles( { TileInstance{ { Face::Chun }, tileInstanceID++, } } );
+	seqTrip.AddFreeTiles( { TileInstance{ { Suit::Manzu, Face::Two }, generateID(), } } );
+	seqTrip.AddFreeTiles( { TileInstance{ { Suit::Manzu, Face::Three }, generateID(), } } );
+	seqTrip.AddFreeTiles( { TileInstance{ { Suit::Manzu, Face::Seven }, generateID(), } } );
+	seqTrip.AddFreeTiles( { TileInstance{ { Suit::Manzu, Face::Eight }, generateID(), } } );
+	seqTrip.AddFreeTiles( { TileInstance{ { Suit::Manzu, Face::Nine }, generateID(), } } );
+	seqTrip.AddFreeTiles( { TileInstance{ { Suit::Manzu, Face::Nine }, generateID(), } } );
+	seqTrip.AddFreeTiles( { TileInstance{ { Suit::Manzu, Face::Nine }, generateID(), } } );
+	seqTrip.AddFreeTiles( { TileInstance{ { Suit::Pinzu, Face::Six }, generateID(), } } );
+	seqTrip.AddFreeTiles( { TileInstance{ { Suit::Souzu, Face::Two }, generateID(), } } );
+	seqTrip.AddFreeTiles( { TileInstance{ { Suit::Souzu, Face::Six }, generateID(), } } );
+	seqTrip.AddFreeTiles( { TileInstance{ { Suit::Souzu, Face::Eight }, generateID(), } } );
+	seqTrip.AddFreeTiles( { TileInstance{ { Face::Chun }, generateID(), } } );
+	seqTrip.AddFreeTiles( { TileInstance{ { Face::Chun }, generateID(), } } );
 
 	Hand multiInterpNoWaits;
-	seqTrip.AddFreeTiles( { TileInstance{ { Suit::Manzu, Face::Three }, tileInstanceID++, } } );
-	seqTrip.AddFreeTiles( { TileInstance{ { Suit::Manzu, Face::Four }, tileInstanceID++, } } );
-	seqTrip.AddFreeTiles( { TileInstance{ { Suit::Manzu, Face::Five }, tileInstanceID++, } } );
-	seqTrip.AddFreeTiles( { TileInstance{ { Suit::Pinzu, Face::Two }, tileInstanceID++, } } );
-	seqTrip.AddFreeTiles( { TileInstance{ { Suit::Pinzu, Face::Five }, tileInstanceID++, } } );
-	seqTrip.AddFreeTiles( { TileInstance{ { Suit::Pinzu, Face::Six }, tileInstanceID++, } } );
-	seqTrip.AddFreeTiles( { TileInstance{ { Suit::Pinzu, Face::Seven }, tileInstanceID++, } } );
-	seqTrip.AddFreeTiles( { TileInstance{ { Suit::Souzu, Face::Seven }, tileInstanceID++, } } );
-	seqTrip.AddFreeTiles( { TileInstance{ { Suit::Souzu, Face::Eight }, tileInstanceID++, } } );
-	seqTrip.AddFreeTiles( { TileInstance{ { Suit::Souzu, Face::Eight }, tileInstanceID++, } } );
-	seqTrip.AddFreeTiles( { TileInstance{ { Suit::Souzu, Face::Eight }, tileInstanceID++, } } );
-	seqTrip.AddFreeTiles( { TileInstance{ { Suit::Souzu, Face::Nine }, tileInstanceID++, } } );
-	seqTrip.AddFreeTiles( { TileInstance{ { Face::Chun }, tileInstanceID++, } } );
+	seqTrip.AddFreeTiles( { TileInstance{ { Suit::Manzu, Face::Three }, generateID(), } } );
+	seqTrip.AddFreeTiles( { TileInstance{ { Suit::Manzu, Face::Four }, generateID(), } } );
+	seqTrip.AddFreeTiles( { TileInstance{ { Suit::Manzu, Face::Five }, generateID(), } } );
+	seqTrip.AddFreeTiles( { TileInstance{ { Suit::Pinzu, Face::Two }, generateID(), } } );
+	seqTrip.AddFreeTiles( { TileInstance{ { Suit::Pinzu, Face::Five }, generateID(), } } );
+	seqTrip.AddFreeTiles( { TileInstance{ { Suit::Pinzu, Face::Six }, generateID(), } } );
+	seqTrip.AddFreeTiles( { TileInstance{ { Suit::Pinzu, Face::Seven }, generateID(), } } );
+	seqTrip.AddFreeTiles( { TileInstance{ { Suit::Souzu, Face::Seven }, generateID(), } } );
+	seqTrip.AddFreeTiles( { TileInstance{ { Suit::Souzu, Face::Eight }, generateID(), } } );
+	seqTrip.AddFreeTiles( { TileInstance{ { Suit::Souzu, Face::Eight }, generateID(), } } );
+	seqTrip.AddFreeTiles( { TileInstance{ { Suit::Souzu, Face::Eight }, generateID(), } } );
+	seqTrip.AddFreeTiles( { TileInstance{ { Suit::Souzu, Face::Nine }, generateID(), } } );
+	seqTrip.AddFreeTiles( { TileInstance{ { Face::Chun }, generateID(), } } );
 
 	Hand multiInterpSomeWaits;
-	seqTrip.AddFreeTiles( { TileInstance{ { Suit::Manzu, Face::Three }, tileInstanceID++, } } );
-	seqTrip.AddFreeTiles( { TileInstance{ { Suit::Manzu, Face::Four }, tileInstanceID++, } } );
-	seqTrip.AddFreeTiles( { TileInstance{ { Suit::Manzu, Face::Five }, tileInstanceID++, } } );
-	seqTrip.AddFreeTiles( { TileInstance{ { Suit::Pinzu, Face::Three }, tileInstanceID++, } } );
-	seqTrip.AddFreeTiles( { TileInstance{ { Suit::Pinzu, Face::Four }, tileInstanceID++, } } );
-	seqTrip.AddFreeTiles( { TileInstance{ { Suit::Pinzu, Face::Five }, tileInstanceID++, } } );
-	seqTrip.AddFreeTiles( { TileInstance{ { Suit::Pinzu, Face::Five }, tileInstanceID++, } } );
-	seqTrip.AddFreeTiles( { TileInstance{ { Suit::Pinzu, Face::Five }, tileInstanceID++, } } );
-	seqTrip.AddFreeTiles( { TileInstance{ { Suit::Souzu, Face::Three }, tileInstanceID++, } } );
-	seqTrip.AddFreeTiles( { TileInstance{ { Suit::Souzu, Face::Four }, tileInstanceID++, } } );
-	seqTrip.AddFreeTiles( { TileInstance{ { Suit::Souzu, Face::Six }, tileInstanceID++, } } );
-	seqTrip.AddFreeTiles( { TileInstance{ { Suit::Souzu, Face::Seven }, tileInstanceID++, } } );
-	seqTrip.AddFreeTiles( { TileInstance{ { Suit::Souzu, Face::Eight }, tileInstanceID++, } } );
+	seqTrip.AddFreeTiles( { TileInstance{ { Suit::Manzu, Face::Three }, generateID(), } } );
+	seqTrip.AddFreeTiles( { TileInstance{ { Suit::Manzu, Face::Four }, generateID(), } } );
+	seqTrip.AddFreeTiles( { TileInstance{ { Suit::Manzu, Face::Five }, generateID(), } } );
+	seqTrip.AddFreeTiles( { TileInstance{ { Suit::Pinzu, Face::Three }, generateID(), } } );
+	seqTrip.AddFreeTiles( { TileInstance{ { Suit::Pinzu, Face::Four }, generateID(), } } );
+	seqTrip.AddFreeTiles( { TileInstance{ { Suit::Pinzu, Face::Five }, generateID(), } } );
+	seqTrip.AddFreeTiles( { TileInstance{ { Suit::Pinzu, Face::Five }, generateID(), } } );
+	seqTrip.AddFreeTiles( { TileInstance{ { Suit::Pinzu, Face::Five }, generateID(), } } );
+	seqTrip.AddFreeTiles( { TileInstance{ { Suit::Souzu, Face::Three }, generateID(), } } );
+	seqTrip.AddFreeTiles( { TileInstance{ { Suit::Souzu, Face::Four }, generateID(), } } );
+	seqTrip.AddFreeTiles( { TileInstance{ { Suit::Souzu, Face::Six }, generateID(), } } );
+	seqTrip.AddFreeTiles( { TileInstance{ { Suit::Souzu, Face::Seven }, generateID(), } } );
+	seqTrip.AddFreeTiles( { TileInstance{ { Suit::Souzu, Face::Eight }, generateID(), } } );
 
 	ShuffleRNG shuffleRNG{ std::random_device()( ) };
 	while ( true )

@@ -68,7 +68,8 @@ StandardYonmaCore::StandardYonmaCore
 	);
 
 	// Yonma uses all tiles
-	uint32_t tileID = 0;
+
+	TileInstanceIDGenerator generateTileID;
 	for ( int tileTypeCount = 0; tileTypeCount < 4; ++tileTypeCount )
 	{
 		for ( Suit suit : Suits{} )
@@ -80,18 +81,18 @@ StandardYonmaCore::StandardYonmaCore
 				{
 					props = TileProperties{ Akadora{} };
 				}
-				m_tileSet.emplace_back( Tile{ suit, num, props }, tileID++ );
+				m_tileSet.emplace_back( Tile{ suit, num, props }, generateTileID() );
 			}
 		}
 
 		for ( Face dragon : Dragons{} )
 		{
-			m_tileSet.emplace_back( dragon, tileID++ );
+			m_tileSet.emplace_back( dragon, generateTileID() );
 		}
 
 		for ( Face wind : Winds{} )
 		{
-			m_tileSet.emplace_back( wind, tileID++ );
+			m_tileSet.emplace_back( wind, generateTileID() );
 		}
 	}
 

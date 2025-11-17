@@ -7,6 +7,7 @@
 #include "Seat.hpp"
 #include "TableEvent.hpp"
 #include "Tile.hpp"
+#include "AI.hpp"
 
 namespace Riichi
 {
@@ -100,33 +101,11 @@ struct GameOver
 struct BaseTurn
 	: Base
 {
-	BaseTurn( Table& i_table, Seat i_seat );
+	BaseTurn( Table& i_table, Seat i_seat, bool i_canTsumo, Vector<TileInstance> i_riichiDiscards, bool i_isRiichi, Vector<HandKanOption> i_kanOptions );
 
 	Hand const& GetCurrentHand() const;
 	Option<TileInstance> GetCurrentTileDraw() const;
 	Seat GetSeat() const { return m_seat; }
-
-protected:
-	void TransitionToBetweenTurns( TileInstance const& i_discardedTile, TableEvent&& i_tableEvent ) const;
-
-private:
-	Seat m_seat;
-};
-
-//------------------------------------------------------------------------------
-struct Turn_AI
-	: BaseTurn
-{
-	Turn_AI( Table& i_table, Seat i_seat );
-
-	void MakeDecision() const;
-};
-
-//------------------------------------------------------------------------------
-struct Turn_User
-	: BaseTurn
-{
-	Turn_User( Table& i_table, Seat i_seat, bool i_canTsumo, Vector<TileInstance> i_riichiDiscards, bool i_isRiichi, Vector<HandKanOption> i_kanOptions );
 
 	bool CanTsumo() const { return m_canTsumo; }
 	bool CanRiichi() const { return !m_riichiDiscards.empty(); }
@@ -135,16 +114,45 @@ struct Turn_User
 	bool CanKan() const { return !m_kanOptions.empty(); }
 	Vector<HandKanOption> const& KanOptions() const { return m_kanOptions; }
 
+protected:
+	void TransitionToBetweenTurns( TileInstance const& i_discardedTile, TableEvent&& i_tableEvent ) const;
+
 	void Tsumo() const;
 	void Discard( Option<TileInstance> const& i_handTileToDiscard ) const; // nullopt will discard drawn tile
 	void Riichi( Option<TileInstance> const& i_handTileToDiscard ) const; // nullopt will discard drawn tile
-	void Kan( HandKanOption const& i_kanOption ) const; // Will meld the 4 matching tiles if a closed kan
+	void Kan( HandKanOption const& i_kanOption ) const;
 
 private:
+	Seat m_seat;
+
 	bool m_canTsumo;
 	Vector<TileInstance> m_riichiDiscards;
 	bool m_isRiichi;
 	Vector<HandKanOption> m_kanOptions;
+};
+
+//------------------------------------------------------------------------------
+struct Turn_AI
+	: BaseTurn
+{
+	using BaseTurn::BaseTurn;
+
+	void MakeDecision() const;
+
+protected:
+	AI::DecisionToken m_token;
+};
+
+//------------------------------------------------------------------------------
+struct Turn_User
+	: BaseTurn
+{
+	using BaseTurn::BaseTurn;
+
+	void Tsumo() const;
+	void Discard( Option<TileInstance> const& i_handTileToDiscard ) const; // nullopt will discard drawn tile
+	void Riichi( Option<TileInstance> const& i_handTileToDiscard ) const; // nullopt will discard drawn tile
+	void Kan( HandKanOption const& i_kanOption ) const; // Will meld the 4 matching tiles if a closed kan
 };
 
 //------------------------------------------------------------------------------

@@ -238,24 +238,25 @@ public:
 // that makes it easier to identify a specific tile for visual purposes, rather than
 // that the ID is supposed to impact the game.
 //------------------------------------------------------------------------------
+using TileInstanceID = TypeSafeID<struct TileInstanceIDTag>;
+using TileInstanceIDGenerator = TypeSafeIDGenerator<TileInstanceID>;
 class TileInstance
 {
 protected:
-	uint32_t m_id;
+	TileInstanceID m_id;
 	Tile m_tile;
 
 public:
-	explicit constexpr TileInstance( Tile i_tile, uint32_t i_tileID )
+	explicit constexpr TileInstance( Tile i_tile, TileInstanceID i_tileID )
 		: m_id{ i_tileID }, m_tile{ i_tile }
 	{}
 
 	// Projections:
 	static inline constexpr Tile const& GetTile( TileInstance const& i_a ) { return i_a.Tile(); }
-	static inline constexpr uint32_t GetID( TileInstance const& i_a ) { return i_a.ID(); }
+	static inline constexpr TileInstanceID GetID( TileInstance const& i_a ) { return i_a.ID(); }
 
 	constexpr Tile const& Tile() const { return m_tile; }
-
-	constexpr uint32_t ID() const { return m_id; }
+	constexpr TileInstanceID ID() const { return m_id; }
 };
 
 template<typename R>
@@ -384,6 +385,6 @@ struct std::hash<Riichi::TileInstance>
 {
 	std::size_t operator()( Riichi::TileInstance const& i_tile ) const noexcept
 	{
-		return std::hash<uint32_t>{}( i_tile.ID() );
+		return std::hash<Riichi::TileInstanceID>{}( i_tile.ID() );
 	}
 };

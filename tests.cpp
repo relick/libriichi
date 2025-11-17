@@ -9,7 +9,7 @@ void TestYaku()
 {
 	using namespace Riichi;
 
-	uint32_t tileInstanceID = 0;
+	TileInstanceIDGenerator generateID;
 
 	// Set up mock
 	Seat mockSeat{ Seat::East };
@@ -47,49 +47,49 @@ void TestYaku()
 	{
 		Hand failHand;
 		failHand.AddFreeTiles( {
-			TileInstance{ { Suit::Manzu, Face::One }, tileInstanceID++, },
-			TileInstance{ { Suit::Manzu, Face::Two }, tileInstanceID++, },
-			TileInstance{ { Suit::Manzu, Face::Three }, tileInstanceID++, },
-			TileInstance{ { Suit::Manzu, Face::Nine }, tileInstanceID++, },
-			TileInstance{ { Suit::Manzu, Face::Nine }, tileInstanceID++, },
-			TileInstance{ { Suit::Pinzu, Face::One }, tileInstanceID++, },
-			TileInstance{ { Suit::Pinzu, Face::Two }, tileInstanceID++, },
-			TileInstance{ { Suit::Pinzu, Face::Three }, tileInstanceID++, },
-			TileInstance{ { Suit::Pinzu, Face::Three }, tileInstanceID++, },
-			TileInstance{ { Suit::Pinzu, Face::Five }, tileInstanceID++, },
-			TileInstance{ { Suit::Pinzu, Face::Seven }, tileInstanceID++, },
-			TileInstance{ { Suit::Pinzu, Face::Eight }, tileInstanceID++, },
-			TileInstance{ { Suit::Pinzu, Face::Nine }, tileInstanceID++, },
+			TileInstance{ { Suit::Manzu, Face::One }, generateID(), },
+			TileInstance{ { Suit::Manzu, Face::Two }, generateID(), },
+			TileInstance{ { Suit::Manzu, Face::Three }, generateID(), },
+			TileInstance{ { Suit::Manzu, Face::Nine }, generateID(), },
+			TileInstance{ { Suit::Manzu, Face::Nine }, generateID(), },
+			TileInstance{ { Suit::Pinzu, Face::One }, generateID(), },
+			TileInstance{ { Suit::Pinzu, Face::Two }, generateID(), },
+			TileInstance{ { Suit::Pinzu, Face::Three }, generateID(), },
+			TileInstance{ { Suit::Pinzu, Face::Three }, generateID(), },
+			TileInstance{ { Suit::Pinzu, Face::Five }, generateID(), },
+			TileInstance{ { Suit::Pinzu, Face::Seven }, generateID(), },
+			TileInstance{ { Suit::Pinzu, Face::Eight }, generateID(), },
+			TileInstance{ { Suit::Pinzu, Face::Nine }, generateID(), },
 			} );
 
 		bool const fail = fnTestForYaku(
 			StandardYaku::MenzenchinTsumohou(),
 			failHand,
-			{ TileInstance{ { Suit::Pinzu, Face::Four }, tileInstanceID++, }, TileDrawType::DiscardDraw }
+			{ TileInstance{ { Suit::Pinzu, Face::Four }, generateID(), }, TileDrawType::DiscardDraw }
 		);
 		riEnsure( !fail, "MenzenchinTsumohou failed!" );
 
 		Hand successHand;
 		successHand.AddFreeTiles( {
-			TileInstance{ { Suit::Manzu, Face::One }, tileInstanceID++, },
-			TileInstance{ { Suit::Manzu, Face::Two }, tileInstanceID++, },
-			TileInstance{ { Suit::Manzu, Face::Three }, tileInstanceID++, },
-			TileInstance{ { Suit::Manzu, Face::Nine }, tileInstanceID++, },
-			TileInstance{ { Suit::Manzu, Face::Nine }, tileInstanceID++, },
-			TileInstance{ { Suit::Pinzu, Face::One }, tileInstanceID++, },
-			TileInstance{ { Suit::Pinzu, Face::Two }, tileInstanceID++, },
-			TileInstance{ { Suit::Pinzu, Face::Three }, tileInstanceID++, },
-			TileInstance{ { Suit::Pinzu, Face::Four }, tileInstanceID++, },
-			TileInstance{ { Suit::Pinzu, Face::Six }, tileInstanceID++, },
-			TileInstance{ { Suit::Pinzu, Face::Seven }, tileInstanceID++, },
-			TileInstance{ { Suit::Pinzu, Face::Eight }, tileInstanceID++, },
-			TileInstance{ { Suit::Pinzu, Face::Nine }, tileInstanceID++, },
+			TileInstance{ { Suit::Manzu, Face::One }, generateID(), },
+			TileInstance{ { Suit::Manzu, Face::Two }, generateID(), },
+			TileInstance{ { Suit::Manzu, Face::Three }, generateID(), },
+			TileInstance{ { Suit::Manzu, Face::Nine }, generateID(), },
+			TileInstance{ { Suit::Manzu, Face::Nine }, generateID(), },
+			TileInstance{ { Suit::Pinzu, Face::One }, generateID(), },
+			TileInstance{ { Suit::Pinzu, Face::Two }, generateID(), },
+			TileInstance{ { Suit::Pinzu, Face::Three }, generateID(), },
+			TileInstance{ { Suit::Pinzu, Face::Four }, generateID(), },
+			TileInstance{ { Suit::Pinzu, Face::Six }, generateID(), },
+			TileInstance{ { Suit::Pinzu, Face::Seven }, generateID(), },
+			TileInstance{ { Suit::Pinzu, Face::Eight }, generateID(), },
+			TileInstance{ { Suit::Pinzu, Face::Nine }, generateID(), },
 			} );
 
 		bool const success = fnTestForYaku(
 			StandardYaku::MenzenchinTsumohou(),
 			successHand,
-			{ TileInstance{ { Suit::Pinzu, Face::Five }, tileInstanceID++, }, TileDrawType::SelfDraw }
+			{ TileInstance{ { Suit::Pinzu, Face::Five }, generateID(), }, TileDrawType::SelfDraw }
 		);
 		riEnsure( success, "MenzenchinTsumohou failed!" );
 	}
@@ -98,25 +98,25 @@ void TestYaku()
 	{
 		Hand failHand;
 		failHand.AddFreeTiles( {
-			TileInstance{ { Suit::Manzu, Face::One }, tileInstanceID++, },
-			TileInstance{ { Suit::Manzu, Face::Two }, tileInstanceID++, },
-			TileInstance{ { Suit::Manzu, Face::Three }, tileInstanceID++, },
-			TileInstance{ { Suit::Manzu, Face::Nine }, tileInstanceID++, },
-			TileInstance{ { Suit::Manzu, Face::Nine }, tileInstanceID++, },
-			TileInstance{ { Suit::Pinzu, Face::One }, tileInstanceID++, },
-			TileInstance{ { Suit::Pinzu, Face::Two }, tileInstanceID++, },
-			TileInstance{ { Suit::Pinzu, Face::Three }, tileInstanceID++, },
-			TileInstance{ { Suit::Pinzu, Face::Three }, tileInstanceID++, },
-			TileInstance{ { Suit::Pinzu, Face::Five }, tileInstanceID++, },
-			TileInstance{ { Suit::Pinzu, Face::Seven }, tileInstanceID++, },
-			TileInstance{ { Suit::Pinzu, Face::Eight }, tileInstanceID++, },
-			TileInstance{ { Suit::Pinzu, Face::Nine }, tileInstanceID++, },
+			TileInstance{ { Suit::Manzu, Face::One }, generateID(), },
+			TileInstance{ { Suit::Manzu, Face::Two }, generateID(), },
+			TileInstance{ { Suit::Manzu, Face::Three }, generateID(), },
+			TileInstance{ { Suit::Manzu, Face::Nine }, generateID(), },
+			TileInstance{ { Suit::Manzu, Face::Nine }, generateID(), },
+			TileInstance{ { Suit::Pinzu, Face::One }, generateID(), },
+			TileInstance{ { Suit::Pinzu, Face::Two }, generateID(), },
+			TileInstance{ { Suit::Pinzu, Face::Three }, generateID(), },
+			TileInstance{ { Suit::Pinzu, Face::Three }, generateID(), },
+			TileInstance{ { Suit::Pinzu, Face::Five }, generateID(), },
+			TileInstance{ { Suit::Pinzu, Face::Seven }, generateID(), },
+			TileInstance{ { Suit::Pinzu, Face::Eight }, generateID(), },
+			TileInstance{ { Suit::Pinzu, Face::Nine }, generateID(), },
 			} );
 
 		bool const fail = fnTestForYaku(
 			StandardYaku::Riichi(),
 			failHand,
-			{ TileInstance{ { Suit::Pinzu, Face::Four }, tileInstanceID++, }, TileDrawType::SelfDraw }
+			{ TileInstance{ { Suit::Pinzu, Face::Four }, generateID(), }, TileDrawType::SelfDraw }
 		);
 		riEnsure( !fail, "Riichi failed!" );
 
@@ -126,25 +126,25 @@ void TestYaku()
 
 		Hand successHand;
 		successHand.AddFreeTiles( {
-			TileInstance{ { Suit::Manzu, Face::One }, tileInstanceID++, },
-			TileInstance{ { Suit::Manzu, Face::Two }, tileInstanceID++, },
-			TileInstance{ { Suit::Manzu, Face::Three }, tileInstanceID++, },
-			TileInstance{ { Suit::Manzu, Face::Nine }, tileInstanceID++, },
-			TileInstance{ { Suit::Manzu, Face::Nine }, tileInstanceID++, },
-			TileInstance{ { Suit::Pinzu, Face::One }, tileInstanceID++, },
-			TileInstance{ { Suit::Pinzu, Face::Two }, tileInstanceID++, },
-			TileInstance{ { Suit::Pinzu, Face::Three }, tileInstanceID++, },
-			TileInstance{ { Suit::Pinzu, Face::Four }, tileInstanceID++, },
-			TileInstance{ { Suit::Pinzu, Face::Six }, tileInstanceID++, },
-			TileInstance{ { Suit::Pinzu, Face::Seven }, tileInstanceID++, },
-			TileInstance{ { Suit::Pinzu, Face::Eight }, tileInstanceID++, },
-			TileInstance{ { Suit::Pinzu, Face::Nine }, tileInstanceID++, },
+			TileInstance{ { Suit::Manzu, Face::One }, generateID(), },
+			TileInstance{ { Suit::Manzu, Face::Two }, generateID(), },
+			TileInstance{ { Suit::Manzu, Face::Three }, generateID(), },
+			TileInstance{ { Suit::Manzu, Face::Nine }, generateID(), },
+			TileInstance{ { Suit::Manzu, Face::Nine }, generateID(), },
+			TileInstance{ { Suit::Pinzu, Face::One }, generateID(), },
+			TileInstance{ { Suit::Pinzu, Face::Two }, generateID(), },
+			TileInstance{ { Suit::Pinzu, Face::Three }, generateID(), },
+			TileInstance{ { Suit::Pinzu, Face::Four }, generateID(), },
+			TileInstance{ { Suit::Pinzu, Face::Six }, generateID(), },
+			TileInstance{ { Suit::Pinzu, Face::Seven }, generateID(), },
+			TileInstance{ { Suit::Pinzu, Face::Eight }, generateID(), },
+			TileInstance{ { Suit::Pinzu, Face::Nine }, generateID(), },
 			} );
 
 		bool const success = fnTestForYaku(
 			StandardYaku::Riichi(),
 			successHand,
-			{ TileInstance{ { Suit::Pinzu, Face::Five }, tileInstanceID++, }, TileDrawType::SelfDraw },
+			{ TileInstance{ { Suit::Pinzu, Face::Five }, generateID(), }, TileDrawType::SelfDraw },
 			&riichiMockRound
 		);
 		riEnsure( success, "Riichi failed!" );
@@ -167,25 +167,25 @@ void TestYaku()
 
 			Hand failHand;
 			failHand.AddFreeTiles( {
-				TileInstance{ { Suit::Manzu, Face::One }, tileInstanceID++, },
-				TileInstance{ { Suit::Manzu, Face::Two }, tileInstanceID++, },
-				TileInstance{ { Suit::Manzu, Face::Three }, tileInstanceID++, },
-				TileInstance{ { Suit::Manzu, Face::Nine }, tileInstanceID++, },
-				TileInstance{ { Suit::Manzu, Face::Nine }, tileInstanceID++, },
-				TileInstance{ { Suit::Pinzu, Face::One }, tileInstanceID++, },
-				TileInstance{ { Suit::Pinzu, Face::Two }, tileInstanceID++, },
-				TileInstance{ { Suit::Pinzu, Face::Three }, tileInstanceID++, },
-				TileInstance{ { Suit::Pinzu, Face::Three }, tileInstanceID++, },
-				TileInstance{ { Suit::Pinzu, Face::Five }, tileInstanceID++, },
-				TileInstance{ { Suit::Pinzu, Face::Seven }, tileInstanceID++, },
-				TileInstance{ { Suit::Pinzu, Face::Eight }, tileInstanceID++, },
-				TileInstance{ { Suit::Pinzu, Face::Nine }, tileInstanceID++, },
+				TileInstance{ { Suit::Manzu, Face::One }, generateID(), },
+				TileInstance{ { Suit::Manzu, Face::Two }, generateID(), },
+				TileInstance{ { Suit::Manzu, Face::Three }, generateID(), },
+				TileInstance{ { Suit::Manzu, Face::Nine }, generateID(), },
+				TileInstance{ { Suit::Manzu, Face::Nine }, generateID(), },
+				TileInstance{ { Suit::Pinzu, Face::One }, generateID(), },
+				TileInstance{ { Suit::Pinzu, Face::Two }, generateID(), },
+				TileInstance{ { Suit::Pinzu, Face::Three }, generateID(), },
+				TileInstance{ { Suit::Pinzu, Face::Three }, generateID(), },
+				TileInstance{ { Suit::Pinzu, Face::Five }, generateID(), },
+				TileInstance{ { Suit::Pinzu, Face::Seven }, generateID(), },
+				TileInstance{ { Suit::Pinzu, Face::Eight }, generateID(), },
+				TileInstance{ { Suit::Pinzu, Face::Nine }, generateID(), },
 				} );
 
 			bool const fail = fnTestForYaku(
 				StandardYaku::Ippatsu(),
 				failHand,
-				{ TileInstance{ { Suit::Pinzu, Face::Four }, tileInstanceID++, }, TileDrawType::SelfDraw },
+				{ TileInstance{ { Suit::Pinzu, Face::Four }, generateID(), }, TileDrawType::SelfDraw },
 				&riichiMockRound
 			);
 			riEnsure( !fail, "Ippatsu failed!" );
@@ -198,25 +198,25 @@ void TestYaku()
 
 			Hand successHand;
 			successHand.AddFreeTiles( {
-				TileInstance{ { Suit::Manzu, Face::One }, tileInstanceID++, },
-				TileInstance{ { Suit::Manzu, Face::Two }, tileInstanceID++, },
-				TileInstance{ { Suit::Manzu, Face::Three }, tileInstanceID++, },
-				TileInstance{ { Suit::Manzu, Face::Nine }, tileInstanceID++, },
-				TileInstance{ { Suit::Manzu, Face::Nine }, tileInstanceID++, },
-				TileInstance{ { Suit::Pinzu, Face::One }, tileInstanceID++, },
-				TileInstance{ { Suit::Pinzu, Face::Two }, tileInstanceID++, },
-				TileInstance{ { Suit::Pinzu, Face::Three }, tileInstanceID++, },
-				TileInstance{ { Suit::Pinzu, Face::Four }, tileInstanceID++, },
-				TileInstance{ { Suit::Pinzu, Face::Six }, tileInstanceID++, },
-				TileInstance{ { Suit::Pinzu, Face::Seven }, tileInstanceID++, },
-				TileInstance{ { Suit::Pinzu, Face::Eight }, tileInstanceID++, },
-				TileInstance{ { Suit::Pinzu, Face::Nine }, tileInstanceID++, },
+				TileInstance{ { Suit::Manzu, Face::One }, generateID(), },
+				TileInstance{ { Suit::Manzu, Face::Two }, generateID(), },
+				TileInstance{ { Suit::Manzu, Face::Three }, generateID(), },
+				TileInstance{ { Suit::Manzu, Face::Nine }, generateID(), },
+				TileInstance{ { Suit::Manzu, Face::Nine }, generateID(), },
+				TileInstance{ { Suit::Pinzu, Face::One }, generateID(), },
+				TileInstance{ { Suit::Pinzu, Face::Two }, generateID(), },
+				TileInstance{ { Suit::Pinzu, Face::Three }, generateID(), },
+				TileInstance{ { Suit::Pinzu, Face::Four }, generateID(), },
+				TileInstance{ { Suit::Pinzu, Face::Six }, generateID(), },
+				TileInstance{ { Suit::Pinzu, Face::Seven }, generateID(), },
+				TileInstance{ { Suit::Pinzu, Face::Eight }, generateID(), },
+				TileInstance{ { Suit::Pinzu, Face::Nine }, generateID(), },
 				} );
 
 			bool const success = fnTestForYaku(
 				StandardYaku::Ippatsu(),
 				successHand,
-				{ TileInstance{ { Suit::Pinzu, Face::Five }, tileInstanceID++, }, TileDrawType::SelfDraw },
+				{ TileInstance{ { Suit::Pinzu, Face::Five }, generateID(), }, TileDrawType::SelfDraw },
 				&riichiMockRound
 			);
 			riEnsure( success, "Ippatsu failed!" );
@@ -229,49 +229,49 @@ void TestYaku()
 
 		Hand failHand;
 		failHand.AddFreeTiles( {
-			TileInstance{ { Suit::Manzu, Face::One }, tileInstanceID++, },
-			TileInstance{ { Suit::Manzu, Face::Two }, tileInstanceID++, },
-			TileInstance{ { Suit::Manzu, Face::Three }, tileInstanceID++, },
-			TileInstance{ { Suit::Manzu, Face::Four }, tileInstanceID++, },
-			TileInstance{ { Suit::Manzu, Face::Five }, tileInstanceID++, },
-			TileInstance{ { Suit::Manzu, Face::Six }, tileInstanceID++, },
-			TileInstance{ { Suit::Manzu, Face::Four }, tileInstanceID++, },
-			TileInstance{ { Suit::Manzu, Face::Five }, tileInstanceID++, },
-			TileInstance{ { Suit::Manzu, Face::Six }, tileInstanceID++, },
-			TileInstance{ { Suit::Manzu, Face::Seven }, tileInstanceID++, },
-			TileInstance{ { Suit::Manzu, Face::Seven }, tileInstanceID++, },
-			TileInstance{ { Suit::Pinzu, Face::Three }, tileInstanceID++, },
-			TileInstance{ { Suit::Pinzu, Face::Six }, tileInstanceID++, },
+			TileInstance{ { Suit::Manzu, Face::One }, generateID(), },
+			TileInstance{ { Suit::Manzu, Face::Two }, generateID(), },
+			TileInstance{ { Suit::Manzu, Face::Three }, generateID(), },
+			TileInstance{ { Suit::Manzu, Face::Four }, generateID(), },
+			TileInstance{ { Suit::Manzu, Face::Five }, generateID(), },
+			TileInstance{ { Suit::Manzu, Face::Six }, generateID(), },
+			TileInstance{ { Suit::Manzu, Face::Four }, generateID(), },
+			TileInstance{ { Suit::Manzu, Face::Five }, generateID(), },
+			TileInstance{ { Suit::Manzu, Face::Six }, generateID(), },
+			TileInstance{ { Suit::Manzu, Face::Seven }, generateID(), },
+			TileInstance{ { Suit::Manzu, Face::Seven }, generateID(), },
+			TileInstance{ { Suit::Pinzu, Face::Three }, generateID(), },
+			TileInstance{ { Suit::Pinzu, Face::Six }, generateID(), },
 			} );
 
 		bool const fail = fnTestForYaku(
 			StandardYaku::Pinfu(),
 			failHand,
-			{ TileInstance{ { Suit::Pinzu, Face::Five }, tileInstanceID++, }, TileDrawType::SelfDraw }
+			{ TileInstance{ { Suit::Pinzu, Face::Five }, generateID(), }, TileDrawType::SelfDraw }
 		);
 		riEnsure( !fail, "Pinfu failed!" );
 
 		Hand successHand;
 		successHand.AddFreeTiles( {
-			TileInstance{ { Suit::Manzu, Face::One }, tileInstanceID++, },
-			TileInstance{ { Suit::Manzu, Face::Two }, tileInstanceID++, },
-			TileInstance{ { Suit::Manzu, Face::Three }, tileInstanceID++, },
-			TileInstance{ { Suit::Manzu, Face::Four }, tileInstanceID++, },
-			TileInstance{ { Suit::Manzu, Face::Five }, tileInstanceID++, },
-			TileInstance{ { Suit::Manzu, Face::Six }, tileInstanceID++, },
-			TileInstance{ { Suit::Manzu, Face::Four }, tileInstanceID++, },
-			TileInstance{ { Suit::Manzu, Face::Five }, tileInstanceID++, },
-			TileInstance{ { Suit::Manzu, Face::Six }, tileInstanceID++, },
-			TileInstance{ { Suit::Manzu, Face::Seven }, tileInstanceID++, },
-			TileInstance{ { Suit::Manzu, Face::Seven }, tileInstanceID++, },
-			TileInstance{ { Suit::Pinzu, Face::Three }, tileInstanceID++, },
-			TileInstance{ { Suit::Pinzu, Face::Four }, tileInstanceID++, },
+			TileInstance{ { Suit::Manzu, Face::One }, generateID(), },
+			TileInstance{ { Suit::Manzu, Face::Two }, generateID(), },
+			TileInstance{ { Suit::Manzu, Face::Three }, generateID(), },
+			TileInstance{ { Suit::Manzu, Face::Four }, generateID(), },
+			TileInstance{ { Suit::Manzu, Face::Five }, generateID(), },
+			TileInstance{ { Suit::Manzu, Face::Six }, generateID(), },
+			TileInstance{ { Suit::Manzu, Face::Four }, generateID(), },
+			TileInstance{ { Suit::Manzu, Face::Five }, generateID(), },
+			TileInstance{ { Suit::Manzu, Face::Six }, generateID(), },
+			TileInstance{ { Suit::Manzu, Face::Seven }, generateID(), },
+			TileInstance{ { Suit::Manzu, Face::Seven }, generateID(), },
+			TileInstance{ { Suit::Pinzu, Face::Three }, generateID(), },
+			TileInstance{ { Suit::Pinzu, Face::Four }, generateID(), },
 			} );
 
 		bool const success = fnTestForYaku(
 			StandardYaku::Pinfu(),
 			successHand,
-			{ TileInstance{ { Suit::Pinzu, Face::Five }, tileInstanceID++, }, TileDrawType::SelfDraw }
+			{ TileInstance{ { Suit::Pinzu, Face::Five }, generateID(), }, TileDrawType::SelfDraw }
 		);
 		riEnsure( success, "Pinfu failed!" );
 	}
@@ -280,49 +280,49 @@ void TestYaku()
 	{
 		Hand failHand;
 		failHand.AddFreeTiles( {
-			TileInstance{ { Suit::Manzu, Face::One }, tileInstanceID++, },
-			TileInstance{ { Suit::Manzu, Face::Two }, tileInstanceID++, },
-			TileInstance{ { Suit::Manzu, Face::Three }, tileInstanceID++, },
-			TileInstance{ { Suit::Manzu, Face::Two }, tileInstanceID++, },
-			TileInstance{ { Suit::Manzu, Face::Three }, tileInstanceID++, },
-			TileInstance{ { Suit::Pinzu, Face::Three }, tileInstanceID++, },
-			TileInstance{ { Suit::Pinzu, Face::Three }, tileInstanceID++, },
-			TileInstance{ { Suit::Pinzu, Face::Three }, tileInstanceID++, },
-			TileInstance{ { Suit::Pinzu, Face::Four }, tileInstanceID++, },
-			TileInstance{ { Suit::Pinzu, Face::Four }, tileInstanceID++, },
-			TileInstance{ { Suit::Pinzu, Face::Four }, tileInstanceID++, },
-			TileInstance{ { Suit::Pinzu, Face::Six }, tileInstanceID++, },
-			TileInstance{ { Suit::Pinzu, Face::Six }, tileInstanceID++, },
+			TileInstance{ { Suit::Manzu, Face::One }, generateID(), },
+			TileInstance{ { Suit::Manzu, Face::Two }, generateID(), },
+			TileInstance{ { Suit::Manzu, Face::Three }, generateID(), },
+			TileInstance{ { Suit::Manzu, Face::Two }, generateID(), },
+			TileInstance{ { Suit::Manzu, Face::Three }, generateID(), },
+			TileInstance{ { Suit::Pinzu, Face::Three }, generateID(), },
+			TileInstance{ { Suit::Pinzu, Face::Three }, generateID(), },
+			TileInstance{ { Suit::Pinzu, Face::Three }, generateID(), },
+			TileInstance{ { Suit::Pinzu, Face::Four }, generateID(), },
+			TileInstance{ { Suit::Pinzu, Face::Four }, generateID(), },
+			TileInstance{ { Suit::Pinzu, Face::Four }, generateID(), },
+			TileInstance{ { Suit::Pinzu, Face::Six }, generateID(), },
+			TileInstance{ { Suit::Pinzu, Face::Six }, generateID(), },
 			} );
 
 		bool const fail = fnTestForYaku(
 			StandardYaku::Iipeikou(),
 			failHand,
-			{ TileInstance{ { Suit::Manzu, Face::Four }, tileInstanceID++, }, TileDrawType::DiscardDraw }
+			{ TileInstance{ { Suit::Manzu, Face::Four }, generateID(), }, TileDrawType::DiscardDraw }
 		);
 		riEnsure( !fail, "Iipeikou failed!" );
 
 		Hand successHand;
 		successHand.AddFreeTiles( {
-			TileInstance{ { Suit::Manzu, Face::One }, tileInstanceID++, },
-			TileInstance{ { Suit::Manzu, Face::Two }, tileInstanceID++, },
-			TileInstance{ { Suit::Manzu, Face::Three }, tileInstanceID++, },
-			TileInstance{ { Suit::Manzu, Face::Two }, tileInstanceID++, },
-			TileInstance{ { Suit::Manzu, Face::Three }, tileInstanceID++, },
-			TileInstance{ { Suit::Pinzu, Face::Three }, tileInstanceID++, },
-			TileInstance{ { Suit::Pinzu, Face::Three }, tileInstanceID++, },
-			TileInstance{ { Suit::Pinzu, Face::Three }, tileInstanceID++, },
-			TileInstance{ { Suit::Pinzu, Face::Four }, tileInstanceID++, },
-			TileInstance{ { Suit::Pinzu, Face::Four }, tileInstanceID++, },
-			TileInstance{ { Suit::Pinzu, Face::Four }, tileInstanceID++, },
-			TileInstance{ { Suit::Pinzu, Face::Six }, tileInstanceID++, },
-			TileInstance{ { Suit::Pinzu, Face::Six }, tileInstanceID++, },
+			TileInstance{ { Suit::Manzu, Face::One }, generateID(), },
+			TileInstance{ { Suit::Manzu, Face::Two }, generateID(), },
+			TileInstance{ { Suit::Manzu, Face::Three }, generateID(), },
+			TileInstance{ { Suit::Manzu, Face::Two }, generateID(), },
+			TileInstance{ { Suit::Manzu, Face::Three }, generateID(), },
+			TileInstance{ { Suit::Pinzu, Face::Three }, generateID(), },
+			TileInstance{ { Suit::Pinzu, Face::Three }, generateID(), },
+			TileInstance{ { Suit::Pinzu, Face::Three }, generateID(), },
+			TileInstance{ { Suit::Pinzu, Face::Four }, generateID(), },
+			TileInstance{ { Suit::Pinzu, Face::Four }, generateID(), },
+			TileInstance{ { Suit::Pinzu, Face::Four }, generateID(), },
+			TileInstance{ { Suit::Pinzu, Face::Six }, generateID(), },
+			TileInstance{ { Suit::Pinzu, Face::Six }, generateID(), },
 			} );
 
 		bool const success = fnTestForYaku(
 			StandardYaku::Iipeikou(),
 			successHand,
-			{ TileInstance{ { Suit::Manzu, Face::One }, tileInstanceID++, }, TileDrawType::DiscardDraw }
+			{ TileInstance{ { Suit::Manzu, Face::One }, generateID(), }, TileDrawType::DiscardDraw }
 		);
 		riEnsure( success, "Iipeikou failed!" );
 	}
@@ -345,49 +345,49 @@ void TestYaku()
 	{
 		Hand failHand;
 		failHand.AddFreeTiles( {
-			TileInstance{ { Suit::Manzu, Face::One }, tileInstanceID++, },
-			TileInstance{ { Suit::Manzu, Face::Two }, tileInstanceID++, },
-			TileInstance{ { Suit::Manzu, Face::Three }, tileInstanceID++, },
-			TileInstance{ { Suit::Manzu, Face::Nine }, tileInstanceID++, },
-			TileInstance{ { Suit::Manzu, Face::Nine }, tileInstanceID++, },
-			TileInstance{ { Suit::Pinzu, Face::One }, tileInstanceID++, },
-			TileInstance{ { Suit::Pinzu, Face::Two }, tileInstanceID++, },
-			TileInstance{ { Suit::Pinzu, Face::Three }, tileInstanceID++, },
-			TileInstance{ { Suit::Pinzu, Face::Three }, tileInstanceID++, },
-			TileInstance{ { Suit::Pinzu, Face::Five }, tileInstanceID++, },
-			TileInstance{ { Suit::Pinzu, Face::Seven }, tileInstanceID++, },
-			TileInstance{ { Suit::Pinzu, Face::Eight }, tileInstanceID++, },
-			TileInstance{ { Suit::Pinzu, Face::Nine }, tileInstanceID++, },
+			TileInstance{ { Suit::Manzu, Face::One }, generateID(), },
+			TileInstance{ { Suit::Manzu, Face::Two }, generateID(), },
+			TileInstance{ { Suit::Manzu, Face::Three }, generateID(), },
+			TileInstance{ { Suit::Manzu, Face::Nine }, generateID(), },
+			TileInstance{ { Suit::Manzu, Face::Nine }, generateID(), },
+			TileInstance{ { Suit::Pinzu, Face::One }, generateID(), },
+			TileInstance{ { Suit::Pinzu, Face::Two }, generateID(), },
+			TileInstance{ { Suit::Pinzu, Face::Three }, generateID(), },
+			TileInstance{ { Suit::Pinzu, Face::Three }, generateID(), },
+			TileInstance{ { Suit::Pinzu, Face::Five }, generateID(), },
+			TileInstance{ { Suit::Pinzu, Face::Seven }, generateID(), },
+			TileInstance{ { Suit::Pinzu, Face::Eight }, generateID(), },
+			TileInstance{ { Suit::Pinzu, Face::Nine }, generateID(), },
 			} );
 
 		bool const fail = fnTestForYaku(
 			StandardYaku::Ikkitsuukan(),
 			failHand,
-			{ TileInstance{ { Suit::Pinzu, Face::Four }, tileInstanceID++, }, TileDrawType::SelfDraw }
+			{ TileInstance{ { Suit::Pinzu, Face::Four }, generateID(), }, TileDrawType::SelfDraw }
 		);
 		riEnsure( !fail, "Ikkitsuukan failed!" );
 
 		Hand successHand;
 		successHand.AddFreeTiles( {
-			TileInstance{ { Suit::Manzu, Face::One }, tileInstanceID++, },
-			TileInstance{ { Suit::Manzu, Face::Two }, tileInstanceID++, },
-			TileInstance{ { Suit::Manzu, Face::Three }, tileInstanceID++, },
-			TileInstance{ { Suit::Manzu, Face::Nine }, tileInstanceID++, },
-			TileInstance{ { Suit::Manzu, Face::Nine }, tileInstanceID++, },
-			TileInstance{ { Suit::Pinzu, Face::One }, tileInstanceID++, },
-			TileInstance{ { Suit::Pinzu, Face::Two }, tileInstanceID++, },
-			TileInstance{ { Suit::Pinzu, Face::Three }, tileInstanceID++, },
-			TileInstance{ { Suit::Pinzu, Face::Four }, tileInstanceID++, },
-			TileInstance{ { Suit::Pinzu, Face::Six }, tileInstanceID++, },
-			TileInstance{ { Suit::Pinzu, Face::Seven }, tileInstanceID++, },
-			TileInstance{ { Suit::Pinzu, Face::Eight }, tileInstanceID++, },
-			TileInstance{ { Suit::Pinzu, Face::Nine }, tileInstanceID++, },
+			TileInstance{ { Suit::Manzu, Face::One }, generateID(), },
+			TileInstance{ { Suit::Manzu, Face::Two }, generateID(), },
+			TileInstance{ { Suit::Manzu, Face::Three }, generateID(), },
+			TileInstance{ { Suit::Manzu, Face::Nine }, generateID(), },
+			TileInstance{ { Suit::Manzu, Face::Nine }, generateID(), },
+			TileInstance{ { Suit::Pinzu, Face::One }, generateID(), },
+			TileInstance{ { Suit::Pinzu, Face::Two }, generateID(), },
+			TileInstance{ { Suit::Pinzu, Face::Three }, generateID(), },
+			TileInstance{ { Suit::Pinzu, Face::Four }, generateID(), },
+			TileInstance{ { Suit::Pinzu, Face::Six }, generateID(), },
+			TileInstance{ { Suit::Pinzu, Face::Seven }, generateID(), },
+			TileInstance{ { Suit::Pinzu, Face::Eight }, generateID(), },
+			TileInstance{ { Suit::Pinzu, Face::Nine }, generateID(), },
 			} );
 
 		bool const success = fnTestForYaku(
 			StandardYaku::Ikkitsuukan(),
 			successHand,
-			{ TileInstance{ { Suit::Pinzu, Face::Five }, tileInstanceID++, }, TileDrawType::SelfDraw }
+			{ TileInstance{ { Suit::Pinzu, Face::Five }, generateID(), }, TileDrawType::SelfDraw }
 		);
 		riEnsure( success, "Ikkitsuukan failed!" );
 	}

@@ -31,35 +31,37 @@ void BetweenTurnsBase::TransitionToTurn
 
 	Player const& turnPlayer = round.GetPlayer( round.CurrentTurn(), table );
 
+	// All this data is calculated for both players and AI!
+	Hand const& playerHand = round.CurrentHand( round.CurrentTurn() );
+
+	bool canTsumo = false;
+	Vector<TileInstance> riichiDiscards;
+
+	bool const isRiichi = round.CalledRiichi( round.CurrentTurn() );
+
+	if ( i_tileDraw.has_value() )
+	{
+		bool const allowedToRiichi = playerHand.Melds().empty()
+			&& !isRiichi
+			&& table.m_rules->HasPermissionToRiichi( round.CurrentTurn(), table.GetPoints( round.GetPlayerID( round.CurrentTurn() ) ) );
+		auto [validWaits, validRiichiDiscards] = table.m_rules->WaitsWithYaku(
+			round,
+			round.CurrentTurn(),
+			playerHand,
+			i_tileDraw.value(),
+			allowedToRiichi
+		);
+
+		canTsumo = validWaits.contains( i_tileDraw.value().m_tile.Tile() );
+		riichiDiscards = std::move( validRiichiDiscards );
+	}
+
+	Vector<HandKanOption> kanOptions = round.CurrentHand( round.CurrentTurn() ).HandKanOptions( i_tileDraw ? Option<TileInstance>( i_tileDraw->m_tile ) : Option<TileInstance>() );
+
 	switch ( turnPlayer.Type() )
 	{
 	case PlayerType::User:
 	{
-		Hand const& playerHand = round.CurrentHand( round.CurrentTurn() );
-
-		bool canTsumo = false;
-		Vector<TileInstance> riichiDiscards;
-
-		bool const isRiichi = round.CalledRiichi( round.CurrentTurn() );
-
-		if ( i_tileDraw.has_value() )
-		{
-			bool const allowedToRiichi = playerHand.Melds().empty()
-				&& !isRiichi
-				&& table.m_rules->HasPermissionToRiichi( round.CurrentTurn(), table.GetPoints( round.GetPlayerID( round.CurrentTurn() ) ) );
-			auto [ validWaits, validRiichiDiscards ] = table.m_rules->WaitsWithYaku(
-				round,
-				round.CurrentTurn(),
-				playerHand,
-				i_tileDraw.value(),
-				allowedToRiichi
-			);
-
-			canTsumo = validWaits.contains( i_tileDraw.value().m_tile.Tile() );
-			riichiDiscards = std::move( validRiichiDiscards );
-		}
-
-		Vector<HandKanOption> kanOptions = round.CurrentHand( round.CurrentTurn() ).HandKanOptions( i_tileDraw ? Option<TileInstance>( i_tileDraw->m_tile ) : Option<TileInstance>() );
 		table.Transition(
 			TableStates::Turn_User{ table, round.CurrentTurn(), canTsumo, std::move( riichiDiscards ), isRiichi, std::move( kanOptions ) },
 			std::move( i_tableEvent )
@@ -69,7 +71,7 @@ void BetweenTurnsBase::TransitionToTurn
 	case PlayerType::AI:
 	{
 		table.Transition(
-			TableStates::Turn_AI{ table, round.CurrentTurn() },
+			TableStates::Turn_AI{ table, round.CurrentTurn(), canTsumo, std::move( riichiDiscards ), isRiichi, std::move( kanOptions ) },
 			std::move( i_tableEvent )
 		);
 		break;
@@ -195,10 +197,18 @@ void BetweenRounds::StartRound
 BaseTurn::BaseTurn
 (
 	Table& i_table,
-	Seat i_seat
+	Seat i_seat,
+	bool i_canTsumo,
+	Vector<TileInstance> i_riichiDiscards,
+	bool i_isRiichi,
+	Vector<HandKanOption> i_kanOptions
 )
 	: Base{ i_table }
 	, m_seat{ i_seat }
+	, m_canTsumo{ i_canTsumo }
+	, m_riichiDiscards( std::move( i_riichiDiscards ) )
+	, m_isRiichi{ i_isRiichi }
+	, m_kanOptions{ std::move( i_kanOptions ) }
 {}
 
 //------------------------------------------------------------------------------
@@ -285,51 +295,7 @@ void BaseTurn::TransitionToBetweenTurns
 }
 
 //------------------------------------------------------------------------------
-Turn_AI::Turn_AI
-(
-	Table& i_table,
-	Seat i_seat
-)
-	: BaseTurn{ i_table, i_seat }
-{}
-
-//------------------------------------------------------------------------------
-void Turn_AI::MakeDecision
-(
-)	const
-{
-	Table& table = m_table.get();
-
-	// TODO-AI: Super good AI goes here
-	// For now, we just discard the drawn tile
-	Round& round = table.m_rounds.back();
-	TileInstance const discardedTile = round.Discard( std::nullopt );
-
-	TransitionToBetweenTurns(
-		discardedTile,
-		TableEvent{ TableEvent::Tag<TableEventType::Discard>(), discardedTile, round.CurrentTurn() }
-	);
-}
-
-//------------------------------------------------------------------------------
-Turn_User::Turn_User
-(
-	Table& i_table,
-	Seat i_seat,
-	bool i_canTsumo,
-	Vector<TileInstance> i_riichiDiscards,
-	bool i_isRiichi,
-	Vector<HandKanOption> i_kanOptions
-)
-	: BaseTurn{ i_table, i_seat }
-	, m_canTsumo{ i_canTsumo }
-	, m_riichiDiscards( std::move( i_riichiDiscards ) )
-	, m_isRiichi{ i_isRiichi }
-	, m_kanOptions{ std::move( i_kanOptions ) }
-{}
-
-//------------------------------------------------------------------------------
-void Turn_User::Tsumo
+void BaseTurn::Tsumo
 (
 )	const
 {
@@ -381,7 +347,7 @@ void Turn_User::Tsumo
 }
 
 //------------------------------------------------------------------------------
-void Turn_User::Discard
+void BaseTurn::Discard
 (
 	Option<TileInstance> const& i_handTileToDiscard
 )	const
@@ -398,7 +364,7 @@ void Turn_User::Discard
 }
 
 //------------------------------------------------------------------------------
-void Turn_User::Riichi
+void BaseTurn::Riichi
 (
 	Option<TileInstance> const& i_handTileToDiscard
 )	const
@@ -427,7 +393,7 @@ void Turn_User::Riichi
 }
 
 //------------------------------------------------------------------------------
-void Turn_User::Kan
+void BaseTurn::Kan
 (
 	HandKanOption const& i_kanOption
 )	const
@@ -454,7 +420,7 @@ void Turn_User::Kan
 			continue;
 		}
 		bool constexpr c_allowedToRiichi = false;
-		auto const [ validWaits, canRiichi ] = table.m_rules->WaitsWithYaku(
+		auto const [validWaits, canRiichi] = table.m_rules->WaitsWithYaku(
 			round,
 			seat,
 			round.CurrentHand( seat ),
@@ -473,6 +439,84 @@ void Turn_User::Kan
 		? TableEvent{ TableEvent::Tag<TableEventType::ClosedKan>(), kanTile.Tile().Kind() }
 		: TableEvent{ TableEvent::Tag<TableEventType::UpgradedKan>(), kanTile }
 	);
+}
+
+//------------------------------------------------------------------------------
+void Turn_AI::MakeDecision
+(
+)	const
+{
+	Table& table = m_table.get();
+
+	Round& round = table.m_rounds.back();
+	Player const& currentPlayer = round.GetPlayer( round.CurrentTurn(), table );
+
+	riEnsure( currentPlayer.Type() == PlayerType::AI, "Must be AI player on AI turn state" );
+
+	AI::TurnDecisionData decision = currentPlayer.Agent().MakeTurnDecision( m_token, table, round, *this );
+	switch ( decision.Type() )
+	{
+	case AI::TurnDecision::Pending:
+	{
+		// Continue processing
+		break;
+	}
+	case AI::TurnDecision::Tsumo:
+	{
+		BaseTurn::Tsumo();
+		break;
+	}
+	case AI::TurnDecision::Discard:
+	{
+		BaseTurn::Discard( decision.Get<AI::TurnDecision::Discard>() );
+		break;
+	}
+	case AI::TurnDecision::Riichi:
+	{
+		BaseTurn::Riichi( decision.Get<AI::TurnDecision::Riichi>() );
+		break;
+	}
+	case AI::TurnDecision::Kan:
+	{
+		BaseTurn::Kan( decision.Get<AI::TurnDecision::Kan>() );
+		break;
+	}
+	}
+}
+
+//------------------------------------------------------------------------------
+void Turn_User::Tsumo
+(
+)	const
+{
+	BaseTurn::Tsumo();
+}
+
+//------------------------------------------------------------------------------
+void Turn_User::Discard
+(
+	Option<TileInstance> const& i_handTileToDiscard
+)	const
+{
+	BaseTurn::Discard( i_handTileToDiscard );
+}
+
+//------------------------------------------------------------------------------
+void Turn_User::Riichi
+(
+	Option<TileInstance> const& i_handTileToDiscard
+)	const
+{
+	BaseTurn::Riichi( i_handTileToDiscard );
+}
+
+//------------------------------------------------------------------------------
+void Turn_User::Kan
+(
+	HandKanOption const& i_kanOption
+)	const
+{
+	BaseTurn::Kan( i_kanOption );
 }
 
 //------------------------------------------------------------------------------

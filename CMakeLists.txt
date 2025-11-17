@@ -24,6 +24,7 @@ target_sources(libriichi PUBLIC FILE_SET HEADERS FILES
 	# Library Support
 	riichi/Base.hpp
 	riichi/Containers.hpp
+	riichi/IDs.hpp
 	riichi/Random.hpp
 	riichi/DebugUtils.hpp
 	riichi/EnumUtils.hpp
@@ -32,6 +33,7 @@ target_sources(libriichi PUBLIC FILE_SET HEADERS FILES
 
 	# Riichi Mahjong Engine
 	riichi/Declare.hpp
+	riichi/AI.hpp
 	riichi/Hand.hpp
 	riichi/Hand.inl
 	riichi/HandInterpreter.hpp

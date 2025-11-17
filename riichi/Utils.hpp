@@ -3,6 +3,7 @@
 #include "Base.hpp"
 #include "Containers.hpp"
 
+#include "IDs.hpp"
 #include "DebugUtils.hpp"
 #include "EnumUtils.hpp"
 #include "RangeUtils.hpp"
