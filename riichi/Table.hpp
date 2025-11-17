@@ -78,6 +78,8 @@ public:
 		return event;
 	}
 
+	AIRNG& GetAIRNG() { return m_aiRNG; }
+
 private:
 	void Transition( TableState&& i_nextState, TableEvent&& i_nextEvent );
 };

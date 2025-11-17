@@ -4,7 +4,8 @@
 
 #include <iostream>
 #include <random>
-#include "range/v3/algorithm.hpp"
+#include <ranges>
+#include <algorithm>
 
 int main()
 {
@@ -130,20 +131,20 @@ int main()
 	while ( true )
 	{
 		Vector<TileInstance> tileSet = yonma.Tileset();
-		ranges::shuffle( tileSet, shuffleRNG );
+		std::ranges::shuffle( tileSet, shuffleRNG );
 		tileSet.erase( tileSet.begin() + 13, tileSet.end() );
 
 		Hand hand;
 		hand.AddFreeTiles( tileSet );
 
 		HandAssessment ass( hand, yonma );
-		bool const unequalGroups = ranges::adjacent_find( ass.Interpretations(),
+		bool const unequalGroups = std::ranges::adjacent_find( ass.Interpretations(),
 			[]( HandInterpretation const& i_a, HandInterpretation const& i_b ) -> bool
 			{
 				return i_a.m_groups.size() != i_b.m_groups.size() && i_b.m_groups.size() >= 3 && i_a.m_groups.size() >= 3;
 			}
 		) != ass.Interpretations().end();
-		bool const hasWaits = ranges::find_if( ass.Interpretations(),
+		bool const hasWaits = std::ranges::find_if( ass.Interpretations(),
 			[]( HandInterpretation const& i_i ) -> bool
 			{
 				return !i_i.m_waits.empty();

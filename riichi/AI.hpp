@@ -2,10 +2,11 @@
 
 #include "Containers.hpp"
 #include "Declare.hpp"
-#include "NamedUnion.hpp"
-#include "Utils.hpp"
-#include "Tile.hpp"
 #include "Hand.hpp"
+#include "NamedUnion.hpp"
+#include "Random.hpp"
+#include "Tile.hpp"
+#include "Utils.hpp"
 
 namespace Riichi::TableStates
 {
@@ -43,7 +44,14 @@ struct Agent
 {
 	virtual ~Agent() = default;
 
-	virtual TurnDecisionData MakeTurnDecision( DecisionToken i_token, Table const& i_table, Round const& i_round, TableStates::BaseTurn const& i_turnData ) = 0;
+	virtual TurnDecisionData MakeTurnDecision
+	(
+		DecisionToken i_token,
+		AIRNG& io_rng,
+		Table const& i_table,
+		Round const& i_round,
+		TableStates::BaseTurn const& i_turnData
+	) = 0;
 };
 
 }

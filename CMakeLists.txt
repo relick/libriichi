@@ -51,6 +51,7 @@ target_sources(libriichi PUBLIC FILE_SET HEADERS FILES
 
 	# Example Riichi implementation
 	riichi/Declare_Standard.hpp
+	riichi/AIAgents_Standard.hpp
 	riichi/HandInterpreter_Standard.hpp
 	riichi/Rules_Standard.hpp
 	riichi/Rules_Standard.inl

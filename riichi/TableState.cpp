@@ -453,7 +453,7 @@ void Turn_AI::MakeDecision
 
 	riEnsure( currentPlayer.Type() == PlayerType::AI, "Must be AI player on AI turn state" );
 
-	AI::TurnDecisionData decision = currentPlayer.Agent().MakeTurnDecision( m_token, table, round, *this );
+	AI::TurnDecisionData decision = currentPlayer.Agent().MakeTurnDecision( m_token, table.GetAIRNG(), table, round, *this);
 	switch ( decision.Type() )
 	{
 	case AI::TurnDecision::Pending:
