@@ -19,12 +19,26 @@ struct GhostAgent
 	(
 		DecisionToken i_token,
 		AIRNG& io_rng,
+		Seat i_agentSeat,
 		Riichi::Table const& i_table,
 		Riichi::Round const& i_round,
-		Riichi::TableStates::BaseTurn const& i_turnData
+		Riichi::TableStates::Turn_AI const& i_turnData
+	) override
+	{
+		return { TurnDecisionData::Tag<TurnDecision::Discard>(), std::nullopt };
+	}
+
+	BetweenTurnsDecisionData MakeBetweenTurnsDecision
+	(
+		DecisionToken i_token,
+		AIRNG& io_rng,
+		Seat i_agentSeat,
+		Table const& i_table,
+		Round const& i_round,
+		TableStates::BetweenTurns const& i_turnData
 	)
 	{
-		return TurnDecisionData( TurnDecisionData::Tag<TurnDecision::Discard>(), std::nullopt );
+		return { BetweenTurnsDecisionData::Tag<BetweenTurnsDecision::Pass>() };
 	}
 };
 
@@ -39,13 +53,12 @@ struct ButtonMasherAgent
 	(
 		DecisionToken i_token,
 		AIRNG& io_rng,
+		Seat i_agentSeat,
 		Riichi::Table const& i_table,
 		Riichi::Round const& i_round,
-		Riichi::TableStates::BaseTurn const& i_turnData
-	)
+		Riichi::TableStates::Turn_AI const& i_turnData
+	) override
 	{
-		// Does whatever is available
-
 		if ( i_turnData.CanTsumo() )
 		{
 			return { TurnDecisionData::Tag<TurnDecision::Tsumo>() };
@@ -77,6 +90,39 @@ struct ButtonMasherAgent
 		{
 			return { TurnDecisionData::Tag<TurnDecision::Discard>(), discardOptions.front() };
 		}
+	}
+
+	BetweenTurnsDecisionData MakeBetweenTurnsDecision
+	(
+		DecisionToken i_token,
+		AIRNG& io_rng,
+		Seat i_agentSeat,
+		Table const& i_table,
+		Round const& i_round,
+		TableStates::BetweenTurns const& i_turnData
+	)
+	{
+		if ( i_turnData.CanRon().Contains( i_agentSeat ) )
+		{
+			return { BetweenTurnsDecisionData::Tag<BetweenTurnsDecision::Ron>() };
+		}
+
+		if ( !i_turnData.CanKan()[ i_agentSeat ].empty() )
+		{
+			return { BetweenTurnsDecisionData::Tag<BetweenTurnsDecision::Kan>(), i_turnData.CanKan()[ i_agentSeat ].front() };
+		}
+
+		if ( !i_turnData.CanPon()[ i_agentSeat ].empty() )
+		{
+			return { BetweenTurnsDecisionData::Tag<BetweenTurnsDecision::Pon>(), i_turnData.CanPon()[ i_agentSeat ].front() };
+		}
+
+		if ( !i_turnData.CanChi()[ i_agentSeat ].empty() )
+		{
+			return { BetweenTurnsDecisionData::Tag<BetweenTurnsDecision::Chi>(), i_turnData.CanChi()[ i_agentSeat ].front() };
+		}
+
+		return { BetweenTurnsDecisionData::Tag<BetweenTurnsDecision::Pass>() };
 	}
 };
 

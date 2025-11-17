@@ -186,6 +186,8 @@ private:
 	PonOptionData m_canPon;
 	KanOptionData m_canKan;
 	RonOptionData m_canRon;
+
+	Utils::EnumArray<AI::BetweenTurnsDecisionData, Seats> m_aiDecisions;
 };
 
 //------------------------------------------------------------------------------

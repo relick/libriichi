@@ -453,7 +453,14 @@ void Turn_AI::MakeDecision
 
 	riEnsure( currentPlayer.Type() == PlayerType::AI, "Must be AI player on AI turn state" );
 
-	AI::TurnDecisionData decision = currentPlayer.Agent().MakeTurnDecision( m_token, table.GetAIRNG(), table, round, *this);
+	AI::TurnDecisionData decision = currentPlayer.Agent().MakeTurnDecision(
+		m_token,
+		table.GetAIRNG(),
+		round.CurrentTurn(),
+		table,
+		round,
+		*this
+	);
 	switch ( decision.Type() )
 	{
 	case AI::TurnDecision::Pending:
@@ -546,7 +553,69 @@ void BetweenTurns::UserPass
 
 	Round& round = table.m_rounds.back();
 
-	// TODO-AI: Process AI call/wins
+	// TODO-AI: This processing should happen BEFORE UserPass is called, so that the
+	// game can skip the player and have the AI jump in, if it wants.
+	// But the game should still be given the option of letting the player jump in before the
+	// AI finishes thinking.
+	Utils::EnumArray<AI::BetweenTurnsDecisionData, Seats> aiDecisions;
+	for ( Seat seat : Seats{} )
+	{
+		Player const& playerInSeat = round.GetPlayer( seat, table );
+		if ( playerInSeat.Type() == PlayerType::AI )
+		{
+			aiDecisions[ seat ] = playerInSeat.Agent().MakeBetweenTurnsDecision(
+				{}, // TODO
+				table.GetAIRNG(),
+				seat,
+				table,
+				round,
+				*this
+			);
+		}
+	}
+
+	// First check if there are rons to process, as that takes precedence
+	SeatSet aiWouldRon;
+	for ( Seat seat : Seats{} )
+	{
+		if ( aiDecisions[ seat ].Type() == AI::BetweenTurnsDecision::Ron )
+		{
+			aiWouldRon.Insert( seat );
+		}
+	}
+
+	if ( aiWouldRon.Size() > 0 )
+	{
+		UserRon( aiWouldRon );
+		return;
+	}
+
+	// Now search for pons/kans
+	for ( Seat seat : Seats{} )
+	{
+		if ( aiDecisions[ seat ].Type() == AI::BetweenTurnsDecision::Pon )
+		{
+			UserPon( seat, aiDecisions[ seat ].Get<AI::BetweenTurnsDecision::Pon>() );
+			return;
+		}
+		else if ( aiDecisions[ seat ].Type() == AI::BetweenTurnsDecision::Kan )
+		{
+			UserKan( seat, aiDecisions[ seat ].Get<AI::BetweenTurnsDecision::Kan>() );
+			return;
+		}
+	}
+
+	// Lastly, search for chis
+	for ( Seat seat : Seats{} )
+	{
+		if ( aiDecisions[ seat ].Type() == AI::BetweenTurnsDecision::Chi )
+		{
+			UserChi( seat, aiDecisions[ seat ].Get<AI::BetweenTurnsDecision::Chi>() );
+			return;
+		}
+	}
+
+	// AI didn't steal the show, carry on with an actual user pass
 
 	if ( round.WallTilesRemaining() == 0u )
 	{
