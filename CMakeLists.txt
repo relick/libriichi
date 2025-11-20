@@ -60,6 +60,7 @@ target_sources(libriichi PUBLIC FILE_SET HEADERS FILES
 )
 target_sources(libriichi PRIVATE
 	# Riichi Mahjong Engine
+	riichi/AI.cpp
 	riichi/Hand.cpp
 	riichi/HandInterpreter.cpp
 	riichi/Round.cpp

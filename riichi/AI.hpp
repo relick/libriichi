@@ -70,6 +70,8 @@ using BetweenTurnsDecisionData = NamedUnion<
 using DecisionToken = TypeSafeID<struct DecisionTokenTag>;
 
 //------------------------------------------------------------------------------
+// Base AI interface
+//------------------------------------------------------------------------------
 struct Agent
 {
 	virtual ~Agent() = default;
@@ -93,6 +95,76 @@ struct Agent
 		Round const& i_round,
 		TableStates::BetweenTurns const& i_turnData
 	) = 0;
+};
+
+//------------------------------------------------------------------------------
+// Base strategy-based AI interface
+// 
+// A strategy follows the same interface as an Agent, but provides a 'strength'
+// value of how strongly a decision should be considered. Once all strategies
+// are processed, the decision with the greatest value is chosen.
+//------------------------------------------------------------------------------
+struct Strategy
+{
+	using Strength = int32_t;
+
+	virtual ~Strategy() = default;
+
+	virtual Pair<TurnDecisionData, Strength> MakeTurnDecision
+	(
+		DecisionToken i_token,
+		AIRNG& io_rng,
+		Seat i_agentSeat,
+		Table const& i_table,
+		Round const& i_round,
+		TableStates::Turn_AI const& i_turnData,
+		bool i_strategyPreviouslyChosen
+	) = 0;
+
+	virtual Pair<BetweenTurnsDecisionData, Strength> MakeBetweenTurnsDecision
+	(
+		DecisionToken i_token,
+		AIRNG& io_rng,
+		Seat i_agentSeat,
+		Table const& i_table,
+		Round const& i_round,
+		TableStates::BetweenTurns const& i_turnData,
+		bool i_strategyPreviouslyChosen
+	) = 0;
+};
+
+struct StrategyAgent
+	: Agent
+{
+	Vector<std::unique_ptr<Strategy>> m_strategies;
+	Strategy* m_mostRecentlyUsedStrategy{ nullptr };
+
+	template<std::derived_from<Strategy>... T_Strategies>
+		requires ( sizeof...( T_Strategies ) > 0 )
+	StrategyAgent( T_Strategies... i_strategies )
+		: m_strategies{ std::make_unique<T_Strategies>( std::move( i_strategies ) )... }
+	{
+	}
+
+	TurnDecisionData MakeTurnDecision
+	(
+		DecisionToken i_token,
+		AIRNG& io_rng,
+		Seat i_agentSeat,
+		Table const& i_table,
+		Round const& i_round,
+		TableStates::Turn_AI const& i_turnData
+	) override;
+
+	BetweenTurnsDecisionData MakeBetweenTurnsDecision
+	(
+		DecisionToken i_token,
+		AIRNG& io_rng,
+		Seat i_agentSeat,
+		Table const& i_table,
+		Round const& i_round,
+		TableStates::BetweenTurns const& i_turnData
+	) override;
 };
 
 }
