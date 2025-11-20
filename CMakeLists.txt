@@ -68,6 +68,7 @@ target_sources(libriichi PRIVATE
 	riichi/Tile.cpp
 	
 	# Example Riichi implementation
+	riichi/AIAgents_Standard.cpp
 	riichi/HandInterpreter_Standard.cpp
 	riichi/Yaku_Standard.cpp
 	riichi/Rules_Standard.cpp

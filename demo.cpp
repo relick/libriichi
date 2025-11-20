@@ -338,6 +338,13 @@ int main()
 
 			break;
 		}
+		case BetweenTurns_PendingAI:
+		{
+			Riichi::TableStates::BetweenTurns_PendingAI const& turn = state.Get<BetweenTurns_PendingAI>();
+			std::cout << "Processing AI decisions between turns..." << std::endl;
+			turn.AdvanceDecisionCalculations();
+			break;
+		}
 		case RonAKanChance:
 		{
 			Riichi::TableStates::RonAKanChance const& ronAKanChance = state.Get<RonAKanChance>();

@@ -71,7 +71,7 @@ void BetweenTurnsBase::TransitionToTurn
 	case PlayerType::AI:
 	{
 		table.Transition(
-			TableStates::Turn_AI{ table, round.CurrentTurn(), canTsumo, std::move( riichiDiscards ), isRiichi, std::move( kanOptions ) },
+			TableStates::Turn_AI{ table, round.CurrentTurn(), canTsumo, std::move( riichiDiscards ), isRiichi, std::move( kanOptions ), table.MakeNewAIDecisionToken() },
 			std::move( i_tableEvent )
 		);
 		break;
@@ -288,10 +288,37 @@ void BaseTurn::TransitionToBetweenTurns
 		}
 	}
 
-	table.Transition(
-		TableStates::BetweenTurns{table, discardedTileAsDraw, std::move( canChi ), std::move( canPon ), std::move( canKan ), std::move( canRon )},
-		std::move( i_tableEvent )
-	);
+	// Only go to the PendingAI state if there are actually any AI
+	bool const anyAIPresent = std::ranges::any_of( Seats{}, [ & ]( Seat seat ) { return round.GetPlayer( seat, table ).Type() == PlayerType::AI; } );
+	if ( anyAIPresent )
+	{
+		table.Transition(
+			TableStates::BetweenTurns_PendingAI{
+				table,
+				discardedTileAsDraw,
+				std::move( canChi ),
+				std::move( canPon ),
+				std::move( canKan ),
+				std::move( canRon ),
+				table.MakeNewAIDecisionToken()
+			},
+			std::move( i_tableEvent )
+		);
+	}
+	else
+	{
+		table.Transition(
+			TableStates::BetweenTurns{
+				table,
+				discardedTileAsDraw,
+				std::move( canChi ),
+				std::move( canPon ),
+				std::move( canKan ),
+				std::move( canRon )
+			},
+			std::move( i_tableEvent )
+		);
+	}
 }
 
 //------------------------------------------------------------------------------
@@ -442,6 +469,30 @@ void BaseTurn::Kan
 }
 
 //------------------------------------------------------------------------------
+Turn_AI::Turn_AI
+(
+	Table& i_table,
+	Seat i_seat,
+	bool i_canTsumo,
+	Vector<TileInstance> i_riichiDiscards,
+	bool i_isRiichi,
+	Vector<HandKanOption> i_kanOptions,
+	AI::DecisionToken i_token
+)
+	: BaseTurn{
+		i_table,
+		i_seat,
+		i_canTsumo,
+		std::move( i_riichiDiscards ),
+		i_isRiichi,
+		std::move( i_kanOptions )
+	}
+	, m_token{ i_token }
+{
+	riEnsure( m_token.IsValid(), "Must use a valid AI decision token" );
+}
+
+//------------------------------------------------------------------------------
 void Turn_AI::MakeDecision
 (
 )	const
@@ -534,7 +585,8 @@ BetweenTurns::BetweenTurns
 	ChiOptionData i_canChi,
 	PonOptionData i_canPon,
 	KanOptionData i_canKan,
-	RonOptionData i_canRon
+	RonOptionData i_canRon,
+	AI::DecisionToken i_token
 )
 	: BetweenTurnsBase{ i_table }
 	, m_discardedTile{ i_discardedTile }
@@ -542,7 +594,27 @@ BetweenTurns::BetweenTurns
 	, m_canPon{ std::move( i_canPon ) }
 	, m_canKan{ std::move( i_canKan ) }
 	, m_canRon{ std::move( i_canRon ) }
-{}
+	, m_token{ i_token }
+{
+	riEnsure( m_token.IsValid(), "Must use a valid AI decision token" );
+}
+
+//------------------------------------------------------------------------------
+BetweenTurns::BetweenTurns
+(
+	BetweenTurns const& i_other,
+	Utils::EnumArray<AI::BetweenTurnsDecisionData, Seats> i_aiDecisions
+)
+	: BetweenTurnsBase{ i_other.m_table }
+	, m_discardedTile{ i_other.m_discardedTile }
+	, m_canChi{ i_other.m_canChi }
+	, m_canPon{ i_other.m_canPon }
+	, m_canKan{ i_other.m_canKan }
+	, m_canRon{ i_other.m_canRon }
+	, m_token{ i_other.m_token }
+	, m_aiDecisions{ std::move( i_aiDecisions ) }
+{
+}
 
 //------------------------------------------------------------------------------
 void BetweenTurns::UserPass
@@ -553,32 +625,11 @@ void BetweenTurns::UserPass
 
 	Round& round = table.m_rounds.back();
 
-	// TODO-AI: This processing should happen BEFORE UserPass is called, so that the
-	// game can skip the player and have the AI jump in, if it wants.
-	// But the game should still be given the option of letting the player jump in before the
-	// AI finishes thinking.
-	Utils::EnumArray<AI::BetweenTurnsDecisionData, Seats> aiDecisions;
-	for ( Seat seat : Seats{} )
-	{
-		Player const& playerInSeat = round.GetPlayer( seat, table );
-		if ( playerInSeat.Type() == PlayerType::AI )
-		{
-			aiDecisions[ seat ] = playerInSeat.Agent().MakeBetweenTurnsDecision(
-				{}, // TODO
-				table.GetAIRNG(),
-				seat,
-				table,
-				round,
-				*this
-			);
-		}
-	}
-
 	// First check if there are rons to process, as that takes precedence
 	SeatSet aiWouldRon;
 	for ( Seat seat : Seats{} )
 	{
-		if ( aiDecisions[ seat ].Type() == AI::BetweenTurnsDecision::Ron )
+		if ( m_aiDecisions[ seat ].Type() == AI::BetweenTurnsDecision::Ron )
 		{
 			aiWouldRon.Insert( seat );
 		}
@@ -593,14 +644,14 @@ void BetweenTurns::UserPass
 	// Now search for pons/kans
 	for ( Seat seat : Seats{} )
 	{
-		if ( aiDecisions[ seat ].Type() == AI::BetweenTurnsDecision::Pon )
+		if ( m_aiDecisions[ seat ].Type() == AI::BetweenTurnsDecision::Pon )
 		{
-			UserPon( seat, aiDecisions[ seat ].Get<AI::BetweenTurnsDecision::Pon>() );
+			UserPon( seat, m_aiDecisions[ seat ].Get<AI::BetweenTurnsDecision::Pon>() );
 			return;
 		}
-		else if ( aiDecisions[ seat ].Type() == AI::BetweenTurnsDecision::Kan )
+		else if ( m_aiDecisions[ seat ].Type() == AI::BetweenTurnsDecision::Kan )
 		{
-			UserKan( seat, aiDecisions[ seat ].Get<AI::BetweenTurnsDecision::Kan>() );
+			UserKan( seat, m_aiDecisions[ seat ].Get<AI::BetweenTurnsDecision::Kan>() );
 			return;
 		}
 	}
@@ -608,9 +659,9 @@ void BetweenTurns::UserPass
 	// Lastly, search for chis
 	for ( Seat seat : Seats{} )
 	{
-		if ( aiDecisions[ seat ].Type() == AI::BetweenTurnsDecision::Chi )
+		if ( m_aiDecisions[ seat ].Type() == AI::BetweenTurnsDecision::Chi )
 		{
-			UserChi( seat, aiDecisions[ seat ].Get<AI::BetweenTurnsDecision::Chi>() );
+			UserChi( seat, m_aiDecisions[ seat ].Get<AI::BetweenTurnsDecision::Chi>() );
 			return;
 		}
 	}
@@ -724,7 +775,55 @@ void BetweenTurns::UserRon
 {
 	riEnsure( m_canRon.ContainsAllOf( i_users ), "Players tried to ron when not allowed." );
 
-	HandleRon( i_users, m_discardedTile );
+	// Add in the AI that will ron along with the users
+	SeatSet willRon = i_users;
+	for ( Seat seat : Seats{} )
+	{
+		if ( m_aiDecisions[ seat ].Type() == AI::BetweenTurnsDecision::Ron )
+		{
+			willRon.Insert( seat );
+		}
+	}
+
+	HandleRon( willRon, m_discardedTile );
+}
+
+//------------------------------------------------------------------------------
+void BetweenTurns_PendingAI::AdvanceDecisionCalculations
+(
+)	const
+{
+	Table& table = m_table.get();
+
+	Round& round = table.m_rounds.back();
+
+	bool allAIDecided = true;
+	Utils::EnumArray<AI::BetweenTurnsDecisionData, Seats> aiDecisions;
+	for ( Seat seat : Seats{} )
+	{
+		Player const& playerInSeat = round.GetPlayer( seat, table );
+		if ( playerInSeat.Type() == PlayerType::AI )
+		{
+			aiDecisions[ seat ] = playerInSeat.Agent().MakeBetweenTurnsDecision(
+				m_token,
+				table.GetAIRNG(),
+				seat,
+				table,
+				round,
+				*this
+			);
+
+			allAIDecided &= ( aiDecisions[ seat ].Type() != AI::BetweenTurnsDecision::Pending );
+		}
+	}
+
+	if ( allAIDecided )
+	{
+		table.Transition(
+			TableStates::BetweenTurns{ *this, std::move( aiDecisions ) },
+			TableEvent::Tag<TableEventType::None>()
+		);
+	}
 }
 
 //------------------------------------------------------------------------------

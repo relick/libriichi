@@ -27,6 +27,7 @@ class Table
 	friend TableStates::Turn_User;
 	friend TableStates::BetweenTurnsBase;
 	friend TableStates::BetweenTurns;
+	friend TableStates::BetweenTurns_PendingAI;
 	friend TableStates::RonAKanChance;
 
 private:
@@ -40,6 +41,7 @@ private:
 	TableEvent m_mostRecentEvent;
 	ShuffleRNG m_shuffleRNG;
 	AIRNG m_aiRNG;
+	TypeSafeIDGenerator<AI::DecisionToken> m_aiTokens;
 
 public:
 	Table
@@ -79,6 +81,7 @@ public:
 	}
 
 	AIRNG& GetAIRNG() { return m_aiRNG; }
+	AI::DecisionToken MakeNewAIDecisionToken() { return m_aiTokens(); }
 
 private:
 	void Transition( TableState&& i_nextState, TableEvent&& i_nextEvent );

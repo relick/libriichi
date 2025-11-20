@@ -26,7 +26,8 @@ enum class TableStateType : EnumValueType
 	Turn_AI,
 	Turn_User,
 	BetweenTurns,
-	RonAKanChance, // It's kinda amusing to me that this is a special state, but it makes sense
+	BetweenTurns_PendingAI,
+	RonAKanChance,
 };
 
 //------------------------------------------------------------------------------
@@ -40,6 +41,7 @@ inline constexpr char const* ToString( TableStateType i_type )
 		"Turn_AI",
 		"Turn_User",
 		"BetweenTurns",
+		"BetweenTurns_PendingAI",
 		"RonAKanChance",
 	};
 	return strs[ ( size_t )i_type ];
@@ -135,7 +137,16 @@ private:
 struct Turn_AI
 	: BaseTurn
 {
-	using BaseTurn::BaseTurn;
+	Turn_AI
+	(
+		Table& i_table,
+		Seat i_seat,
+		bool i_canTsumo,
+		Vector<TileInstance> i_riichiDiscards,
+		bool i_isRiichi,
+		Vector<HandKanOption> i_kanOptions,
+		AI::DecisionToken i_token
+	);
 
 	void MakeDecision() const;
 
@@ -164,9 +175,25 @@ struct BetweenTurns
 	using KanOptionData = Utils::EnumArray<Vector<KanOption>, Seats>;
 	using RonOptionData = SeatSet;
 
-	BetweenTurns( Table& i_table, TileDraw i_discardedTile, ChiOptionData i_canChi, PonOptionData i_canPon, KanOptionData i_canKan, RonOptionData i_canRon );
+	BetweenTurns
+	(
+		Table& i_table,
+		TileDraw i_discardedTile,
+		ChiOptionData i_canChi,
+		PonOptionData i_canPon,
+		KanOptionData i_canKan,
+		RonOptionData i_canRon,
+		AI::DecisionToken i_token = {}
+	);
 
-	// TODO-AI indication about AI intent (to allow AI to jump in before user, depending on game implementation)
+	// From BetweenTurns_PendingAI
+	BetweenTurns
+	(
+		BetweenTurns const& i_other,
+		Utils::EnumArray<AI::BetweenTurnsDecisionData, Seats> i_aiDecisions
+	);
+
+	AI::BetweenTurnsDecisionData const& GetAIDecision( Seat i_ai ) const { return m_aiDecisions[ i_ai ]; }
 
 	ChiOptionData const& CanChi() const { return m_canChi; }
 	PonOptionData const& CanPon() const { return m_canPon; }
@@ -180,14 +207,24 @@ struct BetweenTurns
 	void UserKan( Seat i_user, KanOption const& i_option ) const;
 	void UserRon( SeatSet const& i_users ) const;
 
-private:
+protected:
 	TileDraw m_discardedTile;
 	ChiOptionData m_canChi;
 	PonOptionData m_canPon;
 	KanOptionData m_canKan;
 	RonOptionData m_canRon;
 
+	AI::DecisionToken m_token;
 	Utils::EnumArray<AI::BetweenTurnsDecisionData, Seats> m_aiDecisions;
+};
+
+//------------------------------------------------------------------------------
+struct BetweenTurns_PendingAI
+	: protected BetweenTurns
+{
+	using BetweenTurns::BetweenTurns;
+
+	void AdvanceDecisionCalculations() const;
 };
 
 //------------------------------------------------------------------------------
@@ -218,6 +255,7 @@ using TableState = NamedUnion<
 	TableStates::Turn_AI,
 	TableStates::Turn_User,
 	TableStates::BetweenTurns,
+	TableStates::BetweenTurns_PendingAI,
 	TableStates::RonAKanChance
 >;
 
